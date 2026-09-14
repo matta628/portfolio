@@ -345,7 +345,6 @@
     <a class="demo-back" href="/">← Portfolio</a>
     <span class="demo-tag">Demo</span>
     <span class="demo-say">The pedal's real C++ signal chain, compiled to WebAssembly, running in your browser.</span>
-    <a class="demo-arch" href="architecture.html">Architecture</a>
     <span class="spacer"></span>
     <label class="demo-input">Input
       <select id="demo-source" aria-label="What is plugged into the input"></select>
