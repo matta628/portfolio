@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MA-005 · The Great Elm</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Instrument+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/chrome.css">
+<style>
+  :root {
+    --night: #0c1211;
+    --paper: #efe6d6;
+    --glow: #f5bd5e;
+    --leaf: #9fb98c;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--night); color: var(--paper); }
+  body {
+    font: 400 14px/1.45 'Instrument Sans', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    /* midday: the sky does the lighting, so the paint is the one warm thing in it */
+    background:
+      radial-gradient(ellipse 70% 55% at 50% 42%, rgba(245, 189, 94, .10) 0%, transparent 72%),
+      radial-gradient(ellipse 100% 80% at 50% 10%, #16201d 0%, #0c1211 60%, #070a0a 100%);
+  }
+
+  #sheet {
+    min-height: 100svh;
+    display: grid; grid-template-rows: auto 1fr;
+    gap: 18px;
+    padding: 22px clamp(16px, 3vw, 40px) 34px;
+  }
+
+  header {
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 18px;
+    font: 700 11px/1.5 'Courier Prime', ui-monospace, monospace;
+    letter-spacing: .18em; text-transform: uppercase; color: #85907c;
+  }
+  header b { color: var(--paper); }
+  header .ttl {
+    font: italic 400 27px/1 'Instrument Serif', Georgia, serif;
+    letter-spacing: 0; text-transform: none; color: var(--paper);
+  }
+  header .where { margin-left: auto; font-size: 10px; color: #5f6a58; }
+
+  #frame {
+    display: grid; grid-template-columns: minmax(0, 1fr) 250px;
+    align-items: start; justify-items: center;
+    gap: clamp(20px, 3vw, 46px);
+  }
+
+  /* ---------- the photograph ---------- */
+  #stage {
+    position: relative;
+    margin: 0;            /* <figure> ships with 40px side margins */
+    width: min(100%, calc((100svh - 190px) * 4 / 3), 1180px);
+    aspect-ratio: 4 / 3;
+    box-shadow: 0 26px 60px -18px rgba(0, 0, 0, .85), 0 2px 0 rgba(255, 255, 255, .06) inset;
+  }
+  #stage > img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  #stage::after {
+    content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    background: rgba(6, 10, 9, .4);
+    opacity: 0; transition: opacity .45s ease;
+  }
+  #stage.naming::after, #stage.reading::after { opacity: 1; }
+
+  /* ---------- the limbs, traced ---------- */
+  .hits { position: absolute; inset: 0; z-index: 2; width: 100%; height: 100%; }
+  .hits .grab {
+    fill: none; stroke: rgba(255, 255, 255, .001); stroke-width: 5.4;
+    stroke-linecap: round; stroke-linejoin: round; cursor: pointer;
+  }
+  /* Every limb is given pathLength="100" in decorate(), so a long limb and a
+     short one draw on and carry their current at the same rate — otherwise the
+     east reach, twice the length of the climber, would crawl. */
+  .hits .lit {
+    pointer-events: none;
+    fill: none; stroke: var(--glow); stroke-width: 1.25;
+    stroke-linecap: round; stroke-linejoin: round;
+    /* drawn on from the trunk outwards, the way sap would go */
+    stroke-dasharray: 100; stroke-dashoffset: 100;
+    opacity: 0;
+    filter: drop-shadow(0 0 1.4px rgba(245, 189, 94, .85));
+    transition: opacity .3s ease, stroke-dashoffset .85s cubic-bezier(.25, .8, .3, 1);
+  }
+  .hit.on .lit { opacity: .62; stroke-dashoffset: 0; }
+
+  /* The current. A short bright segment that leaves the trunk and runs the limb
+     to its tip, again and again — charge looking for the end of the wire. The
+     limb underneath is only the conductor; this is the thing you watch. */
+  .hits .spark {
+    pointer-events: none;
+    fill: none; stroke: #fff4d8; stroke-width: 1.85;
+    stroke-linecap: round; stroke-linejoin: round;
+    stroke-dasharray: 8 92; stroke-dashoffset: 100;
+    opacity: 0;
+    filter: drop-shadow(0 0 1.1px rgba(255, 226, 156, 1))
+            drop-shadow(0 0 3.6px rgba(245, 189, 94, .85));
+    transition: opacity .3s ease;
+  }
+  .hit.on .spark { opacity: 1; animation: current 1.45s linear infinite; }
+  /* offset 100 -> 0 walks the dash from the first point to the last, and the
+     first point of every limb is the one at the trunk */
+  @keyframes current { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
+
+  /* The trunk lights only when it is the one being named. It used to sit at a
+     low glow permanently so the current would look like it came from somewhere,
+     but a highlight nothing is pointing at just reads as a mark on the photo. */
+  /* The short fork is the smallest limb and the hardest to tell from the two
+     either side of it, so it gets a far wider catch area and a thinner line.
+     It is declared first, which puts it at the bottom of the stack — the blue
+     and yellow limbs win wherever they overlap, and this takes what is left
+     between them. */
+  .hit-streeteasy .grab { stroke-width: 13; }
+  .hit-streeteasy .lit { stroke-width: .85; stroke-opacity: .75; }
+  .hit-streeteasy .spark { stroke-width: 1.3; }
+
+  .hit-about .lit { stroke-dashoffset: 0; stroke-width: 1.1; }
+  .hit-about.on .lit { opacity: .62; }
+  .hit-about .spark { opacity: 0; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hit.on .spark { animation: none; stroke-dashoffset: 0; opacity: .9; }
+  }
+
+  /* ---------- the names ---------- */
+  .names { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+  .names .name {
+    position: absolute;
+    left: var(--x); top: var(--y);
+    width: max-content; max-width: min(300px, 46%);
+    padding: 8px 13px 9px;
+    transform: translate(-50%, 0) translateY(6px);
+    background: rgba(10, 15, 13, .86);
+    -webkit-backdrop-filter: blur(7px); backdrop-filter: blur(7px);
+    box-shadow: 0 10px 26px -10px rgba(0, 0, 0, .85), 0 0 0 1px rgba(245, 189, 94, .2) inset;
+    opacity: 0;
+    transition: opacity .26s ease, transform .34s cubic-bezier(.2, .7, .2, 1);
+  }
+  .names .name.side-left { transform: translate(-12%, 0) translateY(6px); }
+  .names .name.side-right { transform: translate(-88%, 0) translateY(6px); }
+  .names .name.on { opacity: 1; transform: translate(-50%, 0); }
+  .names .name.side-left.on { transform: translate(-12%, 0); }
+  .names .name.side-right.on { transform: translate(-88%, 0); }
+  .names .name.grabby { pointer-events: auto; }
+
+  .names .name .no { margin: 0; font: 700 9.5px/1 'Courier Prime', monospace; letter-spacing: .2em; color: var(--glow); }
+  .names .name .nm { margin: 5px 0 0; font-weight: 600; font-size: 15.5px; }
+  .names .name .more {
+    display: grid; grid-template-rows: 0fr;
+    transition: grid-template-rows .42s cubic-bezier(.2, .7, .2, 1);
+  }
+  .names .name .more > .inner { overflow: hidden; min-height: 0; display: flex; flex-direction: column; }
+  .names .name.open .more { grid-template-rows: 1fr; }
+  .names .name .kit { margin: 9px 0 0; font: 400 11px/1.4 'Courier Prime', monospace; letter-spacing: .04em; color: var(--leaf); }
+  .names .name .blurb { margin: 8px 0 0; font-size: 13px; line-height: 1.5; color: #ddd3c2; }
+  .names .name .blurb + .blurb { margin-top: 7px; }
+  .names .name .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 13px; }
+  .enter {
+    display: inline-flex; align-items: center; gap: .5em;
+    padding: 9px 13px 8px;
+    background: var(--glow); color: #1a1305;
+    font: 600 12px/1 'Instrument Sans', sans-serif; letter-spacing: .03em;
+    text-decoration: none; transition: background .2s, transform .2s;
+  }
+  .enter:hover, .enter:focus-visible { background: #ffd489; transform: translateY(-1px); }
+  .enter.ghost { background: none; color: var(--glow); box-shadow: inset 0 0 0 1.5px currentColor; }
+  .enter.ghost:hover { background: rgba(245, 189, 94, .14); }
+
+  /* ---------- the tracklist ---------- */
+  #index { width: 250px; justify-self: stretch; padding-top: 2px; }
+  #index h2 {
+    margin: 0 0 4px;
+    font: 700 10px/1.5 'Courier Prime', monospace; letter-spacing: .2em; text-transform: uppercase; color: #5f6a58;
+  }
+  .tracks { list-style: none; margin: 0; padding: 0; }
+  .tracks li { border-bottom: 1px solid rgba(200, 190, 160, .14); }
+  .tracks li:first-child { border-top: 1px solid rgba(200, 190, 160, .14); }
+  .tracks button {
+    display: grid; grid-template-columns: 42px 1fr; align-items: baseline;
+    width: 100%; padding: 9px 0 8px;
+    border: 0; background: none; text-align: left; cursor: pointer; font: inherit; color: inherit;
+  }
+  .tracks .no { font: 700 10px/1 'Courier Prime', monospace; letter-spacing: .1em; color: #5f6a58; }
+  .tracks .nm { font-weight: 500; font-size: 14px; transition: color .2s; }
+  .tracks .nick { grid-column: 2; font: italic 400 13px/1.3 'Instrument Serif', Georgia, serif; color: #85907c; }
+  .tracks button:hover .nm, .tracks button.on .nm { color: var(--glow); }
+  .tracks button:focus-visible { outline: 2px dashed var(--glow); outline-offset: 2px; }
+  #index .hint {
+    margin: 14px 0 0;
+    font: 700 9.5px/1.5 'Courier Prime', monospace; letter-spacing: .15em; text-transform: uppercase; color: #556050;
+  }
+  #index .hint .touch { display: none; }
+  @media (hover: none) { #index .hint .fine { display: none; } #index .hint .touch { display: inline; } }
+
+  /* the fixed sleeve switcher lives in the top right — keep out of its lane */
+  @media (min-width: 861px) { #sheet { padding-right: 176px; } }
+
+  @media (max-width: 860px) {
+    #frame { grid-template-columns: 1fr; justify-items: stretch; gap: 20px; }
+    #stage { width: 100%; }
+    #index { width: auto; }
+    header .where { margin-left: 0; width: 100%; }
+    .names .name { max-width: 62%; }
+    .names .name .nm { font-size: 14px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hits .lit, .names .name, .names .name .more, #stage::after { transition-duration: .01s; }
+  }
+</style>
+</head>
+<body data-pressing="great-elm">
+
+<main id="sheet">
+  <header>
+    <span><b>MA-005</b> · Matt Aguilar</span>
+    <span class="ttl">The Great Elm</span>
+    <span class="where">Central Park · September 2026 · four limbs off one trunk</span>
+  </header>
+
+  <div id="frame">
+    <figure id="stage">
+      <img src="elm.jpg" width="2000" height="1500"
+           alt="A huge elm in Central Park seen from below at midday, four heavy limbs spreading from one trunk against a blue sky.">
+    </figure>
+
+    <aside id="index">
+      <h2>The limbs</h2>
+      <div id="tracklist"></div>
+      <p class="hint"><span class="fine">Hover a limb to name it · click for the credit</span><span class="touch">Tap a limb for the credit</span></p>
+    </aside>
+  </div>
+</main>
+
+<script src="../shared/projects.js"></script>
+<script src="../shared/hotspots.js"></script>
+<script src="../shared/sleeves.js"></script>
+<script>
+(() => {
+  // Percentages of the photograph, x across and y down. Each limb runs from the
+  // crotch of the tree (about 52%, 58%) outwards, so the highlight draws itself
+  // the way the branch grew. Clockwise from the top, which is also the running
+  // order of the record.
+  //
+  // A silhouette is the wrong shape for a branch — it wants a line down the
+  // middle. So these were drawn by hand and then slid sideways onto the wood:
+  // each point searches along the perpendicular for the darkest spot, with a
+  // spring back to where it started so a line can't hop onto a crossing limb.
+  window.photoSleeve({
+    mount: '#stage',
+    tracks: '#tracklist',
+    // Normalise every limb to a path length of 100 so the draw-on and the
+    // current run at one rate, add the travelling spark, and hang the trunk
+    // under the first region so it is drawn before anything that crosses it.
+    decorate({ region, group, svg, el, pct }) {
+      // The short fork has a wide catch area so it can be hit at all, which
+      // would let it steal the pointer from the limbs either side of it. Paint
+      // order settles that, and it is separate from reading order: this sits at
+      // the back of the SVG while still coming last in the track list.
+      if (region.behind) svg.insertBefore(group, svg.firstChild);
+      if (region.kind !== 'line') return;
+      group.querySelectorAll('.grab, .lit').forEach((n) => n.setAttribute('pathLength', 100));
+      // A limb is several tracks, and each one gets its own spark. Sharing a
+      // single dash across the whole path would send the light down one branch
+      // and give the rest a fraction each; this way every track carries a
+      // charge the full distance to its own tip, all at once.
+      const runs = Array.isArray(region.points[0][0]) ? region.points : [region.points];
+      for (const run of runs) {
+        group.appendChild(el('polyline', {
+          class: 'spark', pathLength: 100,
+          points: run.map(([x, y]) => `${x},${pct(y)}`).join(' '),
+        }));
+      }
+    },    photo: [2000, 1500],
+    about: {
+      no: 'TRUNK',
+      name: 'Matt Aguilar',
+      lines: [
+        'Software engineer in New York. I build tools for my own life and keep them running on a Raspberry Pi 5 under the desk.',
+        'This tree is on my walk home.',
+      ],
+      links: [['GitHub', 'https://github.com/matta628']],
+    },
+    regions: [
+{
+        id: 'tastemaker', kind: 'line', nick: 'the climber, four ways',
+        points: [
+          [[50.38, 49.37], [48.67, 42.23], [48.09, 32.64], [46.68, 24.09],
+           [41.78, 18.89], [35.06, 16.31], [27.72, 15.53], [20.29, 15.12],
+           [12.83, 13.1], [6.05, 8.91], [1.69, 3.6]],
+          [[50.52, 49.99], [48.82, 44.47], [48.09, 36.98], [48.16, 29.38],
+           [46.75, 22.82], [42.67, 19.1], [37.42, 16.71], [32.08, 15.02],
+           [27.48, 11.37], [24.15, 5.51], [21.16, 1.54]],
+          [[50.75, 50.68], [49.25, 47.01], [48.12, 42.02], [47.94, 36.89],
+           [48.29, 31.61], [48.43, 26.43], [48.84, 21.21], [50.92, 16.9],
+           [54.47, 14.87], [58.19, 14.02], [61.01, 12.68]],
+          [[50.76, 50.71], [49.27, 47.12], [48.13, 42.23], [47.92, 37.21],
+           [48.27, 32.03], [48.43, 26.96], [48.69, 21.8], [50.27, 16.94],
+           [52.24, 12.25], [53.01, 7.51], [53.05, 3.68]],
+        ],
+        label: [17, 11], side: 'left',
+      },
+      {
+        id: 'pedal', kind: 'line', nick: 'the long reach east, five ways',
+        points: [
+          [[58.24, 51.45], [61.5, 45.99], [65.72, 39.09], [69.28, 32.63],
+           [70.44, 25.32], [71.49, 17.75], [75.29, 12.66], [81.0, 10.11],
+           [87.16, 7.76], [93.11, 5.5], [97.53, 2.98]],
+          [[58.08, 51.72], [60.94, 46.97], [64.63, 40.92], [68.85, 37.25],
+           [73.37, 36.25], [77.99, 34.29], [82.49, 33.1], [86.97, 30.48],
+           [91.76, 26.39], [95.97, 22.05], [98.5, 18.01]],
+          [[58.0, 51.84], [60.72, 47.36], [64.16, 41.52], [67.99, 37.5],
+           [72.28, 36.57], [76.58, 34.89], [80.85, 33.49], [85.01, 32.14],
+           [89.61, 29.77], [94.35, 29.38], [98.0, 30.32]],
+          [[57.85, 52.07], [60.22, 48.26], [63.16, 43.08], [66.25, 38.15],
+           [69.19, 34.08], [70.44, 29.18], [70.43, 23.47], [70.63, 17.76],
+           [71.06, 11.95], [70.9, 6.33], [71.24, 2.25]],
+          [[57.49, 52.61], [58.99, 50.25], [61.3, 47.46], [63.8, 46.2],
+           [66.38, 46.78], [68.58, 48.76], [70.79, 50.74], [73.32, 52.52],
+           [75.46, 54.88], [77.3, 57.63], [78.65, 59.72]],
+        ],
+        label: [84, 15], side: 'right',
+      },
+      {
+        id: 'jobs', kind: 'line', nick: 'the low sweep west',
+        points: [
+          [[47.65, 65.47], [44.11, 64.03], [39.4, 59.9], [34.57, 56.29],
+           [29.71, 54.93], [24.75, 53.32], [19.86, 50.86], [15.21, 47.95],
+           [10.49, 45.14], [5.77, 43.18], [2.28, 41.07]],
+        ],
+        label: [15, 47], side: 'left',
+      },
+      {
+        id: 'streeteasy', kind: 'line', nick: 'the short fork, two tracks', behind: true,
+        points: [
+          [[54.36, 50.29], [54.91, 48.62], [55.82, 46.22], [57.2, 43.98],
+           [58.42, 41.52], [58.86, 39.01], [59.02, 36.5], [59.9, 34.9],
+           [61.66, 34.58], [63.5, 34.9], [64.98, 35.1]],
+          [[54.3, 50.52], [54.72, 49.47], [55.01, 47.88], [55.04, 46.19],
+           [54.72, 44.41], [54.21, 42.79], [53.51, 41.19], [52.81, 39.5],
+           [52.06, 38.17], [51.19, 37.04], [50.55, 36.05]],
+        ],
+        label: [69, 30], side: 'right',
+      },
+      {
+        // The trunk. It is the about because it is the thing the other four
+        // come out of, and because this frame has nothing in it but the tree —
+        // the dusk pressing used the park lamp; there is no lamp in this frame.
+        // One run only. The mark forks near the ground where the trunk meets a
+        // root, and the skeleton picked that up faithfully, but a fork at the
+        // base reads as a mistake rather than as the tree — so the trunk is the
+        // single line up.
+        // Centre line taken per row from the middle of what Matt drew, not from
+        // a smoothed path, which crept onto the left edge of the mark.
+        id: 'about', kind: 'line', nick: 'the trunk',
+        points: [
+          [[51.41, 93.95], [52.11, 91.09], [52.95, 87.1], [53.41, 82.98],
+           [53.27, 78.97], [52.86, 74.86], [52.43, 70.8], [52.52, 66.81],
+           [52.98, 62.69], [53.46, 58.71], [54.01, 55.81]],
+        ],
+        label: [57, 80], side: 'right',
+      },
+    ],
+  });
+})();
+</script>
+</body>
+</html>

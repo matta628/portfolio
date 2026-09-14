@@ -1,0 +1,1716 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>guitar-pedal-cpp — demo</title>
+<style>
+  :root {
+    --bg: #0a0d12;
+    --panel: #12171e;
+    --panel-2: #1a212a;
+    --panel-3: #222b36;
+    --line: #242d39;
+    --line-2: #35404f;
+    --text: #e2e9f2;
+    --dim: #8a97a8;
+    --faint: #5c6875;
+    --accent: #6ee7b7;
+    --accent-dark: #123027;
+    --accent-line: #2f6b56;
+    --info: #7cc4ff;
+    --warn: #f5c451;
+    --bad: #ff8080;
+    --ui: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 14px/1.5 var(--ui);
+    -webkit-font-smoothing: antialiased;
+  }
+  .num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+  /* ------------------------------------------------------------- header */
+  header {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    padding: 10px 18px; border-bottom: 1px solid var(--line);
+    background: linear-gradient(180deg, #161d26, #12171e);
+    position: sticky; top: 0; z-index: 20;
+  }
+  header .mark { display: flex; align-items: center; gap: 9px; margin-right: 4px; }
+  header svg { display: block; }
+  header h1 {
+    font-size: 14px; margin: 0; letter-spacing: .03em; font-weight: 650;
+    font-family: var(--mono);
+  }
+  header h1 small { color: var(--faint); font-weight: 400; margin-left: 8px; letter-spacing: 0; }
+  .spacer { flex: 1 1 auto; }
+
+  .pill {
+    padding: 3px 10px; border-radius: 999px; border: 1px solid var(--line);
+    background: #0e131a; color: var(--dim); font-size: 11.5px; white-space: nowrap;
+    letter-spacing: .02em;
+  }
+  .pill.ok   { color: var(--accent); border-color: var(--accent-line); background: var(--accent-dark); }
+  .pill.bad  { color: var(--bad);   border-color: #5b2626; background: #2c1414; }
+  .pill.warn { color: var(--warn);  border-color: #574718; background: #2b2411; }
+  .pill.info { color: var(--info);  border-color: #234a6b; background: #10202e; }
+
+  /* ------------------------------------------------------------- layout */
+  main {
+    display: grid; gap: 14px; padding: 14px 18px 28px;
+    grid-template-columns: 316px minmax(0, 1fr) 300px;
+    align-items: start;
+  }
+  .col { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+  /* The middle column is a grid rather than a flex column purely so the top row
+     can be two panels wide. Everything else spans both tracks, so the column
+     still reads as a stack -- and every panel stays a direct child, which is
+     what the drag-to-reorder code walks. */
+  .col-mid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-content: start; }
+  .col-mid > * { grid-column: 1 / -1; min-width: 0; }
+  .col-mid > [data-panel="surface"],
+  .col-mid > [data-panel="transport"] { grid-column: auto; }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px;
+         overflow: hidden; margin-bottom: 10px; }
+  .seg button { border: 0; border-radius: 0; background: transparent; color: var(--muted);
+                padding: 6px 14px; font-size: 12.5px; cursor: pointer; }
+  .seg button + button { border-left: 1px solid var(--line); }
+  .seg button.on { background: var(--accent-dark); color: var(--accent); font-weight: 600; }
+  .loops { display: flex; flex-direction: column; gap: 6px; }
+  .loop-row { display: flex; align-items: center; gap: 8px; }
+  .loop-row .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis;
+                  white-space: nowrap; }
+  .loop-row .dur { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+  /* Only the parameter list is tall enough to need its own scroll; letting it
+     scroll is what keeps everything else on one screen. */
+  .col-left {
+    position: sticky; top: 58px;
+    max-height: calc(100vh - 72px); overflow-y: auto;
+    scrollbar-width: thin;
+  }
+  @media (max-width: 1180px) {
+    main { grid-template-columns: 1fr; }
+    .col-left { position: static; max-height: none; overflow: visible; }
+    .col-mid { grid-template-columns: 1fr; }
+    .col-mid > [data-panel="surface"],
+    .col-mid > [data-panel="transport"] { grid-column: 1 / -1; }
+  }
+
+  section {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    padding: 13px 15px 15px;
+  }
+  h2 {
+    margin: 0 0 11px; font-size: 11px; letter-spacing: .13em; text-transform: uppercase;
+    color: var(--dim); font-weight: 650;
+    display: flex; align-items: center; gap: 8px;
+  }
+  h2 .h2-note { text-transform: none; letter-spacing: 0; color: var(--faint); font-weight: 400; font-size: 11.5px; }
+
+  /* The little circled i that marks anything with an explanation attached. */
+  .i {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 14px; height: 14px; border-radius: 50%; flex: none;
+    border: 1px solid var(--line-2); color: var(--faint);
+    font: 600 9px/1 var(--ui); text-transform: none; letter-spacing: 0;
+  }
+  [data-tip] { cursor: help; }
+  [data-tip]:hover > .i, [data-tip]:focus-visible > .i { color: var(--info); border-color: var(--info); }
+  [data-tip]:focus { outline: none; }
+  [data-tip]:focus-visible { outline: 2px solid var(--info); outline-offset: 2px; border-radius: 4px; }
+
+  #tip {
+    position: fixed; z-index: 200; max-width: 330px; pointer-events: none;
+    background: #0c1218; border: 1px solid var(--line-2); border-radius: 9px;
+    padding: 10px 12px; box-shadow: 0 14px 34px rgba(0,0,0,.62);
+    font-size: 12.5px; line-height: 1.55; color: var(--text);
+    left: -9999px; top: 0;
+    opacity: 0; transform: translateY(-4px); transition: opacity .12s ease, transform .12s ease;
+  }
+  #tip.show { opacity: 1; transform: none; }
+  #tip .tip-title {
+    display: block; color: var(--info); font-size: 10px; letter-spacing: .12em;
+    text-transform: uppercase; font-weight: 700; margin-bottom: 5px;
+  }
+  #tip .tip-body { white-space: pre-line; }
+
+  /* ------------------------------------------------------------ controls */
+  button {
+    font: 13px/1.2 var(--ui); color: var(--text); background: var(--panel-2);
+    border: 1px solid var(--line); border-radius: 7px; padding: 7px 12px; cursor: pointer;
+    transition: border-color .12s ease, background .12s ease;
+  }
+  button:hover:not(:disabled) { border-color: var(--line-2); background: var(--panel-3); }
+  button:focus-visible { outline: 2px solid var(--info); outline-offset: 1px; }
+  button:disabled { opacity: .4; cursor: not-allowed; pointer-events: none; }
+  .tipwrap { display: inline-flex; }
+  button.on { background: var(--accent-dark); border-color: var(--accent-line); color: var(--accent); }
+  button.big { padding: 12px 16px; font-size: 15px; font-weight: 600; }
+  button.tiny { padding: 3px 7px; font-size: 11px; border-radius: 5px; }
+  button.danger:hover:not(:disabled) { border-color: #5b2626; color: var(--bad); }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .hint { color: var(--dim); font-size: 11.5px; line-height: 1.5; margin: 9px 0 0; }
+  .muted { color: var(--dim); }
+
+  input[type=text] {
+    font: 12.5px/1.2 var(--ui); color: var(--text); background: #0b1016;
+    border: 1px solid var(--line); border-radius: 6px; padding: 5px 8px; width: 100%;
+  }
+  input[type=text]:focus { outline: none; border-color: var(--info); }
+  input[type=text]::placeholder { color: var(--faint); }
+
+  /* Effect picker. 34 presets are far too many to sit open above the scope,
+     and the setlist pane below already lists every one of them, so this starts
+     collapsed with the running preset carried on its summary line. */
+  details.fx { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; }
+  details.fx > summary {
+    list-style: none; cursor: pointer; padding: 12px 15px;
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  details.fx > summary::-webkit-details-marker { display: none; }
+  details.fx > summary::before { content: "\25B8"; color: var(--faint); transition: transform .12s ease; }
+  details.fx[open] > summary::before { transform: rotate(90deg); }
+  .fx-label { font-size: 11px; letter-spacing: .13em; text-transform: uppercase; color: var(--dim); font-weight: 650; }
+  .fx-current { color: var(--accent); font-weight: 650; font-size: 15px; }
+  .fx-body { padding: 0 15px 15px; }
+  .grip {
+    cursor: grab; color: var(--dim); font-size: 15px; line-height: 1;
+    padding: 0 7px 0 0; margin-right: 2px; touch-action: none;
+    letter-spacing: 1px; user-select: none;
+  }
+  .grip:hover { color: var(--text); }
+  .col-mid > .dragging { opacity: .45; }
+  .col-mid > .drop-target { box-shadow: 0 -2px 0 0 var(--accent); }
+  .freeze-row {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 12px;
+    padding-top: 12px; border-top: 1px solid var(--line);
+  }
+  #btn-freeze.on { background: #123024; border-color: #1f6d4d; color: var(--accent); }
+  .note-box { margin-top: 12px; }
+  .note-box textarea {
+    width: 100%; resize: vertical; margin-top: 6px;
+    font: 12px/1.5 var(--mono); color: var(--text);
+    background: var(--panel-2); border: 1px solid var(--line);
+    border-radius: 6px; padding: 7px 9px;
+  }
+  .note-box textarea:focus { outline: none; border-color: var(--accent-line); }
+  .note-box textarea::placeholder { color: var(--dim); }
+  #presets {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: 6px;
+    max-height: 236px; overflow-y: auto; scrollbar-width: thin; padding-right: 2px;
+  }
+  #presets button { text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* ------------------------------------------------------------ setlist */
+  .sl-grid { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.1fr); gap: 12px; }
+  @media (max-width: 760px) { .sl-grid { grid-template-columns: 1fr; } }
+  .sl-pane {
+    background: #0d1218; border: 1px solid var(--line); border-radius: 8px; padding: 9px 10px 10px;
+    min-width: 0;
+  }
+  .pane-head {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+    font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); font-weight: 650;
+  }
+  .pane-head .count { color: var(--faint); letter-spacing: 0; text-transform: none; font-weight: 400; }
+  #sl-pool { max-height: 206px; overflow-y: auto; scrollbar-width: thin; }
+  .pool-row {
+    display: flex; align-items: center; gap: 8px; width: 100%;
+    padding: 4px 6px; border-radius: 6px; border: 1px solid transparent; background: none;
+    color: var(--text); font: 12.5px/1.3 var(--ui); cursor: pointer; text-align: left;
+  }
+  .pool-row:hover { background: var(--panel-2); border-color: var(--line); }
+  .pool-row .plus { color: var(--accent); font-family: var(--mono); font-weight: 700; flex: none; width: 12px; }
+  .pool-row .pname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pool-row .used {
+    margin-left: auto; flex: none; font-size: 10px; color: var(--info);
+    border: 1px solid #234a6b; background: #10202e; border-radius: 999px; padding: 0 6px;
+  }
+
+  #setlist-strip { display: flex; flex-direction: column; gap: 5px; max-height: 236px; overflow-y: auto; scrollbar-width: thin; }
+  .slot {
+    display: flex; align-items: center; gap: 7px; padding: 5px 6px 5px 8px;
+    border: 1px solid var(--line); border-left: 3px solid var(--line-2);
+    border-radius: 7px; background: var(--panel-2);
+  }
+  .slot .pos {
+    font-family: var(--mono); font-size: 11px; color: var(--faint); flex: none; width: 16px;
+  }
+  .slot .nm {
+    flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    font-size: 13px; background: none; border: none; color: var(--text); text-align: left;
+    padding: 2px 0; cursor: pointer; font-family: var(--ui);
+  }
+  .slot .nm:hover { color: var(--accent); }
+  .slot .nm:focus-visible { outline: 2px solid var(--info); outline-offset: 1px; }
+  .slot .now {
+    flex: none; font-size: 9.5px; letter-spacing: .1em; font-weight: 700; color: var(--accent);
+    border: 1px solid var(--accent-line); border-radius: 999px; padding: 1px 6px;
+  }
+  .slot.active { border-left-color: var(--accent); background: #10241d; }
+  .slot.playing { border-left-color: var(--info); }
+  .slot .ops { display: flex; gap: 3px; flex: none; }
+  .slot .ops button { padding: 2px 5px; font-size: 10px; border-radius: 4px; line-height: 1; min-width: 20px; }
+  .sl-empty { color: var(--faint); font-size: 12px; padding: 14px 6px; text-align: center; line-height: 1.6; }
+
+  /* -------------------------------------------------------------- meters */
+  .meter { margin-bottom: 13px; }
+  .meter:last-child { margin-bottom: 0; }
+  .meter-head {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
+    font-size: 11.5px; color: var(--dim); margin-bottom: 5px;
+  }
+  .meter-head .val { font-family: var(--mono); font-size: 12.5px; color: var(--text); white-space: nowrap; }
+  .meter-head .val .sub { color: var(--dim); font-size: 11.5px; }
+  .bar {
+    position: relative; height: 20px; background: #070a0e;
+    border: 1px solid var(--line); border-radius: 4px; overflow: hidden;
+  }
+  .bar .rms, .bar .peak { position: absolute; top: 0; bottom: 0; left: 0; }
+  .bar .rms { background: #2a6f88; }
+  .bar .peak { width: 2px; background: var(--accent); box-shadow: 0 0 6px rgba(110,231,183,.7); }
+  .bar .ticks {
+    position: absolute; inset: 0;
+    background-image: repeating-linear-gradient(to right, transparent 0 calc(16.666% - 1px), #202832 calc(16.666% - 1px) 16.666%);
+  }
+  .bar .redzone { position: absolute; top: 0; bottom: 0; right: 0; width: 10%; background: rgba(255,128,128,.10); }
+  .scale { display: flex; justify-content: space-between; font-size: 10px; color: var(--faint); margin-top: 3px; font-family: var(--mono); }
+
+  /* ------------------------------------------------------------- canvas */
+  canvas {
+    width: 100%; height: 192px; display: block; background: #070a0e;
+    border: 1px solid var(--line); border-radius: 6px;
+  }
+  .legend { display: flex; gap: 14px; font-size: 11px; color: var(--dim); margin-top: 7px; }
+  .legend i { display: inline-block; width: 14px; height: 2px; vertical-align: middle; margin-right: 6px; }
+
+  /* ------------------------------------------------------------- looper */
+  .loop-bar {
+    height: 24px; background: #070a0e; border: 1px solid var(--line);
+    border-radius: 4px; position: relative; overflow: hidden; margin: 11px 0 5px;
+  }
+  .loop-bar .fill { position: absolute; inset: 0 auto 0 0; background: var(--accent-dark); }
+  .loop-bar.seekable { cursor: pointer; }
+  .loop-bar.seekable:hover { outline: 1px solid var(--accent-line); }
+  .loop-bar .head { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--accent); box-shadow: 0 0 6px rgba(110,231,183,.7); }
+  .state-badge {
+    display: inline-block; padding: 7px 15px; border-radius: 7px; font-size: 15px; font-weight: 650;
+    letter-spacing: .12em; border: 1px solid var(--line); background: var(--panel-2);
+    font-family: var(--mono);
+  }
+  .state-EMPTY { color: var(--dim); }
+  .state-REC { color: var(--bad); border-color: #5b2626; background: #2c1414; }
+  .state-PLAY { color: var(--accent); border-color: var(--accent-line); background: var(--accent-dark); }
+  .state-PAUSED { color: var(--dim); border-color: #3a3a3a; background: #1e1e1e; }
+  .state-OVERDUB { color: var(--warn); border-color: #574718; background: #2b2411; }
+
+  /* --------------------------------------------------------- parameters */
+  .pgroup { margin-bottom: 4px; }
+  .pgroup.idle .param { opacity: .38; }
+  .pgroup.idle .group-title .gt-state { display: inline; }
+  .group-title {
+    display: flex; align-items: center; gap: 7px; margin: 14px 0 4px;
+    font-size: 11.5px; color: var(--info); letter-spacing: .08em; font-weight: 650;
+  }
+  .pgroup:first-child .group-title { margin-top: 0; }
+  .group-title .gt-state {
+    display: none; margin-left: auto; font-size: 9.5px; letter-spacing: .1em; font-weight: 600;
+    color: var(--faint); border: 1px solid var(--line); border-radius: 999px; padding: 1px 6px;
+  }
+  .pgroup.idle .group-title { color: var(--faint); }
+  .param { display: grid; grid-template-columns: 96px 1fr 58px; gap: 10px; align-items: center; margin: 5px 0; }
+  .param label {
+    color: var(--dim); font-size: 12px; line-height: 1.25;
+    border-bottom: 1px dotted #333d4b; justify-self: start;
+  }
+  .param:hover label { color: var(--text); border-bottom-color: var(--info); }
+  .param output { text-align: right; font-size: 12px; font-family: var(--mono); color: var(--text); }
+  input[type=range] { width: 100%; accent-color: #3f8f74; height: 18px; }
+  input[type=range]:focus-visible { outline: 2px solid var(--info); outline-offset: 2px; border-radius: 4px; }
+
+  /* ----------------------------------------------------------- LCD / log */
+  .lcd {
+    background: #0d2a12; color: #86ff93; border: 2px solid #1e3320; border-radius: 5px;
+    padding: 9px 11px; font-size: 16px; letter-spacing: .18em; white-space: pre;
+    font-family: var(--mono); text-shadow: 0 0 7px rgba(134,255,147,.35);
+  }
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 12px; margin: 0; }
+  .kv dt { color: var(--dim); }
+  .kv dd { margin: 0; text-align: right; font-family: var(--mono); overflow: hidden; text-overflow: ellipsis; }
+  .log { max-height: 178px; overflow-y: auto; font-size: 12px; scrollbar-width: thin; font-family: var(--mono); }
+  .log div { padding: 2px 0; border-bottom: 1px solid #171d25; }
+  .log div:last-child { border-bottom: none; }
+  .log time { color: var(--faint); margin-right: 9px; }
+</style>
+<link rel="stylesheet" href="demo.css">
+</head>
+<body>
+
+<header>
+  <span class="mark">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6ee7b7" stroke-width="1.7"
+         stroke-linecap="round" aria-hidden="true">
+      <rect x="3.5" y="2.5" width="17" height="19" rx="3"></rect>
+      <circle cx="12" cy="9" r="3.2"></circle>
+      <path d="M12 5.8v3.2"></path>
+      <circle cx="12" cy="17.2" r="1.9" fill="#6ee7b7" stroke="none"></circle>
+    </svg>
+    <h1>guitar-pedal-cpp<small>bench</small></h1>
+  </span>
+
+  <span id="conn" class="pill" data-tip-title="Connection"
+        data-tip="The browser holds one server-sent-events stream open to the pedal, which pushes a full state frame 25 times a second. 'reconnecting' means that stream dropped — the audio itself is unaffected, since the web server runs on its own thread and never touches the audio callback.">connecting</span>
+  <span id="audio" class="pill" data-tip-title="Audio stream"
+        data-tip="Whether the sound card is actually running the DSP chain. If it is stopped, the reason from ALSA is shown here — usually the interface is unplugged or another program has it open.">audio ?</span>
+  <span id="fmt" class="pill" data-tip-title="Sample rate / buffer"
+        data-tip="Sample rate is how many numbers per second describe the sound: 48000 Hz means one sample every 20.8 microseconds.&#10;&#10;A FRAME is one sample per channel. The buffer is how many frames the sound card hands the callback at once. Bigger buffers are safer (more time to finish the work) but add latency you can feel: 256 frames at 48 kHz is 5.3 ms in and 5.3 ms out.">-</span>
+
+  <span class="spacer"></span>
+
+  <span id="xruns" class="pill" data-tip-title="xruns"
+        data-tip="An xrun means the audio callback missed its deadline and the sound card had no samples to play, so it played a gap — you hear a click or a dropout. You want this at 0.&#10;&#10;Important caveat: on this hardware the stream can degrade audibly while this counter still reads 0. It is evidence, not proof. Trust your ears first.">xruns 0</span>
+  <span id="load" class="pill" data-tip-title="Callback load"
+        data-tip="Average time the DSP callback takes, as a percentage of the time available before the next buffer arrives. Under 50% is comfortable. Anything near 100% will start dropping out.">load -</span>
+  <span class="pill info" tabindex="0" data-tip-title="Keyboard shortcuts"
+        data-tip="Space — looper trigger (record / play / overdub)
+c — clear the loop
+n — step to the next preset in the setlist
+p — step back one in the setlist
+1-9 — jump straight to preset 1-9
+Esc — dismiss this popover
+
+Shortcuts are ignored while a slider or text box has focus.">? keys</span>
+</header>
+
+<main>
+
+  <!-- ============================================================ LEFT -->
+  <div class="col col-left">
+    <section>
+      <h2 tabindex="0" data-tip-title="Parameters"
+          data-tip="Every knob on the effects currently loaded. They are grouped by DSP stage, in the order the signal actually passes through them.&#10;&#10;Groups the current preset does not use are dimmed rather than hidden, so a knob that is doing nothing looks different from one that does not exist. Moving a slider takes effect on the very next buffer — a few milliseconds.&#10;&#10;Hover any control name for what it does to the sound.">
+        Parameters <span class="i" aria-hidden="true">i</span>
+        <span class="h2-note" id="params-note"></span>
+      </h2>
+      <div class="row" style="margin-bottom:6px">
+        <button class="tiny" id="btn-active-only" data-tip-title="Hide unused stages"
+                data-tip="Show only the stages this preset actually runs. Off by default so you can see the whole board.">unused stages: shown</button>
+      </div>
+      <div id="params"></div>
+    </section>
+  </div>
+
+  <!-- =========================================================== MIDDLE -->
+  <div class="col col-mid">
+
+
+
+    <section data-panel="surface">
+      <h2 tabindex="0" data-tip-title="Control surface"
+          data-tip="A mirror of the physical panel wired to the Pi's GPIO pins: the 16x2 character LCD, the two footswitches and the status LEDs. The pills below are lit when that piece of hardware was found at boot — so the browser shows the panel even on a board with nothing soldered to it."><span class="grip" data-tip-title="Drag to reorder" data-tip="Drag this panel to a new position in the column. The order is remembered in this browser." aria-hidden="true">⁙</span>
+        Control surface <span class="i" aria-hidden="true">i</span>
+      </h2>
+      <div class="lcd"><span id="lcd0">                </span><br><span id="lcd1">                </span></div>
+      <div class="row" style="margin-top:11px">
+        <span class="pill" id="gp-looper" data-tip-title="Looper footswitch"
+              data-tip="The primary footswitch, handled with no debounce delay on the press edge: the instant your foot lands is the loop boundary, so it must never wait to see whether a second tap is coming.">looper switch</span>
+        <span class="pill" id="gp-leds" data-tip-title="Status LEDs"
+              data-tip="Two indicator LEDs. The looper LED is off when empty, solid while recording, slow-blinking while playing and fast-blinking while overdubbing. The preset LED flashes twice when the preset changes and once, long, when the loop is cleared.">LEDs</span>
+        <span class="pill" id="gp-lcd" data-tip-title="LCD1602"
+              data-tip="A 16x2 character display driven over GPIO. The text above is the exact same two strings the physical panel is given.">LCD1602</span>
+      </div>
+      <dl class="kv" style="margin-top:11px">
+        <dt data-tip-title="Input device"
+            data-tip="The USB audio interface the guitar is plugged into. Its own input-gain knob is the right place to fix a hot signal — turning it down there prevents clipping, whereas turning anything down in software happens after the damage.">input device</dt>
+        <dd id="dev-in">-</dd>
+        <dt>output device</dt><dd id="dev-out">-</dd>
+      </dl>
+    </section>
+
+    <section data-panel="transport">
+      <h2 tabindex="0" data-tip-title="Looper and Freeze"
+          data-tip="Both of these sit after the pedalboard rather than inside it, so they run on every preset.&#10;&#10;They are shown one at a time because the footswitch can only drive one at a time: with a single switch wired, the stomp does whichever is selected here. Choosing it in the browser rather than with a gesture on the switch is what keeps the press edge instant — a double-tap or long-press would delay the looper's boundary by the length of the gesture."><span class="grip" data-tip-title="Drag to reorder" data-tip="Drag this panel to a new position in the column. The order is remembered in this browser." aria-hidden="true">⁙</span>
+        Looper / Freeze <span class="i" aria-hidden="true">i</span>
+      </h2>
+
+      <div class="seg" role="tablist" aria-label="What the footswitch drives">
+        <button id="seg-looper" role="tab" aria-selected="true" class="on">Looper</button>
+        <button id="seg-freeze" role="tab" aria-selected="false">Freeze</button>
+      </div>
+      <div id="pane-looper">
+        <span id="loop-state" class="state-badge state-EMPTY">EMPTY</span>
+        <div class="loop-bar" id="loop-bar" data-tip-title="Loop position"
+             data-tip="Click anywhere to jump playback to that point. The jump lands at the top of the next audio block, not mid-buffer."><div class="fill" id="loop-fill"></div><div class="head" id="loop-head"></div></div>
+        <div class="scale"><span id="loop-pos">0.00 s</span><span id="loop-len">no loop</span></div>
+        <div class="row" style="margin-top:11px">
+          <button class="big" id="btn-trigger">Trigger</button>
+          <button class="big" id="btn-pause">Pause</button>
+          <button class="big" id="btn-clear">Clear</button>
+          <button id="btn-loop-save" data-tip-title="Save this loop"
+                  data-tip="Writes the loop to disk as a mono 16-bit WAV under ~/.config/guitar-pedal-cpp/loops.&#10;&#10;Only works from PLAYING or EMPTY: while recording or overdubbing the audio thread is writing the buffer, and copying it out from under a writer would give you a torn loop.">Save…</button>
+          <button id="btn-clean-loop" data-tip-title="Record dry, effect on playback"
+                  data-tip="Moves the looper to the front of the chain: it stores the untouched input, and its playback runs through the board with the live signal.&#10;&#10;One recording can then be heard through every preset — switch preset and the loop changes with it.&#10;&#10;Off, the looper sits last and records the finished tone, so a loop keeps the preset it was played with.&#10;&#10;Freeze is captured into the loop only when this is off.">Dry loop</button>
+        </div>
+        <p class="hint">
+          Trigger drives the same state machine as the footswitch:
+          empty &rarr; record &rarr; play &rarr; overdub &rarr; play. <span class="muted">(Space / c)</span>
+        </p>
+      </div>
+
+      <div id="pane-freeze" hidden>
+        <div class="row">
+          <button class="big" id="btn-freeze" data-tip-title="Freeze"
+                  data-tip="Holds the harmonic content of what you just played as a sustained pad while you keep playing over it.&#10;&#10;Unlike the looper, freeze takes whatever happened to be in the buffer the instant you hit it — you use it to turn a chord you just played into a pad, not to build an arrangement. (f)">Freeze</button>
+        </div>
+        <p class="hint">
+          With Freeze selected, the footswitch is momentary or latching depending on how you use it:
+          <b>tap</b> to latch it on, <b>hold past 400&nbsp;ms</b> and it lets go when your foot lifts.
+          Capture always fires on the press, so the drone starts under your foot.
+        </p>
+        <p class="hint muted">
+          Holds the <i>spectrum</i> of what you played, not a slice of it, so nothing repeats.
+          <b>Shimmer</b> sets how much the phase is randomised each frame: 0 continues the chord
+          faithfully and can sound static, 1 is airier. <b>Hold</b> at 1.0 sustains forever.
+        </p>
+      </div>
+    </section>
+
+    <section data-panel="scope">
+      <h2 tabindex="0" data-tip-title="Waveform"
+          data-tip="A 2048-frame window of the signal, sampled every 4th frame and redrawn about 15 times a second. At 48 kHz that window is ~43 ms — roughly two cycles of a low E string.&#10;&#10;It is pulled by the browser rather than pushed, and read out of a lock-free buffer, so a slow browser can never stall the audio thread. Vertical range is -1.2 to +1.2; a trace flat against the top or bottom is clipping."><span class="grip" data-tip-title="Drag to reorder" data-tip="Drag this panel to a new position in the column. The order is remembered in this browser." aria-hidden="true">⁙</span>
+        Waveform <span class="i" aria-hidden="true">i</span>
+      </h2>
+      <canvas id="scope" aria-label="Input and output waveform"></canvas>
+      <div class="legend">
+        <span><i style="background:#3f6d8f"></i>input (dry, straight off the guitar)</span>
+        <span><i style="background:#6ee7b7"></i>output (after every DSP stage)</span>
+      </div>
+    </section>
+
+
+    <details data-panel="effect" class="fx" id="fx-picker">
+      <summary><span class="grip" data-tip-title="Drag to reorder" data-tip="Drag this panel to a new position in the column. The order is remembered in this browser." aria-hidden="true">⁙</span>
+        <span class="fx-label">Effect</span>
+        <span class="fx-current" id="fx-current">Clean</span>
+        <span class="pill warn" id="preset-mod" hidden data-tip-title="Edited preset"
+              data-tip="This preset has saved edits sitting on top of its built-in defaults. 'Revert' puts the original values back.">edited</span>
+      </summary>
+      <div class="fx-body">
+        <div class="row" style="margin-bottom:8px">
+          <input type="text" id="fx-filter" placeholder="filter presets" style="max-width:220px" aria-label="Filter presets">
+          <span class="spacer"></span>
+          <button class="tiny" id="btn-save" data-tip-title="Save these knobs"
+                  data-tip="Writes the current slider positions to disk as this preset's settings, so they come back next boot. This happens on the web thread, never the audio thread — writing a file from an audio callback is exactly the kind of unbounded blocking that causes dropouts.">Save preset</button>
+          <button class="tiny danger" id="btn-revert" data-tip-title="Revert this preset"
+                  data-tip="Throws away the saved edits for this preset and restores its built-in values.">Revert</button>
+          <button class="tiny danger" id="btn-revert-all" data-tip-title="Revert every preset"
+                  data-tip="Throws away saved edits for all 34 presets. There is no undo.">Revert all</button>
+        </div>
+        <div id="presets"></div>
+        <p class="hint" id="preset-hint"></p>
+        <div class="note-box">
+          <label class="pane-head" for="preset-note" tabindex="0"
+                 data-tip-title="Notes on this preset"
+                 data-tip="Your own notes on whichever preset is selected — how loud it is, what it suits, what to fix.&#10;&#10;Saved to the same file as your preset edits and kept per preset, so they survive a restart. A note is an observation, not an edit: writing one does not mark the preset as modified.&#10;&#10;Pair these with preset-levels.csv, which the pedal writes on exit with the measured peak and clip count for every preset you played.">
+            Notes <span class="i" aria-hidden="true">i</span>
+            <span class="spacer"></span>
+            <span class="count" id="note-status"></span>
+          </label>
+          <textarea id="preset-note" rows="2" spellcheck="false"
+                    placeholder="e.g. way too loud, clips on hard picking"></textarea>
+        </div>
+      </div>
+    </details>
+
+    <section data-panel="loops">
+      <h2 tabindex="0" data-tip-title="Saved loops"
+          data-tip="Loops written to disk as mono 16-bit WAV under ~/.config/guitar-pedal-cpp/loops.&#10;&#10;WAV rather than a private format so a loop is worth something outside this program — it opens in any DAW or player.&#10;&#10;Loading swaps the loop in on the audio thread as a pointer exchange, so it costs nothing and cannot miss a deadline. A loop recorded at a different sample rate is refused rather than played back at the wrong pitch."><span class="grip" data-tip-title="Drag to reorder" data-tip="Drag this panel to a new position in the column. The order is remembered in this browser." aria-hidden="true">⁙</span>
+        Saved loops <span class="i" aria-hidden="true">i</span>
+        <span class="spacer"></span>
+        <button class="tiny" id="btn-loops-refresh">refresh</button>
+      </h2>
+      <div class="loops" id="loops-list"></div>
+      <p class="hint" id="loops-empty">Nothing saved yet. Record a loop, stop recording, then <b>Save…</b> in the Looper panel.</p>
+    </section>
+
+    <section data-panel="setlist">
+      <h2 tabindex="0" data-tip-title="Setlist"
+          data-tip="The ordered shortlist of presets the utility footswitch walks, one stomp at a time.&#10;&#10;Cycling all 34 presets by foot is unusable — reaching one sound can cost thirty stomps. A setlist cycles only what you picked for tonight, in the order you picked it.&#10;&#10;On the pedal: tap the utility switch to clear the loop, double-tap to step to the next preset in this list. Picking a preset in the browser also moves the footswitch's place in the list, so the next stomp carries on from what you are actually hearing."><span class="grip" data-tip-title="Drag to reorder" data-tip="Drag this panel to a new position in the column. The order is remembered in this browser." aria-hidden="true">⁙</span>
+        Setlist <span class="i" aria-hidden="true">i</span>
+        <span class="pill" id="gp-util">utility switch</span>
+        <span class="spacer"></span>
+        <button class="tiny" id="btn-sl-step" data-tip-title="Step the setlist"
+                data-tip="Does from the browser what a double-tap of the utility footswitch does on the pedal: move to the next entry and select it. Keyboard: n forward, p back.">Step &#9656;</button>
+        <button class="tiny" id="btn-sl-add" data-tip-title="Append what is playing"
+                data-tip="Adds the preset you are currently hearing to the end of the setlist.">+ current</button>
+        <button class="tiny danger" id="btn-sl-clear" data-tip-title="Clear the setlist"
+                data-tip="Empties the list. The presets themselves are untouched — only tonight's running order goes away.">Clear</button>
+      </h2>
+
+      <div class="sl-grid">
+        <div class="sl-pane">
+          <div class="pane-head">All presets <span class="count" id="sl-pool-count"></span></div>
+          <input type="text" id="sl-filter" placeholder="filter" aria-label="Filter presets to add" style="margin-bottom:7px">
+          <div id="sl-pool"></div>
+        </div>
+        <div class="sl-pane">
+          <div class="pane-head">Tonight&rsquo;s set <span class="count" id="setlist-count">empty</span></div>
+          <div id="setlist-strip"></div>
+        </div>
+      </div>
+      <p class="hint" id="setlist-hint"></p>
+    </section>
+
+    <section data-panel="log">
+      <h2 tabindex="0" data-tip-title="Event log"
+          data-tip="What the pedal has done, newest first: preset changes, looper actions, saves and errors. The audio thread never writes here — appending takes a mutex, which is exactly why it is forbidden inside the callback."><span class="grip" data-tip-title="Drag to reorder" data-tip="Drag this panel to a new position in the column. The order is remembered in this browser." aria-hidden="true">⁙</span>
+        Event log <span class="i" aria-hidden="true">i</span>
+      </h2>
+      <div class="log" id="log"></div>
+    </section>
+  </div>
+
+  <!-- ============================================================ RIGHT -->
+  <div class="col col-right">
+
+    <section>
+      <h2 tabindex="0" data-tip-title="Levels (dBFS)"
+          data-tip="dBFS means decibels relative to full scale. 0 dBFS is the loudest a sample can represent, so every real signal reads negative. It is logarithmic, not linear: -6 dB is about half the amplitude, -12 dB about a quarter.&#10;&#10;Healthy guitar peaks land around -12 to -6 dBFS. That leaves headroom for a pick attack without ever touching 0.&#10;&#10;The bars are drawn on a dB scale rather than a linear one, because linear spends 90% of its width on the top 20 dB — exactly where a guitar never sits.">
+        Levels <span class="i" aria-hidden="true">i</span>
+      </h2>
+      <div class="meter">
+        <div class="meter-head">
+          <span data-tip-title="Peak vs RMS"
+                data-tip="PEAK is the loudest single sample in the window. It tells you how much headroom is left before 0 dBFS, so it is the number that predicts clipping.&#10;&#10;RMS is a rolling average of energy and tracks roughly how loud the signal SOUNDS.&#10;&#10;On guitar the two are far apart — often 12 dB or more — because a pluck is a brief spike followed by a much quieter decay. A meter showing only one of them will mislead you.">Input <span class="i" aria-hidden="true">i</span> <span class="muted">guitar in</span></span>
+          <span class="val"><b id="in-peak-db">-inf</b> <span class="sub">pk /</span> <span id="in-rms-db">-inf</span> <span class="sub">rms</span></span>
+        </div>
+        <div class="bar"><div class="rms" id="in-rms"></div><div class="peak" id="in-peak"></div><div class="ticks"></div><div class="redzone"></div></div>
+      </div>
+      <div class="meter">
+        <div class="meter-head">
+          <span data-tip-title="Output level"
+                data-tip="The same measurement taken after every DSP stage has run. Distortion, compressor makeup gain and delay feedback all add level — if the output peaks much hotter than the input, one of those knobs is the cause.">Output <span class="i" aria-hidden="true">i</span> <span class="muted">post-DSP</span></span>
+          <span class="val"><b id="out-peak-db">-inf</b> <span class="sub">pk /</span> <span id="out-rms-db">-inf</span> <span class="sub">rms</span></span>
+        </div>
+        <div class="bar"><div class="rms" id="out-rms"></div><div class="peak" id="out-peak"></div><div class="ticks"></div><div class="redzone"></div></div>
+      </div>
+      <div class="scale"><span>-60</span><span>-50</span><span>-40</span><span>-30</span><span>-20</span><span>-10</span><span>0 dB</span></div>
+
+      <div class="meter" style="margin-top:13px">
+        <div class="meter-head">
+          <span data-tip-title="Gain reduction"
+                data-tip="How many dB the compressor is turning the signal down right now. It only moves when the signal is above the compressor's threshold, and it moves at the speed set by Attack and Release. A steady 3-6 dB on peaks is a normal amount; pinned at the bottom means the threshold is too low or the ratio too high.&#10;&#10;Reads 0 when the current preset does not use the compressor.">Gain reduction <span class="i" aria-hidden="true">i</span></span>
+          <span class="val"><span id="comp-gr-db">0.0</span> <span class="sub">dB</span></span>
+        </div>
+        <div class="bar" style="height:12px"><div class="rms" id="comp-gr" style="background:#7a5a2a"></div><div class="ticks"></div></div>
+      </div>
+
+      <div class="row" style="margin-top:12px">
+        <span id="clips" class="pill" tabindex="0" data-tip-title="clips"
+              data-tip="A clip is a sample that hit or exceeded 0 dBFS — digital full scale. There is no number above it, so the peak gets flattened off. That is harsh, unrecoverable distortion, and it sounds nothing like the deliberate analog-style clipping a fuzz does.&#10;&#10;You want this at 0.&#10;&#10;Fix it by lowering the input gain on the audio interface, not in software: once a sample has been squared off, no later stage can put the missing peak back.">clips 0</span>
+        <button id="btn-reset" data-tip-title="Reset counters"
+                data-tip="Zeroes the peak holds, the clip count, the xrun count and the worst-case callback time. Nothing about the audio changes — it just clears the evidence so you can test one thing at a time.">Reset counters</button>
+        <span class="tipwrap" data-tip-title="Simulate input"
+              data-tip="Feeds a generated test signal through the whole DSP chain instead of the sound card, so the effects can be exercised with no guitar and no interface attached. It is disabled whenever the card is running: both would otherwise be driving the same chain.">
+          <button id="btn-sim">Simulate input</button>
+        </span>
+      </div>
+    </section>
+
+    <section>
+      <h2 tabindex="0" data-tip-title="The deadline"
+          data-tip="This is the real-time constraint the whole project is built around. The sound card hands the callback a buffer of frames and will come back for the next one after frames / sample_rate seconds — 5333 microseconds for 256 frames at 48 kHz. Every stage of DSP has to finish inside that window, every single time.&#10;&#10;Go over it once and the card has nothing to play: that is an xrun, and you hear a click.&#10;&#10;Average load tells you how much room you normally have. WORST is the number that actually matters, because one late buffer is audible even if the average is fine.">
+        Deadline <span class="i" aria-hidden="true">i</span>
+      </h2>
+      <div class="meter">
+        <div class="meter-head"><span>Callback time vs. budget</span><span class="val"><b id="pct">-</b></span></div>
+        <div class="bar"><div class="rms" id="load-avg"></div><div class="peak" id="load-max"></div><div class="ticks"></div><div class="redzone" style="width:20%"></div></div>
+        <div class="scale"><span>0%</span><span>50%</span><span>100% = missed</span></div>
+      </div>
+      <dl class="kv" style="margin-top:11px">
+        <dt data-tip-title="Budget"
+            data-tip="frames / sample_rate, in microseconds. The wall-clock time available to process one buffer before the sound card needs the next one. It is set by the buffer size, not by how fast the Pi is.">budget / buffer</dt>
+        <dd id="budget">-</dd>
+        <dt data-tip-title="Last / average / worst"
+            data-tip="Wall-clock microseconds spent inside the audio callback. 'Last' is the most recent buffer, 'average' a running mean, 'worst' the high-water mark since the counters were last reset. Worst is the one to watch: it catches the single late buffer that the average hides.">last</dt>
+        <dd id="us-last">-</dd>
+        <dt>average</dt><dd id="us-avg">-</dd>
+        <dt>worst</dt><dd id="us-max">-</dd>
+        <dt data-tip-title="Buffers processed"
+            data-tip="How many buffers the callback has handled since the counters were reset. At 48 kHz with 256-frame buffers that is 187 per second, so this climbs fast — useful as a denominator for the xrun count.">buffers processed</dt>
+        <dd id="blocks">0</dd>
+        <dt data-tip-title="xruns"
+            data-tip="Times the callback missed the deadline and the card had no samples to play, producing a click or a dropout. You want 0.&#10;&#10;Be careful with this number: on this hardware a stream can degrade audibly while this still reads 0. It is evidence, not proof.">xruns</dt>
+        <dd id="xruns2">0</dd>
+      </dl>
+    </section>
+  </div>
+
+</main>
+
+<div id="tip" role="tooltip" aria-hidden="true"><span class="tip-title"></span><span class="tip-body"></span></div>
+
+<script src="shim.js"></script>
+<script>
+"use strict";
+
+const $ = (id) => document.getElementById(id);
+const DB_FLOOR = -60;
+
+/* =====================================================================
+   Tooltips
+   One shared popover positioned by script rather than a CSS-only bubble:
+   the parameter list lives inside an overflow:auto column, and a CSS
+   tooltip anchored inside it would be clipped by that scroll container.
+   Triggers are any [data-tip]; hover shows it, focus shows it (so it is
+   reachable from the keyboard and from a tap on a touch screen), and
+   anything not naturally focusable is given a tab stop on render.
+   ===================================================================== */
+const tipEl = $("tip");
+const tipTitleEl = tipEl.querySelector(".tip-title");
+const tipBodyEl = tipEl.querySelector(".tip-body");
+let tipOwner = null;
+
+function showTip(el) {
+  const body = el.getAttribute("data-tip");
+  if (!body) return;
+  tipOwner = el;
+  const title = el.getAttribute("data-tip-title") || "";
+  tipTitleEl.textContent = title;
+  tipTitleEl.style.display = title ? "" : "none";
+  tipBodyEl.textContent = body;
+  tipEl.style.left = "0px";
+  tipEl.style.top = "0px";
+  tipEl.classList.add("show");
+  tipEl.setAttribute("aria-hidden", "false");
+  el.setAttribute("aria-describedby", "tip");
+
+  const r = el.getBoundingClientRect();
+  const t = tipEl.getBoundingClientRect();
+  const pad = 8;
+  let left = r.left + r.width / 2 - t.width / 2;
+  left = Math.max(pad, Math.min(left, window.innerWidth - t.width - pad));
+  let top = r.bottom + 8;
+  if (top + t.height > window.innerHeight - pad) {
+    // Not enough room below: flip above, and if it does not fit there
+    // either, pin it to the top of the viewport rather than let it run off.
+    top = Math.max(pad, r.top - t.height - 8);
+  }
+  tipEl.style.left = Math.round(left) + "px";
+  tipEl.style.top = Math.round(top) + "px";
+}
+
+function hideTip() {
+  if (!tipOwner) return;
+  tipOwner.removeAttribute("aria-describedby");
+  tipOwner = null;
+  tipEl.classList.remove("show");
+  tipEl.setAttribute("aria-hidden", "true");
+}
+
+document.addEventListener("pointerover", (e) => {
+  const el = e.target.closest ? e.target.closest("[data-tip]") : null;
+  if (el === tipOwner) return;
+  hideTip();
+  if (el) showTip(el);
+});
+document.documentElement.addEventListener("pointerleave", hideTip);
+document.addEventListener("focusin", (e) => {
+  const el = e.target.closest ? e.target.closest("[data-tip]") : null;
+  hideTip();
+  if (el) showTip(el);
+});
+document.addEventListener("focusout", hideTip);
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") hideTip(); });
+// Capture phase so an inner scroller (the parameter column) also dismisses it,
+// otherwise the popover would hang in mid-air over unrelated content.
+window.addEventListener("scroll", hideTip, true);
+window.addEventListener("resize", hideTip);
+
+// Anything explained but not otherwise focusable needs a tab stop. Elements
+// that already contain a control (a slider row) are skipped: focusing the
+// slider inside them shows the same tip.
+function makeTipsReachable(root) {
+  (root || document).querySelectorAll("[data-tip]").forEach((el) => {
+    if (el.hasAttribute("tabindex")) return;
+    if (el.matches("input, button, select, textarea, a[href], summary")) return;
+    if (el.querySelector("input, button, select, textarea, a[href]")) return;
+    el.tabIndex = 0;
+  });
+}
+
+/* =====================================================================
+   What every knob actually does, keyed by the id the server sends.
+   Descriptions come from the stages themselves (include/*.h, src/*.cpp),
+   not from a generic effects glossary.
+   ===================================================================== */
+const GROUP_TIPS = {
+  "Compressor": "Evens out how loud your playing is: anything above the threshold gets turned down. It runs FIRST in the chain, and that placement is deliberate — compressing after distortion does almost nothing, because the distortion has already flattened the dynamics.",
+  "Amp": "A whole amplifier as one stage: preamp drive, then the tone stack, then the power amp, then presence, then the speaker. The order is the point. On a real amp the tone stack sits BETWEEN the two gain stages, so turning up the bass changes what the power amp is asked to distort — an EQ pedal placed after a distortion pedal cannot do that.",
+  "Fuzz": "Hard, squared-off clipping — a Big Muff or a Tone Bender, not an overdrive. It drives the signal so far past the rails that the output is nearly a square wave no matter how gently you pick.",
+  "Drive": "Smooth saturation using a tanh curve. Unlike the fuzz it keeps the shape of the note, which is what an overdrive does.",
+  "Bit Crusher": "Digital damage on purpose: coarse sample values and a lowered sample rate. Two different-sounding failures, kept as two knobs.",
+  "Ring Mod": "Multiplies your signal by a sine tone. What comes out is only the sums and differences of your notes with the carrier, so the original pitches are gone — metallic and inharmonic rather than musical.",
+  "Tone": "Three-band EQ — low shelf, sweepable mid peak, high shelf — independent of the amp's own tone stack. Coefficients are only recalculated when a knob actually moves, because the trig costs far more than the filtering does.",
+  "Pitch": "Pitch shifting by reading a delay line faster or slower than it is written, with two crossfaded taps so the read pointer's wrap-around does not click. Cheap and allocation-free; it pays for that with a warble on sustained notes.",
+  "Phaser": "Allpass filters swept by an LFO and summed with the dry signal. The summing is what turns phase shift into cancellation notches — a handful of them, not harmonically related. That is why a phaser sounds like breathing.",
+  "Flanger": "A very short modulated delay with feedback. Its notches are harmonically spaced and there are hundreds of them, which is why it sounds like a jet where a phaser sounds like breathing.",
+  "Chorus": "A ~15 ms modulated delay mixed with the dry signal: a second, slightly detuned guitar. No feedback, so no jet whoosh.",
+  "Tremolo": "Volume going up and down under an LFO. The oldest effect here and the only one that is purely a volume control — no delay line, no filter, no state beyond the oscillator's phase.",
+  "Delay": "Echo with feedback, plus the two things that separate tape from digital: a filter inside the feedback loop, and a wobble on the delay time.",
+  "Reverb": "A Freeverb-style network — parallel comb filters build the density, series allpasses smear what comes out. The four modes change both the size of the space and what the space is made of.",
+  "Looper": "Records what you play into a fixed buffer and plays it back underneath you."
+};
+
+const PARAM_TIPS = {
+  "comp.threshold": "The level where the compressor starts turning things down. Anything quieter than this passes untouched. Around -18 dB is a sensible start; lower means more of your playing gets squashed.",
+  "comp.ratio": "How hard it clamps once you are over the threshold. 4 means 4 dB over the threshold comes out as 1 dB over. 1 is off; 20 is effectively a limiter.",
+  "comp.attack": "How quickly it reacts to a note, in milliseconds. Short (1-5 ms) catches the pick attack and evens it out. Longer (over ~30 ms) lets the attack through and only squashes the sustain, which keeps the playing feeling lively.",
+  "comp.release": "How long it takes to let go once the note dies down. Too short and it audibly pumps and breathes between notes; ~120 ms is a good starting point.",
+  "comp.makeup": "A fixed volume boost after the squashing, to win back the level compression took away. Watch the output meter when you move this — it is the knob most likely to push you into clipping.",
+
+  "amp.gain": "Preamp drive: the first gain stage. This is where the amp's character comes from at low volume. Up for crunch, down for clean.",
+  "amp.bass": "Low shelf in the tone stack. Because the stack sits before the power amp, adding bass does not just add weight — it pushes the power stage harder in the low end and changes how the whole thing breaks up.",
+  "amp.mid": "Middle band of the tone stack. Cut it for the scooped rhythm sound; boost it to cut through a band.",
+  "amp.treble": "Top of the tone stack, still before the power amp. Adds attack and string noise, and gives the power stage more high end to distort.",
+  "amp.presence": "A high shelf after the power amp (on a real amp it lives in the power stage's feedback loop). Adds bite and edge without the fizz that more treble would bring.",
+  "amp.master": "How hard the power amp is driven. This is the knob that makes an amp sound big rather than merely loud — it is a second, different-sounding distortion after the tone stack.",
+  "amp.volume": "Plain output level, after everything. Changes loudness, not tone. Use this one if the output meter is running hot.",
+  "amp.cab": "Speaker simulation: rolls off what a guitar speaker cannot produce, roughly everything above 5 kHz. At 0 you get the raw fizz; ~0.7 sounds like a real cabinet. Skipping this is the single biggest reason naive amp sims sound like a wasp in a tin.",
+
+  "fuzz.drive": "How hard the signal is slammed into the clipper, 1 to 100. Past about 20 the output is close to a square wave however gently you pick — that is fuzz rather than overdrive.",
+  "fuzz.bias": "Clipping asymmetry, imitating a germanium transistor that is not biased at its midpoint. Off-centre adds even harmonics, which is what makes a Tone Bender sound warm instead of buzzy. The DC offset it creates is stripped out afterwards, the same job a real pedal's coupling capacitor does. 0 is symmetrical.",
+  "fuzz.gate": "Sputter threshold. Turned up, the fuzz cuts out as a note decays — the dying-battery, velcro-fuzz sound. It is modelled on the note's envelope, not as a noise gate. 0 gives clean sustain.",
+  "fuzz.tone": "A single lowpass filter after the clipper. 0 is dark and woolly, 1 is bright and buzzy. 0.5 is a good middle.",
+  "fuzz.level": "Output trim for the fuzz stage. Fuzz makes everything far louder, so this usually needs pulling down.",
+  "fuzz.mix": "Blend of fuzz against your untouched signal. 1 is all fuzz; below that you keep some pick attack and note definition underneath.",
+
+  "drive.drive": "Overdrive amount — a smooth tanh curve, not the fuzz's hard squaring. It saturates but keeps the shape of the note, like a tube amp pushed hard.",
+  "drive.mix": "Blend of driven against clean. 1 is all drive.",
+
+  "crush.bits": "Amplitude resolution, from 16 bits down to 1. Rounding every sample to a coarse grid adds a distortion that scales with the signal, so it is loudest on QUIET passages and vanishes on loud ones. That backwards dynamic is what makes it sound broken rather than merely distorted.",
+  "crush.rate": "Sample-and-hold decimation: each sample is held for N frames. Everything above the new Nyquist frequency folds back down as aliasing — inharmonic tones that move the opposite way to the notes you play. There is deliberately no anti-aliasing filter here; the aliasing IS the effect.",
+  "crush.mix": "Blend of crushed against clean.",
+
+  "ring.freq": "Frequency of the sine your signal is multiplied by. The output holds only the sums and differences of your notes with this carrier — the original pitches are gone, which is why it sounds metallic. Below about 20 Hz it stops being a ring modulator and becomes a tremolo: the same maths heard differently.",
+  "ring.mix": "Blend against dry. A little adds a metallic edge; full wet loses the sense of pitch entirely.",
+
+  "tone.bass": "Low shelf at 200 Hz, up to 18 dB either way. General shaping, separate from the amp's own stack.",
+  "tone.mid": "Boost or cut at whatever frequency Mid Hz is set to. Cut for the scooped rhythm sound that sits under a vocal; boost for a mid-forward, transistor-radio push.",
+  "tone.midhz": "Where the mid band sits, 200 Hz to 3 kHz. Around 800 Hz is the honk of a guitar; higher gets nasal.",
+  "tone.midq": "How narrow that mid band is. 0.3 is broad and gentle. 8 is a sharp peak — which is a wah pedal parked in one position rather than swept.",
+  "tone.treble": "High shelf at 3 kHz, up to 18 dB either way.",
+
+  "pitch.semitones": "Transpose, in semitones; 12 is an octave. Full wet at +12 or -12 is a Whammy. Expect a warble on sustained notes: this splices the waveform in ~50 ms windows rather than analysing it, and that artefact is what a real Whammy sounds like too.",
+  "pitch.cents": "Fine detune, in hundredths of a semitone. Ten cents mixed under the dry signal is the wide, shimmery doubling a rack harmoniser gives — far too small an interval to reach on the semitone slider.",
+  "pitch.mix": "Blend of shifted against dry. A low mix at +12 in front of the reverb is a shimmer; full wet is a hard octave.",
+
+  "phaser.rate": "Speed of the sweep, in Hz. 0.5 Hz is one slow breath every two seconds.",
+  "phaser.depth": "How far the notches sweep up and down. 0 leaves them parked; 1 uses the full range.",
+  "phaser.feedback": "Resonance: feeds the output back in, sharpening the notches into something more vocal and hollow.",
+  "phaser.stages": "Number of allpass sections, 2 to 8, always even. Each pair produces one notch, so 4 stages gives 2 notches — the Phase 90 / Small Stone configuration.",
+  "phaser.mix": "Blend against dry. The phaser only works BY summing with the dry signal — that is what turns phase shift into cancellation — so around 0.5 is maximum effect, not 1.0.",
+
+  "flanger.rate": "Sweep speed in Hz. Slow, around 0.1-0.3, gives the long jet-engine whoosh.",
+  "flanger.depth": "How wide the delay time sweeps, in milliseconds. 0 parks the notches.",
+  "flanger.delay": "Centre of the sweep, 0.5 to 10 ms. This very short delay is what makes the comb notches harmonically spaced and audible, and it is the whole difference between a flanger and a chorus.",
+  "flanger.feedback": "Feeds the delayed signal back into itself, -0.95 to +0.95. Positive gives the jet whoosh and will nearly self-oscillate at the top. NEGATIVE inverts the feedback, moving the notches to sit between the harmonics instead of on them — a hollower, through-zero-ish flange.",
+  "flanger.mix": "Blend against dry. 0.5 gives the deepest cancellation.",
+
+  "chorus.rate": "How fast the pitch wobbles, in Hz. 0.5 to 1 Hz is the usual territory.",
+  "chorus.depth": "How far the delay time moves, in milliseconds. That movement is what detunes the copy, so more depth means a more obvious warble.",
+  "chorus.mix": "Blend of the wobbling delayed copy against dry. The delay sits around 15 ms — too long to make flanger notches — so you hear a second, slightly out-of-tune guitar instead.",
+
+  "trem.rate": "How many times a second the volume pulses, 0.1 to 20 Hz.",
+  "trem.depth": "How far the volume drops on each pulse. 0 is off, 1 chops all the way to silence.",
+  "trem.shape": "0 is a sine, which breathes. 1 is nearly a square, which chops — the harder, more rhythmic 1960s amp sound. Rather than two oscillators, the sine is progressively hardened towards a square as you turn this up.",
+
+  "delay.time": "Gap between repeats, 0.01 to 2 seconds. Around 0.4 s is a dotted eighth at 110 bpm.",
+  "delay.feedback": "How much of each repeat is fed back in, so how many repeats you get. 0.95 is very nearly infinite — watch the output meter, because feedback that high builds up and clips.",
+  "delay.tone": "A lowpass INSIDE the feedback loop, so each repeat comes back darker than the one before it. 1 is open and digital; low values decay into tape-like mud. Filtering the output instead would make every repeat equally dull, which is not the same sound at all.",
+  "delay.mod": "Wow and flutter: a slow wobble of the delay time, in milliseconds, imitating tape that does not run at a constant speed. 0 gives an ordinary digital delay.",
+  "delay.mix": "Blend of repeats against dry.",
+
+  "reverb.mode": "0 Room, 1 Plate, 2 Hall, 3 Spring. The mode sets both the comb lengths (how big the space is) and a bandpass on the wet signal (what the space is made of): a spring tank is narrow and mid-forward, a plate is bright and dense, a hall is long and rolls off the top. Switching mode changes an index bound, never a buffer size, so it is safe to do from a footswitch mid-song.",
+  "reverb.size": "How large the space is. Longer comb delays give a longer, more spread-out tail.",
+  "reverb.damping": "How much the room absorbs high frequencies as the tail decays. Up is soft and carpeted; down is tiled and bright.",
+  "reverb.mix": "How much reverb sits under the dry signal. 0.2-0.3 reads as a room; past 0.5 you are in the space rather than in front of it.",
+
+  "looper.decay": "How much of the EXISTING loop survives each overdub pass, 0.5 to 1.0. At 1.0 every layer is kept forever, which can build up until it clips. Below 1.0 older layers fade out as you add new ones. This multiplies the STORED signal, so it genuinely erases material over time — unlike Loop volume.",
+  "looper.level": "How loud the recorded loop is in what you hear, 0 to 1.5. It scales the loop only as it is mixed into the output, never what is written back into the loop buffer. So you can pull it to silence, overdub, and bring it back with everything intact — it is safe to ride while playing, which Overdub decay is not."
+};
+
+// Suffix fallbacks, so a parameter added to the C++ later still gets something
+// sensible rather than nothing.
+const SUFFIX_TIPS = {
+  "mix": "How much of this effect you hear against your untouched signal. 0 is bypassed, 1 is effect only.",
+  "level": "Output trim for this stage. Changes how loud it is, not what it does.",
+  "gain": "Input gain into this stage. More means it is pushed harder.",
+  "drive": "How hard the signal is pushed into the non-linear part of this stage. More gives more distortion.",
+  "rate": "Speed of this stage's low-frequency oscillator, in Hz: how many sweeps or pulses per second.",
+  "depth": "How far the modulation swings. 0 leaves the effect sitting still.",
+  "feedback": "How much of the output is routed back into the input. More gives more repeats or more resonance, and high values can run away.",
+  "tone": "A filter on this stage. Lower is darker, higher is brighter.",
+  "damping": "How quickly high frequencies are absorbed as the sound decays.",
+  "size": "How large the simulated space is."
+};
+
+function fmtRange(v) {
+  const n = Number(v);
+  return (Math.abs(n) >= 10 || Number.isInteger(n)) ? String(n) : n.toFixed(2);
+}
+
+function paramTip(p) {
+  if (PARAM_TIPS[p.id]) return PARAM_TIPS[p.id];
+  const suffix = String(p.id).split(".").pop();
+  if (SUFFIX_TIPS[suffix]) return SUFFIX_TIPS[suffix];
+  return "No description has been written for this control yet. It belongs to the " + p.group +
+         " stage and its range is " + fmtRange(p.min) + " to " + fmtRange(p.max) + ".";
+}
+
+// A few parameters are really discrete. Giving them an integer step stops a
+// drag producing values the C++ is only going to round anyway.
+const STEPS = { "reverb.mode": 1, "phaser.stages": 2 };
+const REVERB_MODES = ["Room", "Plate", "Hall", "Spring"];
+
+function fmtValue(id, v) {
+  const n = Number(v);
+  if (id === "reverb.mode") return REVERB_MODES[Math.max(0, Math.min(3, Math.round(n)))];
+  if (id === "phaser.stages") return String(Math.round(n));
+  if (Math.abs(n) >= 100) return n.toFixed(0);
+  if (Math.abs(n) >= 10) return n.toFixed(1);
+  return n.toFixed(2);
+}
+
+/* ===================================================================== */
+
+function toDb(x) {
+  if (!(x > 0)) return -Infinity;
+  return 20 * Math.log10(x);
+}
+function dbText(x) {
+  const d = toDb(x);
+  return d === -Infinity ? "-inf" : d.toFixed(1);
+}
+// Meters are drawn on a dB scale, not a linear one: linear spends 90% of its
+// width on the top 20 dB, which is exactly where a guitar signal never sits.
+function dbFraction(x) {
+  const d = toDb(x);
+  if (!(d > DB_FLOOR)) return 0;
+  return Math.min(1, (d - DB_FLOOR) / (0 - DB_FLOOR));
+}
+
+let cfg = null;
+let scopePoints = 512;
+let dragging = null;      // param id the user is currently holding
+const seenLog = new Set();
+let sim = false;
+let cleanLoop = false;
+let loopPaused = false;
+let loopFrames = 0;
+let curPreset = 0;
+let activeOnly = false;
+
+// Local mirror of the setlist. Edits are applied here first and posted after,
+// so the list does not visibly bounce back for the 40 ms until the next state
+// frame confirms it.
+let setlist = [];
+let setlistSig = null;
+let setlistHold = 0;
+
+async function post(path, params) {
+  const q = new URLSearchParams(params || {}).toString();
+  try {
+    await fetch(path + (q ? "?" + q : ""), { method: "POST" });
+  } catch (e) { /* the stream's disconnect indicator already says it */ }
+}
+
+/* ------------------------------------------------------------- config -- */
+function presetName(i) {
+  const p = cfg && cfg.presets && cfg.presets[i];
+  return p ? p.name : "preset " + i;
+}
+function presetTip(p) {
+  return p.gear && p.gear !== "\u2014" ? p.blurb + "\n\n" + p.gear : p.blurb;
+}
+
+async function loadConfig() {
+  cfg = await (await fetch("/api/params")).json();
+  scopePoints = cfg.scope_points || 512;
+
+  $("fmt").textContent = cfg.sample_rate + " Hz / " + cfg.buffer_frames + " frames";
+  $("dev-in").textContent = cfg.device_in || "-";
+  $("dev-out").textContent = cfg.device_out || "-";
+  $("sl-pool-count").textContent = cfg.presets.length + " available";
+
+  const holder = $("presets");
+  holder.innerHTML = "";
+  cfg.presets.forEach((p, i) => {
+    const b = document.createElement("button");
+    b.textContent = p.name;
+    b.setAttribute("data-tip-title", p.name);
+    b.setAttribute("data-tip", presetTip(p));
+    b.dataset.preset = String(i);
+    // Deliberately leaves the picker open: choosing a sound is nearly always
+    // several tries in a row, and closing it after each one means reopening it
+    // and finding your place again between every comparison.
+    b.onclick = () => post("/api/preset", { value: i });
+    holder.appendChild(b);
+  });
+
+  buildPool();
+
+  const box = $("params");
+  box.innerHTML = "";
+  let groupBox = null;
+  let group = null;
+  for (const p of cfg.params) {
+    if (p.group !== group) {
+      group = p.group;
+      groupBox = document.createElement("div");
+      groupBox.className = "pgroup";
+      groupBox.dataset.group = group;
+      const h = document.createElement("div");
+      h.className = "group-title";
+      h.setAttribute("data-tip-title", group);
+      h.setAttribute("data-tip", GROUP_TIPS[group] ||
+        "A DSP stage. Its knobs are listed below, in the order the signal meets them.");
+      const nm = document.createElement("span");
+      nm.textContent = group;
+      const st = document.createElement("span");
+      st.className = "gt-state";
+      st.textContent = "not used here";
+      h.append(nm, st);
+      groupBox.appendChild(h);
+      box.appendChild(groupBox);
+    }
+    const row = document.createElement("div");
+    row.className = "param";
+    row.setAttribute("data-tip-title", p.group + " — " + p.label);
+    row.setAttribute("data-tip", paramTip(p));
+    const lab = document.createElement("label");
+    lab.textContent = p.label;
+    const input = document.createElement("input");
+    input.type = "range";
+    input.min = p.min; input.max = p.max;
+    input.step = STEPS[p.id] || (p.max - p.min) / 200;
+    input.dataset.id = p.id;
+    const out = document.createElement("output");
+    out.id = "pv-" + p.id;
+    input.addEventListener("pointerdown", () => { dragging = p.id; });
+    input.addEventListener("input", () => {
+      dragging = p.id;
+      out.textContent = fmtValue(p.id, input.value);
+      post("/api/param", { id: p.id, value: input.value });
+    });
+    input.addEventListener("blur", () => { if (dragging === p.id) dragging = null; });
+    lab.htmlFor = input.id = "pi-" + p.id;
+    row.append(lab, input, out);
+    groupBox.appendChild(row);
+  }
+  makeTipsReachable();
+}
+
+/* ------------------------------------------------------------ setlist -- */
+function buildPool() {
+  const pool = $("sl-pool");
+  pool.innerHTML = "";
+  cfg.presets.forEach((p, i) => {
+    const b = document.createElement("button");
+    b.className = "pool-row";
+    b.dataset.preset = String(i);
+    b.setAttribute("data-tip-title", "Add: " + p.name);
+    b.setAttribute("data-tip", presetTip(p) + "\n\nClick to append it to the end of the setlist.");
+    const plus = document.createElement("span");
+    plus.className = "plus";
+    plus.textContent = "+";
+    const nm = document.createElement("span");
+    nm.className = "pname";
+    nm.textContent = p.name;
+    const used = document.createElement("span");
+    used.className = "used";
+    used.hidden = true;
+    b.append(plus, nm, used);
+    b.onclick = () => pushSetlist(setlist.concat(i));
+    pool.appendChild(b);
+  });
+  filterPool();
+}
+
+function filterList(container, selector, term) {
+  const q = term.trim().toLowerCase();
+  container.querySelectorAll(selector).forEach((el) => {
+    el.hidden = q !== "" && !el.textContent.toLowerCase().includes(q);
+  });
+}
+function filterPool() { filterList($("sl-pool"), ".pool-row", $("sl-filter").value); }
+
+function pushSetlist(list) {
+  setlist = list.slice();
+  // Setlist::set resets the cursor, so mirror that locally instead of leaving
+  // a stale highlight on a slot that has moved.
+  setlistHold = performance.now() + 800;
+  setlistSig = null;
+  renderSetlist(-1);
+  post("/api/setlist", { value: setlist.join(",") });
+}
+
+function buildSetlist() {
+  const strip = $("setlist-strip");
+  strip.innerHTML = "";
+  if (setlist.length === 0) {
+    const e = document.createElement("div");
+    e.className = "sl-empty";
+    e.textContent = "No setlist yet. Pick presets on the left, in the order you want to stomp through them tonight.";
+    strip.appendChild(e);
+    return;
+  }
+  setlist.forEach((preset, k) => {
+    const slot = document.createElement("div");
+    slot.className = "slot";
+    slot.dataset.slot = String(k);
+
+    const pos = document.createElement("span");
+    pos.className = "pos num";
+    pos.textContent = (k + 1) + ".";
+
+    const nm = document.createElement("button");
+    nm.className = "nm";
+    nm.textContent = presetName(preset);
+    nm.setAttribute("data-tip-title", "Slot " + (k + 1) + ": " + presetName(preset));
+    nm.setAttribute("data-tip", "Click to jump straight to this preset. Doing so also moves the footswitch's place in the setlist here, so the next stomp carries on from slot " + (k + 2 > setlist.length ? 1 : k + 2) + ".");
+    nm.onclick = () => post("/api/preset", { value: preset });
+
+    const now = document.createElement("span");
+    now.className = "now";
+    now.textContent = "NOW";
+    now.hidden = true;
+
+    const ops = document.createElement("span");
+    ops.className = "ops";
+    const up = document.createElement("button");
+    up.className = "tiny";
+    up.textContent = "↑";
+    up.setAttribute("aria-label", "Move earlier");
+    up.disabled = k === 0;
+    up.onclick = () => moveSlot(k, -1);
+    const down = document.createElement("button");
+    down.className = "tiny";
+    down.textContent = "↓";
+    down.setAttribute("aria-label", "Move later");
+    down.disabled = k === setlist.length - 1;
+    down.onclick = () => moveSlot(k, 1);
+    const del = document.createElement("button");
+    del.className = "tiny danger";
+    del.textContent = "✕";
+    del.setAttribute("aria-label", "Remove from setlist");
+    del.onclick = () => pushSetlist(setlist.filter((_, j) => j !== k));
+    ops.append(up, down, del);
+
+    slot.append(pos, nm, now, ops);
+    strip.appendChild(slot);
+  });
+}
+
+function moveSlot(k, dir) {
+  const to = k + dir;
+  if (to < 0 || to >= setlist.length) return;
+  const next = setlist.slice();
+  const tmp = next[k]; next[k] = next[to]; next[to] = tmp;
+  pushSetlist(next);
+}
+
+function renderSetlist(cursor) {
+  const sig = setlist.join(",");
+  if (sig !== setlistSig) {
+    setlistSig = sig;
+    buildSetlist();
+    const counts = new Map();
+    setlist.forEach((p) => counts.set(p, (counts.get(p) || 0) + 1));
+    $("sl-pool").querySelectorAll(".pool-row").forEach((row) => {
+      const n = counts.get(Number(row.dataset.preset)) || 0;
+      const badge = row.querySelector(".used");
+      badge.hidden = n === 0;
+      badge.textContent = n > 1 ? "x" + n : "in set";
+    });
+    $("setlist-count").textContent = setlist.length === 0 ? "empty" : setlist.length + " presets";
+    makeTipsReachable($("setlist-strip"));
+  }
+  $("setlist-strip").querySelectorAll(".slot").forEach((slot) => {
+    const k = Number(slot.dataset.slot);
+    slot.classList.toggle("active", k === cursor);
+    slot.classList.toggle("playing", k !== cursor && setlist[k] === curPreset);
+    slot.querySelector(".now").hidden = k !== cursor;
+  });
+}
+
+// Where the next stomp lands. The cursor is authoritative when the footswitch
+// has actually stepped; before that, fall back to wherever the preset you are
+// hearing sits in the list.
+function nextSlot(cursor, dir) {
+  if (setlist.length === 0) return -1;
+  let base = cursor;
+  if (base < 0) base = setlist.indexOf(curPreset);
+  if (base < 0) return dir > 0 ? 0 : setlist.length - 1;
+  return (base + dir + setlist.length) % setlist.length;
+}
+
+let lastCursor = -1;
+let lastUtility = null;
+function stepSetlist(dir) {
+  // Forward steps go through the server so the browser and the footswitch
+  // share one implementation. Computing the slot here and POSTing /api/preset
+  // diverges when a preset appears twice in a set: Setlist::advance moves the
+  // cursor by one, while selecting a preset syncs to its FIRST occurrence.
+  if (dir > 0) {
+    post("/api/setlist/advance", {});
+    return;
+  }
+  const k = nextSlot(lastCursor, dir);
+  if (k < 0) return;
+  post("/api/preset", { value: setlist[k] });
+}
+
+/* ------------------------------------------------------ panel ordering -- */
+// Pointer events rather than HTML5 drag-and-drop: DnD does not fire on touch
+// without a polyfill, and this page has to work from a phone on the same LAN.
+const PANEL_ORDER_KEY = "pedal.panelOrder";
+
+function panelColumn() { return document.querySelector(".col-mid"); }
+
+function savePanelOrder() {
+  const ids = [...panelColumn().children].map((el) => el.dataset.panel).filter(Boolean);
+  try { localStorage.setItem(PANEL_ORDER_KEY, JSON.stringify(ids)); } catch (e) { /* private mode */ }
+}
+
+function restorePanelOrder() {
+  let ids = null;
+  try { ids = JSON.parse(localStorage.getItem(PANEL_ORDER_KEY) || "null"); } catch (e) { ids = null; }
+  if (!Array.isArray(ids)) return;
+  const col = panelColumn();
+
+  // The markup order is the default, and it is the only record of where a new
+  // panel belongs. Capture it before reordering: appending in saved order alone
+  // would dump every panel added since that order was stored at the bottom,
+  // which is how "Saved loops sits under Effects" quietly stops being true for
+  // anyone who has ever dragged a panel.
+  const defaults = [...col.children].map((el) => el.dataset.panel).filter(Boolean);
+
+  for (const id of ids) {
+    const el = col.querySelector(':scope > [data-panel="' + CSS.escape(id) + '"]');
+    if (el) col.appendChild(el);
+  }
+
+  for (const id of defaults) {
+    if (ids.includes(id)) continue;
+    const el = col.querySelector(':scope > [data-panel="' + CSS.escape(id) + '"]');
+    if (!el) continue;
+    // Put it back in front of whichever panel followed it by default.
+    const after = defaults.slice(defaults.indexOf(id) + 1)
+                          .map((n) => col.querySelector(':scope > [data-panel="' + CSS.escape(n) + '"]'))
+                          .find(Boolean);
+    col.insertBefore(el, after || null);
+  }
+}
+
+function initPanelDragging() {
+  const col = panelColumn();
+  let dragged = null;
+
+  col.addEventListener("pointerdown", (e) => {
+    const grip = e.target.closest(".grip");
+    if (!grip) return;
+    dragged = grip.closest("[data-panel]");
+    if (!dragged || dragged.parentElement !== col) { dragged = null; return; }
+    e.preventDefault();                    // do not toggle <details> or select text
+    grip.setPointerCapture(e.pointerId);
+    dragged.classList.add("dragging");
+  });
+
+  col.addEventListener("pointermove", (e) => {
+    if (!dragged) return;
+    const siblings = [...col.children].filter((el) => el !== dragged && el.dataset.panel);
+    let before = null;
+    for (const el of siblings) {
+      const box = el.getBoundingClientRect();
+      if (e.clientY < box.top + box.height / 2) { before = el; break; }
+    }
+    siblings.forEach((el) => el.classList.remove("drop-target"));
+    if (before) before.classList.add("drop-target");
+    // Move live rather than on drop, so the layout shows the result as you go.
+    if (before !== dragged.nextElementSibling) col.insertBefore(dragged, before);
+  });
+
+  const finish = () => {
+    if (!dragged) return;
+    dragged.classList.remove("dragging");
+    [...col.children].forEach((el) => el.classList.remove("drop-target"));
+    dragged = null;
+    savePanelOrder();
+    fitCanvas();                            // the scope may have changed width
+  };
+  col.addEventListener("pointerup", finish);
+  col.addEventListener("pointercancel", finish);
+}
+
+/* -------------------------------------------------------------- notes -- */
+let notes = [];
+let noteShownFor = -1;
+
+async function loadNotes() {
+  try {
+    const r = await fetch("/api/notes");
+    notes = (await r.json()).notes || [];
+    noteShownFor = -1;   // force the box to refill from the new data
+  } catch (e) { /* the pedal is unreachable; the stream banner already says so */ }
+}
+
+function saveNote() {
+  const i = noteShownFor;
+  if (i < 0) return;
+  const text = $("preset-note").value;
+  if (text === (notes[i] || "")) return;      // nothing changed
+  notes[i] = text;
+  post("/api/preset/note", { index: i, value: text });
+  const status = $("note-status");
+  status.textContent = "saved";
+  setTimeout(() => { if (status.textContent === "saved") status.textContent = ""; }, 1500);
+}
+
+function renderNote(preset) {
+  const box = $("preset-note");
+  // Never overwrite what is being typed: only refill when the selected preset
+  // actually changed, and never while the box has focus.
+  if (preset === noteShownFor || document.activeElement === box) return;
+  saveNote();                       // flush the previous preset's edit first
+  noteShownFor = preset;
+  box.value = notes[preset] || "";
+  $("note-status").textContent = "";
+}
+
+/* ------------------------------------------------------------- render -- */
+function setPill(el, on, label) {
+  el.className = "pill " + (on ? "ok" : "");
+  el.textContent = label;
+}
+
+function render(s) {
+  curPreset = s.preset;
+  renderNote(s.preset);
+
+  document.querySelectorAll("#presets button").forEach((b) => {
+    b.classList.toggle("on", Number(b.dataset.preset) === s.preset);
+  });
+
+  $("btn-freeze").classList.toggle("on", !!s.frozen);
+  $("btn-freeze").textContent = s.frozen ? "Frozen \u2014 release" : "Freeze";
+  setTransportTab(!!s.freeze_mode);
+  // With two switches wired the stomp is always the looper, so the choice is
+  // meaningless and the control should not be there to confuse.
+  // With two switches wired, switch 1 stays on the looper permanently, so the
+  // choice stops being a choice and the tabs become a plain view switch.
+  $("seg-freeze").title = (s.gpio && s.gpio.utility_switch)
+    ? "Switch 2 is wired, so the footswitch stays on the looper"
+    : "The footswitch drives freeze while this is selected";
+
+  const sel = cfg && cfg.presets && cfg.presets[s.preset];
+  if (sel) {
+    const gear = sel.gear && sel.gear !== "\u2014" ? " \u2014 " + sel.gear : "";
+    $("preset-hint").textContent = sel.blurb + gear;
+    // The picker is collapsible, so its summary has to carry the current
+    // preset -- otherwise closing it hides which effect is running.
+    $("fx-current").textContent = sel.name;
+  }
+  $("preset-mod").hidden = !s.preset_modified;
+
+  // Dim the stages this preset does not run, rather than hiding them, so a
+  // knob that is doing nothing looks different from one that is missing.
+  const active = new Set(s.active_groups || []);
+  let activeCount = 0;
+  document.querySelectorAll("#params .pgroup").forEach((g) => {
+    const on = active.has(g.dataset.group);
+    if (on) activeCount++;
+    g.classList.toggle("idle", !on);
+    g.hidden = activeOnly && !on;
+  });
+  $("params-note").textContent = activeCount + " of " +
+    document.querySelectorAll("#params .pgroup").length + " stages in use";
+
+  // --- setlist
+  if (performance.now() > setlistHold) {
+    setlist = (s.setlist || []).slice();
+  }
+  lastCursor = s.setlist_cursor;
+  renderSetlist(s.setlist_cursor);
+  if (s.gpio.utility_switch !== lastUtility) {
+    lastUtility = s.gpio.utility_switch;
+    const u = $("gp-util");
+    setPill(u, lastUtility, lastUtility ? "utility switch" : "no utility switch");
+    u.setAttribute("data-tip-title", "Utility footswitch");
+    u.setAttribute("data-tip", lastUtility
+      ? "Wired and armed. Tap it to clear the loop; double-tap it to step to the next preset in the setlist."
+      : "Not wired on this board, so nothing can step the setlist by foot. Everything still works from here: use the Step button, the n and p keys, or click a slot.");
+  }
+  $("btn-sl-step").disabled = setlist.length === 0;
+  $("setlist-hint").textContent = setlist.length === 0
+    ? "An empty setlist means a stomp of the utility switch has nowhere to go."
+    : (s.setlist_cursor >= 0
+        ? "Now on slot " + (s.setlist_cursor + 1) + " of " + setlist.length +
+          ". Next stomp goes to slot " + (nextSlot(s.setlist_cursor, 1) + 1) + "."
+        : "Not stepped yet — the next stomp goes to slot " + (nextSlot(-1, 1) + 1) + ".");
+
+  loopPaused = !!s.loop_paused;
+  // PAUSED is a display state, not one of the looper's own: the machine is
+  // still in Playing or Overdubbing, it just isn't advancing.
+  const shown = (loopPaused && (s.looper === "PLAY" || s.looper === "OVERDUB"))
+      ? "PAUSED" : s.looper;
+  const badge = $("loop-state");
+  badge.textContent = shown;
+  badge.className = "state-badge state-" + shown;
+
+  const pauseBtn = $("btn-pause");
+  pauseBtn.classList.toggle("on", loopPaused);
+  pauseBtn.textContent = loopPaused ? "Resume" : "Pause";
+  pauseBtn.disabled = s.loop_frames === 0;
+  $("loop-bar").classList.toggle("seekable", s.loop_frames > 0);
+
+  const sr = (cfg && cfg.sample_rate) || 48000;
+  loopFrames = s.loop_frames;
+  const lenSec = s.loop_frames / sr;
+  const frac = s.loop_frames > 0 ? s.loop_position / s.loop_frames : 0;
+  $("loop-fill").style.width = (s.loop_frames > 0 ? 100 : 0) + "%";
+  $("loop-head").style.left = (frac * 100) + "%";
+  $("loop-pos").textContent = (s.loop_position / sr).toFixed(2) + " s";
+  $("loop-len").textContent = s.loop_frames > 0 ? lenSec.toFixed(2) + " s loop" : "no loop";
+
+  $("in-rms").style.width = (dbFraction(s.in.rms) * 100) + "%";
+  $("in-peak").style.left = (dbFraction(s.in.peak) * 100) + "%";
+  $("out-rms").style.width = (dbFraction(s.out.rms) * 100) + "%";
+  $("out-peak").style.left = (dbFraction(s.out.peak) * 100) + "%";
+  $("in-peak-db").textContent = dbText(s.in.peak);
+  $("in-rms-db").textContent = dbText(s.in.rms);
+  $("out-peak-db").textContent = dbText(s.out.peak);
+  $("out-rms-db").textContent = dbText(s.out.rms);
+
+  // Gain reduction is negative dB; show it as a bar filling from the left over
+  // a 0..-24 dB range, which covers everything short of absurd settings.
+  const gr = Math.max(0, Math.min(24, -(s.comp_reduction_db || 0)));
+  $("comp-gr").style.width = (gr / 24 * 100) + "%";
+  $("comp-gr-db").textContent = (s.comp_reduction_db || 0).toFixed(1);
+
+  const clipEl = $("clips");
+  clipEl.textContent = "clips " + s.clips;
+  clipEl.className = "pill " + (s.clips > 0 ? "bad" : "");
+
+  const b = s.block_us;
+  const pct = b.budget > 0 ? (b.avg / b.budget) * 100 : 0;
+  const pctMax = b.budget > 0 ? (b.max / b.budget) * 100 : 0;
+  $("pct").textContent = pct.toFixed(1) + "% avg / " + pctMax.toFixed(1) + "% worst";
+  $("load-avg").style.width = Math.min(100, pct) + "%";
+  $("load-max").style.left = Math.min(100, pctMax) + "%";
+  $("budget").textContent = b.budget.toFixed(1) + " us";
+  $("us-last").textContent = b.last.toFixed(1) + " us";
+  $("us-avg").textContent = b.avg.toFixed(1) + " us";
+  $("us-max").textContent = b.max.toFixed(1) + " us";
+  $("blocks").textContent = s.blocks.toLocaleString();
+  $("xruns2").textContent = s.xruns;
+
+  const xr = $("xruns");
+  xr.textContent = "xruns " + s.xruns;
+  xr.className = "pill " + (s.xruns > 0 ? "bad" : "ok");
+  const ld = $("load");
+  ld.textContent = "load " + pct.toFixed(0) + "%";
+  ld.className = "pill " + (pctMax > 80 ? "bad" : pctMax > 50 ? "warn" : "ok");
+
+  const au = $("audio");
+  au.textContent = s.audio_running ? "audio running" : ("audio stopped" + (s.audio_status ? ": " + s.audio_status : ""));
+  au.className = "pill " + (s.audio_running ? "ok" : "warn");
+
+  cleanLoop = !!s.clean_loop;
+  const cleanBtn = $("btn-clean-loop");
+  cleanBtn.classList.toggle("on", cleanLoop);
+  cleanBtn.textContent = cleanLoop ? "Dry loop" : "Wet loop";
+
+  sim = s.simulator;
+  const simBtn = $("btn-sim");
+  simBtn.classList.toggle("on", sim);
+  // The sound card and the generator would both be driving the same chain, so
+  // only one of them is ever allowed to.
+  simBtn.disabled = false;
+  simBtn.textContent = sim ? "Simulating input" : "Simulate input";
+
+  $("lcd0").textContent = (s.lcd[0] + "                ").slice(0, 16);
+  $("lcd1").textContent = (s.lcd[1] + "                ").slice(0, 16);
+  setPill($("gp-looper"), s.gpio.looper_switch, "looper switch");
+  setPill($("gp-leds"), s.gpio.leds, "LEDs");
+  setPill($("gp-lcd"), s.gpio.lcd, "LCD1602");
+
+  for (const id in s.params) {
+    if (dragging === id) continue;   // don't yank a slider out from under a drag
+    const input = document.querySelector('input[data-id="' + id + '"]');
+    if (input) input.value = s.params[id];
+    const out = $("pv-" + id);
+    if (out) out.textContent = fmtValue(id, s.params[id]);
+  }
+
+  const logBox = $("log");
+  for (const e of s.log) {
+    if (seenLog.has(e.id)) continue;
+    seenLog.add(e.id);
+    const row = document.createElement("div");
+    const t = document.createElement("time");
+    t.textContent = e.t;
+    row.append(t, document.createTextNode(e.m));
+    logBox.prepend(row);
+  }
+  while (logBox.childElementCount > 200) logBox.lastElementChild.remove();
+}
+
+// A release that lands outside the slider still ends the drag, so a stream
+// frame is never blocked from updating a control the user let go of.
+window.addEventListener("pointerup", () => { dragging = null; });
+window.addEventListener("pointercancel", () => { dragging = null; });
+
+/* -------------------------------------------------------------- scope -- */
+const canvas = $("scope");
+const ctx = canvas.getContext("2d");
+let scopeBusy = false;
+
+function fitCanvas() {
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = Math.round(canvas.clientWidth * dpr);
+  canvas.height = Math.round(canvas.clientHeight * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+window.addEventListener("resize", fitCanvas);
+
+function drawTrace(data, offset, count, w, h, color, width) {
+  ctx.beginPath();
+  for (let i = 0; i < count; i++) {
+    const x = (i / (count - 1)) * w;
+    const y = h / 2 - Math.max(-1.2, Math.min(1.2, data[offset + i])) * (h / 2 - 4);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.strokeStyle = color;
+  ctx.lineWidth = width;
+  ctx.stroke();
+}
+
+function drawGrid(w, h) {
+  ctx.strokeStyle = "#141b23";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  for (let i = 1; i < 8; i++) {
+    const x = Math.round((i / 8) * w) + 0.5;
+    ctx.moveTo(x, 0); ctx.lineTo(x, h);
+  }
+  ctx.stroke();
+  // Full-scale rails: a trace touching these is at 0 dBFS and about to clip.
+  ctx.strokeStyle = "#2b1c1c";
+  ctx.beginPath();
+  const top = Math.round(h / 2 - (h / 2 - 4) / 1.2) + 0.5;
+  const bot = Math.round(h / 2 + (h / 2 - 4) / 1.2) + 0.5;
+  ctx.moveTo(0, top); ctx.lineTo(w, top);
+  ctx.moveTo(0, bot); ctx.lineTo(w, bot);
+  ctx.stroke();
+  ctx.strokeStyle = "#212a34";
+  ctx.beginPath();
+  ctx.moveTo(0, Math.round(h / 2) + 0.5); ctx.lineTo(w, Math.round(h / 2) + 0.5);
+  ctx.stroke();
+}
+
+async function pollScope() {
+  if (scopeBusy) return;
+  scopeBusy = true;
+  try {
+    const buf = await (await fetch("/api/scope")).arrayBuffer();
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    ctx.clearRect(0, 0, w, h);
+    drawGrid(w, h);
+    if (buf.byteLength >= scopePoints * 8) {
+      const f = new Float32Array(buf);
+      drawTrace(f, 0, scopePoints, w, h, "#3f6d8f", 1);
+      drawTrace(f, scopePoints, scopePoints, w, h, "#6ee7b7", 1.5);
+    }
+  } catch (e) { /* ignore a dropped frame */ }
+  scopeBusy = false;
+}
+
+/* ------------------------------------------------------------- wiring -- */
+$("btn-trigger").onclick = () => post("/api/looper", { action: "trigger" });
+$("btn-clear").onclick = () => post("/api/looper", { action: "clear" });
+$("btn-pause").onclick =
+    () => post("/api/looper", { action: "pause", value: loopPaused ? "0" : "1" });
+
+// Click anywhere on the bar to jump there. The fraction is turned into a frame
+// here rather than sent as a fraction, so the pedal is never asked to guess
+// what the browser thought the loop length was.
+$("loop-bar").onclick = (e) => {
+  if (loopFrames <= 0) return;
+  const r = e.currentTarget.getBoundingClientRect();
+  if (r.width <= 0) return;
+  const frac = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+  post("/api/looper", { action: "seek", frame: String(Math.floor(frac * loopFrames)) });
+};
+$("btn-reset").onclick = () => post("/api/reset");
+$("btn-sim").onclick = () => post("/api/sim", { on: sim ? "0" : "1" });
+$("btn-clean-loop").onclick =
+    () => post("/api/looper", { action: "clean", value: cleanLoop ? "0" : "1" });
+$("btn-save").onclick = () => post("/api/preset/save");
+$("btn-revert").onclick = () => post("/api/preset/reset");
+$("btn-revert-all").onclick = () => {
+  if (window.confirm("Discard saved edits for every preset?")) post("/api/preset/reset-all");
+};
+
+$("btn-sl-clear").onclick = () => pushSetlist([]);
+$("btn-sl-add").onclick = () => pushSetlist(setlist.concat(curPreset));
+$("btn-sl-step").onclick = () => stepSetlist(1);
+$("sl-filter").addEventListener("input", filterPool);
+$("fx-filter").addEventListener("input", () => filterList($("presets"), "button", $("fx-filter").value));
+
+$("btn-active-only").onclick = () => {
+  activeOnly = !activeOnly;
+  $("btn-active-only").classList.toggle("on", activeOnly);
+  $("btn-active-only").textContent = activeOnly ? "unused stages: hidden" : "unused stages: shown";
+};
+
+document.addEventListener("keydown", (e) => {
+  const tag = e.target.tagName;
+  if (tag === "INPUT" || tag === "TEXTAREA" || tag === "BUTTON" || tag === "SUMMARY") return;
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.code === "Space") { e.preventDefault(); post("/api/looper", { action: "trigger" }); }
+  if (e.key === "c") post("/api/looper", { action: "clear" });
+  if (e.key === "f") post("/api/freeze", {});
+  if (e.key === "n") stepSetlist(1);
+  if (e.key === "p") stepSetlist(-1);
+  if (e.key >= "1" && e.key <= "9") post("/api/preset", { value: Number(e.key) - 1 });
+});
+
+function connect() {
+  const es = new EventSource("/api/events");
+  es.onopen = () => { const c = $("conn"); c.textContent = "connected"; c.className = "pill ok"; };
+  es.onmessage = (ev) => render(JSON.parse(ev.data));
+  es.onerror = () => {
+    const c = $("conn"); c.textContent = "reconnecting"; c.className = "pill bad";
+    // EventSource retries on its own; this only reports it.
+  };
+}
+
+restorePanelOrder();
+initPanelDragging();
+makeTipsReachable();
+fitCanvas();
+$("btn-freeze").onclick = () => post("/api/freeze", {});
+function setTransportTab(freeze) {
+  $("seg-looper").classList.toggle("on", !freeze);
+  $("seg-freeze").classList.toggle("on", freeze);
+  $("seg-looper").setAttribute("aria-selected", String(!freeze));
+  $("seg-freeze").setAttribute("aria-selected", String(freeze));
+  $("pane-looper").hidden = freeze;
+  $("pane-freeze").hidden = !freeze;
+}
+// Selecting a tab is not a view preference -- it is what the footswitch does --
+// so it posts the mode and lets the next state poll confirm it landed.
+$("seg-looper").onclick = () => post("/api/freeze", { action: "mode", value: 0 });
+$("seg-freeze").onclick = () => post("/api/freeze", { action: "mode", value: 1 });
+
+
+/* -------------------------------------------------------- saved loops -- */
+// These POSTs need their reply, unlike post(), because saving is the one action
+// here that routinely fails for a reason the player has to hear: nothing
+// recorded, a name with nothing usable in it, a rate mismatch, a full disk.
+async function loopAction(action, name, to) {
+  try {
+    const params = { action, name };
+    if (to !== undefined) params.to = to;
+    const q = new URLSearchParams(params).toString();
+    const r = await fetch("/api/loops?" + q, { method: "POST" });
+    const d = await r.json().catch(() => ({}));
+    if (!d.ok && d.error) window.alert(d.error);
+  } catch (e) { /* the disconnect indicator already says it */ }
+  refreshLoops();
+}
+
+async function refreshLoops() {
+  let loops = [];
+  try {
+    const r = await fetch("/api/loops");
+    loops = (await r.json()).loops || [];
+  } catch (e) { return; }
+
+  const list = $("loops-list");
+  list.textContent = "";
+  $("loops-empty").hidden = loops.length > 0;
+
+  for (const l of loops) {
+    const row = document.createElement("div");
+    row.className = "loop-row";
+
+    // textContent throughout: a loop name is sanitised on the way to disk, but
+    // a file dropped into the directory by hand has never been near that check.
+    const nm = document.createElement("span");
+    nm.className = "nm";
+    nm.textContent = l.name;
+    nm.title = l.name;
+
+    const dur = document.createElement("span");
+    dur.className = "dur";
+    dur.textContent = (l.seconds || 0).toFixed(2) + " s";
+
+    const load = document.createElement("button");
+    load.className = "tiny";
+    load.textContent = "load";
+    load.onclick = () => loopAction("load", l.name);
+
+    // Fork a take before overdubbing onto it: the copy is what gets layered,
+    // and the original stays on disk exactly as it was played.
+    const dup = document.createElement("button");
+    dup.className = "tiny";
+    dup.textContent = "duplicate";
+    dup.title = "Copy this loop under a new name, then overdub onto the copy";
+    dup.onclick = () => {
+      const to = window.prompt("Name for the copy", l.name + " copy");
+      if (to === null) return;
+      loopAction("duplicate", l.name, to.trim());
+    };
+
+    const del = document.createElement("button");
+    del.className = "tiny";
+    del.textContent = "delete";
+    del.onclick = () => {
+      if (window.confirm("Delete \u201c" + l.name + "\u201d? This cannot be undone.")) {
+        loopAction("delete", l.name);
+      }
+    };
+
+    row.append(nm, dur, load, dup, del);
+    list.appendChild(row);
+  }
+}
+
+$("btn-loops-refresh").onclick = refreshLoops;
+$("btn-loop-save").onclick = () => {
+  const name = window.prompt("Name this loop");
+  if (name === null) return;
+  loopAction("save", name);
+};
+refreshLoops();
+
+$("preset-note").addEventListener("blur", saveNote);
+// Ctrl/Cmd+Enter commits without leaving the box.
+$("preset-note").addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); saveNote(); }
+});
+// A note being typed when the tab closes would otherwise be lost.
+window.addEventListener("beforeunload", saveNote);
+
+Promise.all([loadConfig(), loadNotes()]).then(() => {
+  connect();
+  setInterval(pollScope, 66);   // ~15 Hz, pulled rather than pushed
+});
+</script>
+</body>
+</html>

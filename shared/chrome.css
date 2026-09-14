@@ -1,0 +1,152 @@
+/* Chrome shared by every pressing: the sleeve switcher and the toast. */
+
+.sleeves {
+  position: fixed;
+  top: 18px;
+  right: 22px;
+  z-index: 50;
+  /* label over a two-wide grid of covers: stays narrow enough to sit in the
+     margin beside In Rainbows' lines, and more sleeves just add rows */
+  display: grid;
+  grid-template-columns: repeat(2, auto);
+  justify-items: center;
+  gap: 10px;
+  padding: 10px 12px 12px;
+  background: rgba(14, 12, 11, 0.74);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  font: 700 9.5px/1 'Courier Prime', ui-monospace, monospace;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #b8ae9f;
+}
+.sleeves .label { grid-column: 1 / -1; white-space: nowrap; transition: color 0.3s; }
+
+.sleeve {
+  position: relative;
+  display: block;
+  width: 46px;
+  height: 46px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.55);
+  transition: transform 0.22s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.sleeve:hover,
+.sleeve:focus-visible {
+  transform: translateY(-3px) rotate(-3deg);
+  /* the caption hangs below the cover, so lift the whole tile above its
+     neighbours or the next row's covers paint straight over it */
+  z-index: 2;
+}
+.sleeve:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+.sleeve.current { outline: 2px solid #f4d03f; outline-offset: 3px; }
+.sleeve.current:hover { transform: none; }
+
+.sleeve .name {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: -7px;
+  padding: 6px 9px;
+  white-space: nowrap;
+  background: #f4d03f;
+  color: #1b1714;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.18s, transform 0.18s;
+  pointer-events: none;
+}
+.sleeve:hover .name,
+.sleeve:focus-visible .name { opacity: 1; transform: none; }
+
+/* mini covers */
+.art { position: absolute; inset: 0; overflow: hidden; }
+
+.art-in-rainbows {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 5px;
+  background: #060607;
+}
+.art-in-rainbows::before {
+  content: '';
+  position: absolute;
+  inset: 16% 20% 18% 18%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 45% 40%, #fff6cf, #ffc24a 18%, #ff6a2b 42%, #e8336f 68%, #2f7de0 92%);
+  opacity: 0.9;
+}
+.art-in-rainbows i {
+  position: relative;
+  flex: 1;
+  background: var(--c);
+  /* reads as a row of letters with the odd gap, like the cover's lines */
+  -webkit-mask: repeating-linear-gradient(90deg, #000 0 3px, transparent 3px 4px, #000 4px 9px, transparent 9px 11px);
+  mask: repeating-linear-gradient(90deg, #000 0 3px, transparent 3px 4px, #000 4px 9px, transparent 9px 11px);
+}
+.art-in-rainbows i:nth-child(even) { -webkit-mask-position: 3px 0; mask-position: 3px 0; }
+
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 3px 4px;
+  padding: 11px 5px 6px;
+  background:
+    linear-gradient(180deg, #cfd2cb 0 3px, #3f3630 3px 8px, transparent 8px),
+    #8a7764;
+}
+
+/* the photographic sleeves are just their own picture, cropped square */
+.art img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+/* the once-per-visit wiggle */
+.sleeves.nudge .label { color: #f4d03f; }
+.sleeves.nudge .sleeve:not(.current) { animation: peek 1.5s ease-in-out 2; }
+@keyframes peek {
+  0%, 100% { transform: none; }
+  25% { transform: translateY(-6px) rotate(-5deg); }
+  50% { transform: translateY(0) rotate(3deg); }
+  70% { transform: translateY(-2px) rotate(-1deg); }
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  transform: translate(-50%, 20px);
+  opacity: 0;
+  z-index: 60;
+  max-width: calc(100vw - 32px);
+  padding: 10px 16px;
+  background: #f4d03f;
+  color: #1b1714;
+  font: 700 13px/1.3 'Courier Prime', ui-monospace, monospace;
+  pointer-events: none;
+  transition: opacity 0.25s, transform 0.25s;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+@media (max-width: 720px) {
+  .sleeves {
+    top: auto;
+    bottom: 12px;
+    right: 12px;
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 6px 6px 11px;
+  }
+  .sleeves .label { grid-column: auto; }
+  .sleeve { width: 38px; height: 38px; }
+  .sleeve .name { top: auto; bottom: calc(100% + 10px); right: -6px; }
+  .art-in-rainbows { gap: 1.5px; padding: 5px 4px; }
+  .toast { bottom: 76px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sleeve { transition: none; }
+}

@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MA-001 · Side/Projects</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600&family=Courier+Prime:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/chrome.css">
+<style>
+  :root {
+    --bg: #060607;
+    --n: 13;
+    --rows: 7;
+    --cell: min(calc((100vw - 96px) / var(--n)), calc(92svh / var(--rows) / 1.62));
+    --pitch: calc(var(--cell) * 1.62);
+    --orange: #f39a1e; --blue: #3f7fd0; --green: #3cb44b;
+    --yellow: #f7c600; --red: #e0322b; --cyan: #29b6d9;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: #fff; }
+  body { font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; -webkit-font-smoothing: antialiased; }
+  #lines .m-only { display: none; }
+  @media (max-width: 720px) {
+    :root { --cell: calc((100vw - 32px) / var(--n)); }
+    #lines .m-only { display: grid; }
+    #lines .d-only { display: none; }
+  }
+
+  /* print grain over everything */
+  body::after {
+    content: ''; position: fixed; inset: 0; z-index: 30; pointer-events: none;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  #cover {
+    position: relative;
+    min-height: 100svh;
+    display: grid;
+    place-items: center;
+    padding-block: 4svh;
+    overflow: hidden;
+  }
+  #splash {
+    position: absolute; z-index: 1;
+    left: 50%; top: 50%;
+    width: calc(var(--cell) * 13 * .92);
+    max-width: 96vw;
+    transform: translate(-56%, -50%);
+    filter: hue-rotate(var(--hue, 0deg)) saturate(var(--sat, 1));
+    transition: filter 1.1s ease;
+    pointer-events: none;
+  }
+  #splash .spin { transform-origin: 50% 50%; animation: drift 70s linear infinite; }
+  @keyframes drift { to { transform: rotate(360deg); } }
+
+  #lines { position: relative; z-index: 2; width: calc(var(--cell) * var(--n)); }
+  .line {
+    display: grid;
+    grid-template-columns: repeat(var(--n), var(--cell));
+    align-items: center;
+    height: var(--pitch);
+    width: 100%;
+    margin: 0; padding: 0; border: 0;
+    background: none;
+    color: var(--c);
+    font: 500 calc(var(--cell) * 1.6)/1 'Barlow Condensed', 'Arial Narrow', sans-serif;
+    text-align: center;
+    transition: opacity .45s ease;
+  }
+  .line span { display: block; }
+  .line span.flip { animation: flip .26s steps(3) 1; }
+  @keyframes flip { 0% { opacity: .1; } 40% { opacity: 1; transform: translateY(-5%); } 70% { opacity: .4; } 100% { opacity: 1; } }
+  button.line { cursor: pointer; }
+  button.line:focus-visible { outline: 2px solid var(--c); outline-offset: 2px; }
+
+  #lines.focus .line:not(.hot) { opacity: .13; }
+  #lines.focus .insert:not(.open) { opacity: .13; }
+
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+  /* a line opens like an insert sliding out of the sleeve */
+  .insert {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows .6s cubic-bezier(.2, .7, .2, 1), opacity .45s;
+    color: var(--c);
+  }
+  .insert.open { grid-template-rows: 1fr; }
+  .insert > div { overflow: hidden; }
+  .insert .inner {
+    display: grid;
+    grid-template-columns: repeat(var(--n), var(--cell));
+    row-gap: calc(var(--cell) * .35);
+    padding-block: calc(var(--cell) * .2) calc(var(--cell) * .35);
+  }
+  .insert .desc {
+    grid-column: 1 / span 7;
+    margin: 0;
+    font: 500 clamp(15px, calc(var(--cell) * .34), 26px)/1.12 'Barlow Condensed', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+  }
+  .insert .crew {
+    grid-column: 9 / span 5;
+    list-style: none; margin: 0; padding: 0;
+    font: 500 clamp(12px, calc(var(--cell) * .22), 17px)/1.45 'Barlow Condensed', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+  }
+  .insert .crew li { display: flex; justify-content: space-between; gap: 1em; border-bottom: 1px solid color-mix(in srgb, var(--c) 30%, transparent); }
+  .insert .crew li span:last-child { opacity: .65; }
+  .insert .enter {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(var(--n), var(--cell));
+    height: calc(var(--pitch) * .8);
+    align-items: center;
+    color: #fff;
+    text-decoration: none;
+    font: 600 calc(var(--cell) * 1.15)/1 'Barlow Condensed', sans-serif;
+    text-align: center;
+  }
+  .insert .enter:hover span, .insert .enter:focus-visible span { color: var(--c); }
+  .insert .enter span { transition: color .2s; }
+
+  .meta {
+    position: absolute; z-index: 3;
+    font: 700 11px/1.5 'Courier Prime', ui-monospace, monospace;
+    letter-spacing: .18em; text-transform: uppercase;
+    color: #6d6d72;
+  }
+  .meta.tl { left: 24px; top: 20px; }
+  .meta.bl { left: 24px; bottom: 20px; transition: opacity .4s; }
+  .meta b { color: #b9b9be; }
+
+  #liner {
+    position: relative; z-index: 2;
+    width: min(calc(var(--cell) * 13), calc(100vw - 32px));
+    margin: 0 auto;
+    padding: 10vh 0 18vh;
+    font: 500 18px/1.6 'Barlow Condensed', sans-serif;
+    letter-spacing: .06em; text-transform: uppercase;
+    color: #8b8b91;
+  }
+  #liner ol { list-style: none; padding: 0; margin: 0 0 24px; font-size: 26px; }
+  #liner li span { display: inline-block; width: 2.4em; color: #55555a; }
+
+  @media (max-width: 720px) {
+    #cover { place-items: start center; padding-block: 64px 72px; }
+    .insert .desc, .insert .crew { grid-column: 1 / -1; }
+    .meta.tl { left: 16px; top: 16px; }
+    .meta.bl { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #splash .spin { animation: none; }
+    .line span.flip { animation: none; }
+  }
+</style>
+</head>
+<body data-pressing="in-rainbows">
+
+<main id="cover">
+  <div class="meta tl"><b>MA-001</b> · Matt Aguilar · Side/Projects</div>
+  <div class="meta bl" id="hint">hover a name · click to open it</div>
+
+  <svg id="splash" viewBox="0 0 1000 1000" aria-hidden="true">
+    <defs>
+      <radialGradient id="core" cx="46%" cy="42%" r="58%">
+        <stop offset="0" stop-color="#fff6cf"/>
+        <stop offset=".16" stop-color="#ffc24a"/>
+        <stop offset=".4" stop-color="#ff6a2b"/>
+        <stop offset=".66" stop-color="#e8336f"/>
+        <stop offset=".86" stop-color="#8a2a8f"/>
+        <stop offset="1" stop-color="#2a2f8f"/>
+      </radialGradient>
+      <radialGradient id="rim" cx="50%" cy="50%" r="50%">
+        <stop offset=".5" stop-color="#1f5fc4" stop-opacity="0"/>
+        <stop offset=".78" stop-color="#2f7de0" stop-opacity=".95"/>
+        <stop offset=".95" stop-color="#0d2a6a" stop-opacity=".6"/>
+        <stop offset="1" stop-color="#0d2a6a" stop-opacity="0"/>
+      </radialGradient>
+      <filter id="wax" x="-40%" y="-40%" width="180%" height="180%" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency="0.0055 0.008" numOctaves="4" seed="11" result="n"/>
+        <feDisplacementMap in="SourceGraphic" in2="n" scale="190" xChannelSelector="R" yChannelSelector="B" result="d"/>
+        <feGaussianBlur in="d" stdDeviation="7" result="b"/>
+        <feSpecularLighting in="b" surfaceScale="14" specularConstant="1.25" specularExponent="32" lighting-color="#ffffff" result="s">
+          <fePointLight x="360" y="200" z="380"/>
+        </feSpecularLighting>
+        <feComposite in="s" in2="d" operator="in" result="si"/>
+        <feMerge><feMergeNode in="d"/><feMergeNode in="si"/></feMerge>
+      </filter>
+      <filter id="spatter" x="-20%" y="-20%" width="140%" height="140%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="3" result="n"/>
+        <feDisplacementMap in="SourceGraphic" in2="n" scale="40" xChannelSelector="R" yChannelSelector="G" result="d"/>
+        <feGaussianBlur in="d" stdDeviation="1.4" result="b"/>
+        <feSpecularLighting in="b" surfaceScale="4" specularConstant="1" specularExponent="24" lighting-color="#fff" result="s">
+          <fePointLight x="360" y="200" z="300"/>
+        </feSpecularLighting>
+        <feComposite in="s" in2="d" operator="in" result="si"/>
+        <feMerge><feMergeNode in="d"/><feMergeNode in="si"/></feMerge>
+      </filter>
+    </defs>
+    <g class="spin">
+      <g filter="url(#wax)">
+        <circle cx="500" cy="500" r="330" fill="url(#rim)"/>
+        <ellipse cx="505" cy="485" rx="245" ry="228" fill="url(#core)"/>
+        <circle cx="690" cy="330" r="74" fill="#ff8a2a"/>
+        <circle cx="300" cy="660" r="62" fill="#ff4f6e"/>
+        <circle cx="720" cy="640" r="48" fill="#ffd04a"/>
+        <ellipse cx="520" cy="770" rx="40" ry="95" fill="#e8336f"/>
+        <ellipse cx="380" cy="300" rx="70" ry="40" fill="#ffb03a"/>
+      </g>
+      <g filter="url(#spatter)">
+        <circle cx="180" cy="280" r="14" fill="#ff8a2a"/>
+        <circle cx="140" cy="520" r="9" fill="#2f7de0"/>
+        <circle cx="850" cy="220" r="18" fill="#ffd04a"/>
+        <circle cx="880" cy="560" r="11" fill="#ff4f6e"/>
+        <circle cx="820" cy="820" r="16" fill="#2f7de0"/>
+        <circle cx="240" cy="840" r="12" fill="#ffc24a"/>
+        <circle cx="610" cy="120" r="10" fill="#e8336f"/>
+        <circle cx="90" cy="700" r="7" fill="#ff6a2b"/>
+        <circle cx="930" cy="400" r="6" fill="#ffc24a"/>
+        <circle cx="420" cy="930" r="9" fill="#ff8a2a"/>
+      </g>
+    </g>
+  </svg>
+
+  <div id="lines"></div>
+</main>
+
+<section id="liner" aria-label="Liner notes">
+  <ol id="liner-tracks"></ol>
+  Written, produced and debugged by Matt Aguilar.<br>
+  The splash is placeholder art. The real pressing gets real paint, scanned.
+</section>
+
+<script src="../shared/projects.js"></script>
+<script src="../shared/sleeves.js"></script>
+<script>
+(() => {
+  const N = 13;
+  const byId = Object.fromEntries(window.PORTFOLIO.projects.map(p => [p.id, p]));
+  const HUE = { tastemaker: 185, jobs: 95, streeteasy: 28, pedal: -18 };
+  // What a line resolves to when it has your attention: the noise locks into the name.
+  const CLEAN = { tastemaker: ' TASTE MAKER ', jobs: ' JOB TRACKER ', streeteasy: ' STREET EASY ', pedal: 'GUITAR PEDAL ' };
+
+  // text: the opening glitch, 13 cells. base: the letters it re-glitches from.
+  // where: 'd' desktop only, 'm' mobile only, 'b' both.
+  const LINES = [
+    { text: 'SIDE/PROJECTS', c: 'orange', where: 'b' },
+    { text: 'TASTE / MAKER', c: 'blue', id: 'tastemaker', where: 'b' },
+    { text: '_TAS TEMA KER', c: 'blue', id: 'tastemaker', where: 'm' },
+    { text: 'SIDEPROJ_ECTS', c: 'orange', where: 'b' },
+    { text: 'GUITAR PED_AL', c: 'red', id: 'pedal', where: 'b' },
+    { text: 'GUITAR/ PEDAL', c: 'red', id: 'pedal', where: 'm' },
+    { text: 'JOB  TRA/CKER', c: 'green', id: 'jobs', where: 'b' },
+    { text: '_JOB TRACKER/', c: 'green', id: 'jobs', where: 'm' },
+    { text: 'STREET/ EA SY', c: 'yellow', id: 'streeteasy', where: 'b' },
+    { text: '_STREET EASY/', c: 'yellow', id: 'streeteasy', where: 'm' },
+    { text: 'MA TT AGUILAR', c: 'cyan', where: 'm' },
+    { text: '_MATT AGUILAR', c: 'cyan', where: 'b' },
+  ];
+  const isGlitch = ch => ch === ' ' || ch === '/' || ch === '_';
+
+  const linesEl = document.getElementById('lines');
+  const cellsHTML = t => [...t.padEnd(N, ' ')].map(ch => `<span>${ch === ' ' ? '&nbsp;' : ch}</span>`).join('');
+
+  const html = [];
+  LINES.forEach((l, i) => {
+    const cls = l.where === 'd' ? 'd-only' : l.where === 'm' ? 'm-only' : '';
+    const style = `--c: var(--${l.c})`;
+    if (!l.id) {
+      html.push(`<div class="line ${cls}" style="${style}" data-i="${i}" aria-hidden="true">${cellsHTML(l.text)}</div>`);
+      return;
+    }
+    const p = byId[l.id];
+    html.push(`<button class="line ${cls}" style="${style}" data-i="${i}" data-id="${l.id}" aria-expanded="false">
+      <span class="sr">${p.track} ${p.name}</span>${cellsHTML(l.text).replaceAll('<span>', '<span aria-hidden="true">')}</button>`);
+    html.push(`<div class="insert ${cls}" style="${style}" data-for="${i}"><div><div class="inner">
+      <p class="desc">${p.track} · ${p.blurb}</p>
+      <ul class="crew">${p.personnel.map(([t, r]) => `<li><span>${t}</span><span>${r}</span></li>`).join('')}</ul>
+      <a class="enter" href="${p.href}" data-name="${p.name}">${cellsHTML('ENTER/ DEMO →')}</a>
+    </div></div></div>`);
+  });
+  linesEl.innerHTML = html.join('');
+  linesEl.style.setProperty('--rows', 7);
+
+  const lineEls = [...linesEl.querySelectorAll('.line')];
+  const splash = document.getElementById('splash');
+  const hint = document.getElementById('hint');
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ---------- the living cover: slashes and gaps wander ----------
+  function glitched(text) {
+    const letters = text.replace(/[ /_]/g, '');
+    const k = N - letters.length;
+    const slots = new Set();
+    while (slots.size < k) slots.add(Math.floor(Math.random() * N));
+    const out = [];
+    let li = 0;
+    for (let c = 0; c < N; c++) {
+      if (slots.has(c)) {
+        const r = Math.random();
+        out.push(r < .45 ? ' ' : r < .75 ? '/' : '_');
+      } else out.push(letters[li++]);
+    }
+    return out;
+  }
+  function reglitch(el, fixed) {
+    const out = fixed ? [...fixed] : glitched(LINES[+el.dataset.i].text);
+    const spans = [...el.querySelectorAll('span[aria-hidden], div.line > span')].filter(s => !s.classList.contains('sr'));
+    spans.forEach((s, c) => {
+      const next = out[c] === ' ' ? ' ' : out[c];
+      if (s.textContent !== next) {
+        s.textContent = next;
+        s.classList.remove('flip'); void s.offsetWidth; s.classList.add('flip');
+      }
+    });
+  }
+  const visible = () => lineEls.filter(el => el.offsetParent !== null);
+  if (!reduced) {
+    setInterval(() => {
+      if (document.hidden) return;
+      const pool = visible().filter(el => !el.classList.contains('hot'));
+      if (pool.length) reglitch(pool[Math.floor(Math.random() * pool.length)]);
+    }, 1300);
+  }
+
+  // ---------- focus: hover (fine pointers) and open (everyone) ----------
+  let open = null, focused = null;
+  function focusOn(el) {
+    if (el === focused) return;
+    focused = el;
+    lineEls.forEach(x => x.classList.toggle('hot', x === el));
+    linesEl.classList.toggle('focus', !!el);
+    splash.style.setProperty('--hue', el ? `${HUE[el.dataset.id]}deg` : '0deg');
+    splash.style.setProperty('--sat', el ? 1.25 : 1);
+    if (el) reglitch(el, CLEAN[el.dataset.id].replaceAll(' ', ' '));
+    hint.style.opacity = el ? 0 : 1;
+  }
+  const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
+  lineEls.filter(el => el.dataset.id).forEach(el => {
+    if (fine) {
+      el.addEventListener('mouseenter', () => { if (!open) focusOn(el); });
+      el.addEventListener('mouseleave', () => { if (!open) focusOn(null); });
+    }
+    el.addEventListener('click', () => toggle(el));
+  });
+  function toggle(el) {
+    const ins = linesEl.querySelector(`.insert[data-for="${el.dataset.i}"]`);
+    const wasOpen = open === el;
+    if (open) {
+      open.setAttribute('aria-expanded', 'false');
+      linesEl.querySelector(`.insert[data-for="${open.dataset.i}"]`).classList.remove('open');
+      open = null;
+    }
+    if (!wasOpen) {
+      el.setAttribute('aria-expanded', 'true');
+      ins.classList.add('open');
+      open = el;
+      focusOn(el);
+    } else {
+      focusOn(fine && el.matches(':hover') ? el : null);
+    }
+  }
+  document.addEventListener('click', e => {
+    if (open && !e.target.closest('.line, .insert')) toggle(open);
+  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && open) toggle(open); });
+  linesEl.querySelectorAll('.enter').forEach(a => a.addEventListener('click', e =>
+    window.enterDemo(e, a.dataset.name, a.getAttribute('href'))));
+
+  document.getElementById('liner-tracks').innerHTML = window.PORTFOLIO.projects
+    .map(p => `<li><span>${p.track}</span>${p.name}</li>`).join('');
+})();
+</script>
+</body>
+</html>

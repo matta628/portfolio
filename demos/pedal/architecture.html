@@ -1,0 +1,848 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>guitar-pedal-cpp — architecture</title>
+<style>
+  /* The pedal page's own palette and font tokens (web/index.html), so this
+     reads as the same instrument. */
+  :root {
+    --bg: #0a0d12;
+    --panel: #12171e;
+    --panel-2: #1a212a;
+    --panel-3: #222b36;
+    --line: #242d39;
+    --line-2: #35404f;
+    --text: #e2e9f2;
+    --dim: #8a97a8;
+    --faint: #5c6875;
+    --accent: #6ee7b7;
+    --accent-dark: #123027;
+    --accent-line: #2f6b56;
+    --info: #7cc4ff;
+    --warn: #f5c451;
+    --bad: #ff8080;
+    --ui: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
+  }
+  * { box-sizing: border-box; }
+  html { color-scheme: dark; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 14px/1.5 var(--ui);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ------------------------------------------------------------- demo bar */
+  #demo-bar {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    padding: 8px 18px;
+    background: #0d1a16;
+    border-bottom: 1px solid var(--accent-line);
+    font-size: 12.5px; color: var(--dim);
+  }
+  #demo-bar a { color: var(--accent); text-decoration: none; font-weight: 600; }
+  #demo-bar a:hover, #demo-bar a:focus-visible { text-decoration: underline; text-underline-offset: 3px; }
+  #demo-bar .demo-tag {
+    padding: 2px 9px; border-radius: 999px;
+    background: var(--accent-dark); color: var(--accent); border: 1px solid var(--accent-line);
+    font: 650 11px/1.4 var(--mono); letter-spacing: .08em; text-transform: uppercase;
+  }
+  #demo-bar .demo-say { color: var(--text); }
+  #demo-bar .spacer { flex: 1 1 auto; }
+
+  /* ---------------------------------------------------------------- page */
+  main { max-width: 1180px; margin: 0 auto; padding: 28px 18px 72px; }
+  header.page { border-bottom: 1px solid var(--line); padding-bottom: 20px; }
+  header.page h1 { margin: 0; font: 650 20px/1.2 var(--mono); letter-spacing: .02em; }
+  header.page h1 small { color: var(--faint); font-weight: 400; margin-left: 10px; letter-spacing: 0; font-size: 13px; }
+  header.page p { max-width: 820px; margin: 12px 0 0; color: var(--dim); font-size: 13.5px; line-height: 1.6; }
+  header.page .meta { display: flex; flex-wrap: wrap; gap: 6px 22px; margin-top: 12px; font-size: 11.5px; color: var(--faint); }
+  header.page .meta code { color: var(--dim); }
+
+  section { margin-top: 40px; }
+  h2 { margin: 0; font-size: 15px; font-weight: 650; color: var(--text); letter-spacing: .01em; }
+  h2 + .kicker { margin: 3px 0 0; font-size: 13px; color: var(--faint); }
+  .body { margin-top: 16px; font-size: 13.5px; line-height: 1.62; color: #c9d3de; }
+  .body > * + * { margin-top: 12px; }
+  .body p { margin: 0; }
+  .body ul { margin: 0; padding-left: 20px; }
+  .body li + li { margin-top: 8px; }
+  .body li b, .body p b { color: var(--text); font-weight: 600; }
+  code {
+    font: 12px var(--mono); color: var(--text);
+    background: var(--panel-2); border-radius: 4px; padding: 1px 5px;
+  }
+  .body li::marker { color: var(--faint); }
+
+  figure { margin: 0; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: rgba(18, 23, 30, .5); }
+  figure .scroll { overflow-x: auto; }
+  figure .scroll > div { min-width: 980px; }
+  figure svg { display: block; width: 100%; height: auto; }
+  figcaption { margin: 10px 4px 0; font-size: 11.5px; line-height: 1.55; color: var(--faint); }
+  figcaption code { font-size: 11px; }
+
+  /* SVG palette — the same tokens, as fills and strokes. */
+  svg .lane  { fill: #0c1117; stroke: var(--line-2); stroke-width: 1; }
+  svg .node  { fill: var(--panel); stroke: var(--line-2); stroke-width: 1; }
+  svg .node.dashed { fill: none; stroke-dasharray: 4 3; }
+  svg .node.accent { stroke: var(--accent); }
+  svg .t-lane  { fill: var(--faint); font-weight: 600; font-family: var(--ui); }
+  svg .t-title { fill: var(--text); font-weight: 600; font-family: var(--ui); }
+  svg .t-title.accent { fill: var(--accent); }
+  svg .t-tag   { fill: var(--faint); font-family: var(--ui); }
+  svg .t-body  { fill: var(--dim); font-family: var(--ui); }
+  svg .t-cap   { fill: var(--faint); font-family: var(--ui); }
+  svg .flow    { fill: none; stroke: #4b5868; stroke-width: 1.2; }
+  svg .flow.dashed { stroke-dasharray: 4 3; }
+  svg .head    { fill: #6b7a8c; }
+
+  .tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; text-align: left; }
+  thead th {
+    padding: 8px 12px; font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--faint); font-weight: 600; background: rgba(26, 33, 42, .6);
+    white-space: nowrap;
+  }
+  tbody td { padding: 7px 12px; border-top: 1px solid var(--line); vertical-align: top; color: #c9d3de; }
+  tbody td.k { font-family: var(--mono); font-size: 11.5px; color: var(--accent); white-space: nowrap; }
+  tbody td.n { font-family: var(--mono); font-size: 11.5px; font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--text); }
+  tbody td.d { color: var(--dim); }
+  table.w-stages { min-width: 720px; }
+  table.w-routes { min-width: 760px; }
+  table.w-loops { min-width: 640px; }
+  table.w-kv { min-width: 760px; }
+  table.w-build { min-width: 640px; }
+
+  .callout {
+    padding: 12px 14px; border-left: 2px solid var(--warn); border-radius: 0 8px 8px 0;
+    background: rgba(245, 196, 81, .06); color: #e8dcc0; font-size: 13px; line-height: 1.55;
+  }
+  .callout b { color: var(--warn); }
+</style>
+</head>
+<body>
+
+<div id="demo-bar">
+  <a class="demo-back" href="/">← Portfolio</a>
+  <span class="demo-tag">Demo</span>
+  <a href="index.html">← Pedal</a>
+  <span class="demo-say">How the real pedal is built — the code, the threads, and the Pi it runs on.</span>
+  <span class="spacer"></span>
+</div>
+
+<main>
+<header class="page">
+  <h1>Architecture<small>guitar-pedal-cpp</small></h1>
+  <p>
+    A software guitar pedal on a Raspberry Pi 5: a USB interface hands the audio thread 256 frames of
+    guitar every 5.33 ms, a C++ chain of up to ten effect stages processes them in place, and the same
+    buffer goes back out to the interface's headphone jack. Around that one callback sit a footswitch and
+    LEDs on the GPIO header, a looper with a WAV store, 38 presets with saved edits, and a dependency-free
+    web server that serves the pedal's own bench console. Everything on this page was read off the code
+    at commit <code>c53a85f</code> and off the Pi itself over ssh, not off the README, which is behind
+    the code in several places (section 10). Numbers are a snapshot taken on 14 September 2026.
+  </p>
+  <div class="meta">
+    <span>C++20 · CMake · RtAudio 6.0.1 over ALSA · libgpiod 2.2.1 · no other dependencies</span>
+    <span>Raspberry Pi 5 Model B, 2 GB, Debian 13</span>
+    <span>52 commits, 24 Aug → 12 Sep 2026, as of <code>c53a85f</code></span>
+    <span>5,672 lines in <code>src/</code>, 2,058 in <code>include/</code>, 1,714 in <code>web/index.html</code></span>
+  </div>
+</header>
+
+<!-- ================================================================ 1 -->
+<section id="deadline">
+  <h2>1 · One callback, one deadline</h2>
+  <p class="kicker">The constraint everything else is arranged around.</p>
+  <div class="body">
+    <p>
+      RtAudio opens one duplex stream on the interface (<code>src/main.cpp</code>, <code>open_stream</code>)
+      and calls <code>audio_callback</code> once per buffer. The default is 256 frames, and the sample rate
+      is negotiated against what the device advertises with 48 kHz preferred
+      (<code>audiodev::pick_rate</code>), so the budget is 256 / 48000 = 5.33 ms. Miss it and ALSA plays a
+      gap; <code>Telemetry</code> counts that as an xrun. The whole per-buffer job is one function,
+      <code>run_block</code>, so the same code path can be driven by the sound card or by the built-in
+      signal generator when no interface is plugged in.
+    </p>
+    <p>
+      The rules inside <code>run_block</code> are the ones any real-time audio thread lives by: no
+      allocation, no locks, no syscalls. They show up as concrete decisions rather than a comment. The
+      mono scratch buffer is sized after <code>openStream</code> reports the buffer size it actually
+      granted and before <code>startStream</code> lets a callback run; a buffer larger than that is
+      answered with silence and an xrun rather than a resize. Every control the other threads can touch
+      is a relaxed atomic the callback reads once at the top of the block: the preset index, the knob
+      values, the looper's trigger / clear / seek flags, the freeze capture flag, the master level.
+      <code>steady_clock::now()</code> is called twice per block for the timing figure, which on Linux is
+      a vDSO read, not a syscall.
+    </p>
+    <figure>
+      <div class="scroll"><div>
+<svg viewBox="0 0 1180 720" role="img" aria-labelledby="d1-title">
+<title id="d1-title">Signal path and threads of guitar_pedal on the Raspberry Pi</title>
+<defs><marker id="ah" viewBox="0 0 8 8" refX="7.5" refY="4" markerWidth="5.5" markerHeight="5.5" orient="auto"><path d="M0 0 L8 4 L0 8 Z" class="head"/></marker></defs>
+<rect class="lane" x="188" y="8" width="748" height="700" rx="8"/>
+<text class="t-lane" x="200" y="30" font-size="9.5" letter-spacing="0.09em">guitar_pedal · ONE PROCESS ON THE RASPBERRY PI 5 · 2 GB · DEBIAN 13</text>
+<rect class="node" x="16" y="74" width="160" height="90" rx="6"/>
+<text class="t-title" x="26" y="92" font-size="10.5">M-Audio M-Track Duo</text>
+<text class="t-body" x="26" y="107" font-size="8.5">USB Audio Class, so one</text>
+<text class="t-body" x="26" y="120" font-size="8.5">clock in both directions;</text>
+<text class="t-body" x="26" y="133" font-size="8.5">guitar into the DI input,</text>
+<text class="t-body" x="26" y="146" font-size="8.5">headphones out of the same</text>
+<text class="t-cap" x="16" y="188" font-size="8.5">shows up as USB AUDIO CODEC</text>
+<text class="t-cap" x="16" y="201" font-size="8.5">(TI PCM2900C); unplugged on</text>
+<text class="t-cap" x="16" y="214" font-size="8.5">14 Sep 2026</text>
+<rect class="node" x="16" y="366" width="160" height="122" rx="6"/>
+<text class="t-title" x="26" y="384" font-size="10.5">40-pin header</text>
+<text class="t-body" x="26" y="399" font-size="8.5">gpiochip0 (RP1), libgpiod v2</text>
+<text class="t-body" x="26" y="412" font-size="8.5">GPIO17  looper switch, wired</text>
+<text class="t-body" x="26" y="425" font-size="8.5">GPIO22  looper LED, wired</text>
+<text class="t-body" x="26" y="438" font-size="8.5">GPIO23  preset LED, unwired</text>
+<text class="t-body" x="26" y="451" font-size="8.5">GPIO27  utility switch, gone</text>
+<text class="t-body" x="26" y="464" font-size="8.5">LCD1602 on 5/6/13/19/26/20,</text>
+<text class="t-body" x="26" y="477" font-size="8.5">blank since 31 Aug</text>
+<rect class="lane" x="196" y="44" width="728" height="260" rx="8"/>
+<text class="t-lane" x="208" y="66" font-size="9.5" letter-spacing="0.09em">AUDIO THREAD · RtAudio callback over ALSA · one call per 256 frames · 5.33 ms budget at 48 kHz</text>
+<rect class="node" x="210" y="74" width="100" height="90" rx="6"/>
+<text class="t-title" x="220" y="92" font-size="10.5">Input</text>
+<text class="t-body" x="220" y="107" font-size="8.5">one channel in,</text>
+<text class="t-body" x="220" y="120" font-size="8.5">memcpy into a</text>
+<text class="t-body" x="220" y="133" font-size="8.5">scratch buffer</text>
+<text class="t-body" x="220" y="146" font-size="8.5">sized before the</text>
+<text class="t-body" x="220" y="159" font-size="8.5">stream starts</text>
+<rect class="node" x="334" y="74" width="160" height="90" rx="6"/>
+<text class="t-title" x="344" y="92" font-size="10.5">Pedalboard</text>
+<text class="t-tag" x="484" y="92" font-size="8.5" text-anchor="end">16 stages</text>
+<text class="t-body" x="344" y="107" font-size="8.5">walks preset.chain[]:</text>
+<text class="t-body" x="344" y="120" font-size="8.5">up to 10 Effect* into</text>
+<text class="t-body" x="344" y="133" font-size="8.5">one instance of each</text>
+<text class="t-body" x="344" y="146" font-size="8.5">of the 16 stages, then</text>
+<text class="t-body" x="344" y="159" font-size="8.5">× the measured trim</text>
+<rect class="node" x="518" y="74" width="116" height="90" rx="6"/>
+<text class="t-title" x="528" y="92" font-size="10.5">Freeze</text>
+<text class="t-body" x="528" y="107" font-size="8.5">spectral hold, not</text>
+<text class="t-body" x="528" y="120" font-size="8.5">a looped grain:</text>
+<text class="t-body" x="528" y="133" font-size="8.5">FFT 4096 · hop 1024,</text>
+<text class="t-body" x="528" y="146" font-size="8.5">new phase per frame</text>
+<rect class="node" x="658" y="74" width="110" height="90" rx="6"/>
+<text class="t-title" x="668" y="92" font-size="10.5">Looper</text>
+<text class="t-body" x="668" y="107" font-size="8.5">record → play →</text>
+<text class="t-body" x="668" y="120" font-size="8.5">overdub; one flag</text>
+<text class="t-body" x="668" y="133" font-size="8.5">per command; 120 s</text>
+<text class="t-body" x="668" y="146" font-size="8.5">buffer + a spare</text>
+<text class="t-body" x="668" y="159" font-size="8.5">for swap-in loads</text>
+<rect class="node" x="792" y="74" width="118" height="90" rx="6"/>
+<text class="t-title" x="802" y="92" font-size="10.5">Output</text>
+<text class="t-body" x="802" y="107" font-size="8.5">master level, then</text>
+<text class="t-body" x="802" y="120" font-size="8.5">the mono result is</text>
+<text class="t-body" x="802" y="133" font-size="8.5">fanned out to both</text>
+<text class="t-body" x="802" y="146" font-size="8.5">channels of the</text>
+<text class="t-body" x="802" y="159" font-size="8.5">interface</text>
+<path class="flow" d="M310,119 L330,119" marker-end="url(#ah)"/>
+<path class="flow" d="M494,119 L514,119" marker-end="url(#ah)"/>
+<path class="flow" d="M634,119 L654,119" marker-end="url(#ah)"/>
+<path class="flow" d="M768,119 L788,119" marker-end="url(#ah)"/>
+<path class="flow" d="M176,104 L206,104" marker-end="url(#ah)"/>
+<path class="flow" d="M851,164 L851,173 L96,173 L96,166" marker-end="url(#ah)"/>
+<text class="t-cap" x="210" y="190" font-size="8.5">--clean-loop (“record dry”): the Looper moves to the front of this row, so a dry take is re-coloured by whichever preset is selected now</text>
+<rect class="node" x="210" y="202" width="230" height="92" rx="6"/>
+<text class="t-title" x="220" y="220" font-size="10.5">Telemetry::record_block</text>
+<text class="t-body" x="220" y="235" font-size="8.5">peak (300 ms release) and RMS (150 ms)</text>
+<text class="t-body" x="220" y="248" font-size="8.5">in and out; clips counted at ≥ 0.999;</text>
+<text class="t-body" x="220" y="261" font-size="8.5">block µs last / avg / max vs the budget;</text>
+<text class="t-body" x="220" y="274" font-size="8.5">2048-sample scope window published</text>
+<text class="t-body" x="220" y="287" font-size="8.5">through a seqlock, never a lock</text>
+<rect class="node" x="455" y="202" width="190" height="92" rx="6"/>
+<text class="t-title" x="465" y="220" font-size="10.5">PresetStats::record</text>
+<text class="t-body" x="465" y="235" font-size="8.5">one atomic slot per preset:</text>
+<text class="t-body" x="465" y="248" font-size="8.5">blocks, clips, in/out peak,</text>
+<text class="t-body" x="465" y="261" font-size="8.5">sized once, never resized</text>
+<rect class="node dashed accent" x="660" y="202" width="250" height="92" rx="6"/>
+<text class="t-title accent" x="670" y="220" font-size="10.5">What the callback never does</text>
+<text class="t-body" x="670" y="235" font-size="8.5">allocate, lock, or make a syscall.</text>
+<text class="t-body" x="670" y="248" font-size="8.5">Every control is a relaxed atomic</text>
+<text class="t-body" x="670" y="261" font-size="8.5">read at the top of the block, and</text>
+<text class="t-body" x="670" y="274" font-size="8.5">steady_clock::now() is a vDSO read</text>
+<path class="flow" d="M300,366 L300,308" marker-end="url(#ah)"/>
+<text class="t-cap" x="310" y="316" font-size="8.5">commands: atomic stores and pending flags (preset index, knob values, trigger, clear, capture)</text>
+<path class="flow" d="M880,304 L880,362" marker-end="url(#ah)"/>
+<text class="t-cap" x="870" y="329" font-size="8.5" text-anchor="end">observations: relaxed atomics; a seqlock for the scope window</text>
+<rect class="lane" x="196" y="334" width="728" height="240" rx="8"/>
+<text class="t-lane" x="208" y="356" font-size="9.5" letter-spacing="0.09em">CONTROL THREADS · none of these can block the callback; none holds a lock the callback takes</text>
+<rect class="node" x="210" y="366" width="176" height="122" rx="6"/>
+<text class="t-title" x="220" y="384" font-size="10.5">GpioButton thread</text>
+<text class="t-body" x="220" y="399" font-size="8.5">polls GPIO17 every 5 ms via</text>
+<text class="t-body" x="220" y="412" font-size="8.5">libgpiod v2; 20 ms debounce;</text>
+<text class="t-body" x="220" y="425" font-size="8.5">press → looper.on_trigger()</text>
+<text class="t-body" x="220" y="438" font-size="8.5">or freeze capture (the mode</text>
+<text class="t-body" x="220" y="451" font-size="8.5">is picked in the browser); a</text>
+<text class="t-body" x="220" y="464" font-size="8.5">hold over 400 ms un-freezes</text>
+<rect class="node" x="398" y="366" width="150" height="122" rx="6"/>
+<text class="t-title" x="408" y="384" font-size="10.5">Indicator thread</text>
+<text class="t-body" x="408" y="399" font-size="8.5">every 20 ms: LedPattern</text>
+<text class="t-body" x="408" y="412" font-size="8.5">→ GpioLed 22 (looper)</text>
+<text class="t-body" x="408" y="425" font-size="8.5">and 23 (preset ack);</text>
+<text class="t-body" x="408" y="438" font-size="8.5">Lcd1602 rows rewritten</text>
+<text class="t-body" x="408" y="451" font-size="8.5">only when the text moves</text>
+<rect class="node" x="560" y="366" width="140" height="122" rx="6"/>
+<text class="t-title" x="570" y="384" font-size="10.5">main thread</text>
+<text class="t-body" x="570" y="399" font-size="8.5">sleeps 200 ms; writes</text>
+<text class="t-body" x="570" y="412" font-size="8.5">preset-levels.csv every</text>
+<text class="t-body" x="570" y="425" font-size="8.5">60 s and at exit;</text>
+<text class="t-body" x="570" y="438" font-size="8.5">SIGINT / SIGTERM → stop</text>
+<rect class="node" x="712" y="366" width="198" height="122" rx="6"/>
+<text class="t-title" x="722" y="384" font-size="10.5">WebServer thread</text>
+<text class="t-tag" x="900" y="384" font-size="8.5" text-anchor="end">:8080</text>
+<text class="t-body" x="722" y="399" font-size="8.5">one poll() loop, no HTTP or</text>
+<text class="t-body" x="722" y="412" font-size="8.5">JSON library; 19 /api routes;</text>
+<text class="t-body" x="722" y="425" font-size="8.5">pushes a state frame over SSE</text>
+<text class="t-body" x="722" y="438" font-size="8.5">at 25 Hz; scope pulled ~15 Hz;</text>
+<text class="t-body" x="722" y="451" font-size="8.5">≤ 32 connections, 1 MB out cap;</text>
+<text class="t-body" x="722" y="464" font-size="8.5">does the LoopStore / conf writes</text>
+<path class="flow" d="M176,406 L206,406" marker-end="url(#ah)"/>
+<path class="flow" d="M473,488 L473,506 L150,506 L150,492" marker-end="url(#ah)"/>
+<text class="t-cap" x="210" y="540" font-size="8.5">sim thread: only when no sound card opened — the built-in pluck generator drives run_block on the same 256-frame period</text>
+<rect class="lane" x="196" y="600" width="728" height="90" rx="8"/>
+<text class="t-lane" x="208" y="622" font-size="9.5" letter-spacing="0.09em">ON DISK · ~/.config/guitar-pedal-cpp/ · written by the web thread and the main thread only</text>
+<rect class="node" x="210" y="632" width="226" height="50" rx="6"/>
+<text class="t-title" x="220" y="650" font-size="10.5">presets.conf</text>
+<text class="t-body" x="220" y="665" font-size="8.5">[id] blocks of notes and knob edits · 187 B</text>
+<rect class="node" x="447" y="632" width="226" height="50" rx="6"/>
+<text class="t-title" x="457" y="650" font-size="10.5">preset-levels.csv</text>
+<text class="t-body" x="457" y="665" font-size="8.5">rewritten every 60 s · 1 row (Clean)</text>
+<rect class="node" x="684" y="632" width="226" height="50" rx="6"/>
+<text class="t-title" x="694" y="650" font-size="10.5">loops/*.wav</text>
+<text class="t-body" x="694" y="665" font-size="8.5">12 loops · 14.7 MB · mono 16-bit · 48 kHz</text>
+<path class="flow" d="M690,488 L690,596" marker-end="url(#ah)"/>
+<path class="flow" d="M811,488 L811,596" marker-end="url(#ah)"/>
+<rect class="node" x="968" y="366" width="196" height="122" rx="6"/>
+<text class="t-title" x="978" y="384" font-size="10.5">Browser on the LAN</text>
+<text class="t-body" x="978" y="399" font-size="8.5">web/index.html, served by the</text>
+<text class="t-body" x="978" y="412" font-size="8.5">pedal itself; compiled into</text>
+<text class="t-body" x="978" y="425" font-size="8.5">the binary by embed_html.cmake</text>
+<text class="t-body" x="978" y="438" font-size="8.5">EventSource + fetch + POST,</text>
+<text class="t-body" x="978" y="451" font-size="8.5">query strings, no bodies;</text>
+<text class="t-body" x="978" y="464" font-size="8.5">no auth — bench use only</text>
+<path class="flow" d="M910,426 L964,426" marker-end="url(#ah)"/>
+<path class="flow" d="M964,446 L914,446" marker-end="url(#ah)"/>
+<text class="t-cap" x="952" y="418" font-size="8.5" text-anchor="middle">SSE</text>
+<text class="t-cap" x="952" y="459" font-size="8.5" text-anchor="middle">POST</text>
+<text class="t-cap" x="968" y="506" font-size="8.5">The demo swaps this box&#x27;s server for</text>
+<text class="t-cap" x="968" y="519" font-size="8.5">shim.js and the audio lane for an</text>
+<text class="t-cap" x="968" y="532" font-size="8.5">AudioWorklet — second diagram.</text>
+</svg>
+      </div></div>
+      <figcaption>
+        The audio thread reads the top lane left to right. Solid arrows are data or commands. The
+        <code>--clean-loop</code> line is the one reordering the chain allows (section 3). The disk lane is only
+        ever touched by the web and main threads. Sizes and counts are the Pi's own on 14 Sep 2026; the
+        interface, the pedal process and the audio stream were all absent that day (section 8).
+      </figcaption>
+    </figure>
+    <p>
+      The order in the top lane matters. Freeze sits after the board so a captured chord already has the
+      preset's colour on it, and the looper sits last so it records what you would hear. A master level
+      comes after even the looper because it is a room control, not a tone control, and it survives preset
+      changes where a preset's trim does not. The mono result is fanned out to both channels of the
+      interface in the callback itself: asking RtAudio for a one-channel output stream puts the guitar in
+      one ear and silence in the other, which was a bug that shipped once.
+    </p>
+  </div>
+</section>
+
+<!-- ================================================================ 2 -->
+<section id="pedalboard">
+  <h2>2 · The Pedalboard and its sixteen stages</h2>
+  <p class="kicker">One instance of everything, for the life of the process.</p>
+  <div class="body">
+    <p>
+      Every effect implements one interface, <code>Effect::process(float* buffer, size_t n_frames)</code>
+      (<code>include/Effect.h</code> is nine lines). The <code>Pedalboard</code> owns exactly one instance of
+      each of sixteen stages as plain members, and a preset is nothing more than an ordered array of
+      up to ten <code>Effect*</code> into those members plus a list of (parameter index, value) pairs.
+      <code>Pedalboard::select()</code> applies the values through the stages' atomic setters, stores the
+      trim, then publishes one integer; <code>process()</code> does one relaxed load of that integer and
+      walks the array. Switching presets therefore constructs, frees, resizes and reorders nothing, which is
+      what makes it safe to drive from the footswitch thread and the browser at the same time while the
+      callback is mid-buffer. The price is a rule the table has to obey: because stages are shared, a preset
+      must set <em>every</em> parameter of every stage it uses, or the sound depends on which preset was
+      selected before. <code>offline_tests</code> enforces that
+      (<code>test_every_preset_fully_specifies_the_stages_it_uses</code>).
+    </p>
+    <div class="tbl"><table class="w-stages">
+      <thead><tr><th>Group</th><th>Stage</th><th>Knobs</th><th>What it is, in one line</th></tr></thead>
+      <tbody>
+        <tr><td class="d">dynamics</td><td class="k">Compressor</td><td class="n">5</td><td>feed-forward peak compressor, hard knee; publishes its gain reduction for the UI meter</td></tr>
+        <tr><td class="d">amp</td><td class="k">Amp</td><td class="n">8</td><td>preamp drive → three-band tone stack → power-amp drive → presence shelf → speaker roll-off; five <code>Biquad</code>s in series</td></tr>
+        <tr><td class="d">drive</td><td class="k">Distortion</td><td class="n">2</td><td>tanh saturation, the overdrive</td></tr>
+        <tr><td class="d">drive</td><td class="k">Fuzz</td><td class="n">6</td><td>hard clipping with bias (asymmetry), a sputter gate, a DC blocker after it</td></tr>
+        <tr><td class="d">drive</td><td class="k">WaveFolder</td><td class="n">4</td><td>folds the waveform back instead of clipping it; symmetry adds even harmonics</td></tr>
+        <tr><td class="d">drive</td><td class="k">BitCrusher</td><td class="n">3</td><td>amplitude quantisation and sample-and-hold decimation, kept as separate knobs</td></tr>
+        <tr><td class="d">drive</td><td class="k">RingMod</td><td class="n">2</td><td>multiplies by a sine carrier</td></tr>
+        <tr><td class="d">filter</td><td class="k">Tone</td><td class="n">5</td><td>low shelf at 200 Hz, sweepable mid peak, high shelf at 3 kHz; three RBJ <code>Biquad</code>s</td></tr>
+        <tr><td class="d">filter</td><td class="k">EnvFilter</td><td class="n">7</td><td>auto-wah: a resonant lowpass driven by an asymmetric envelope follower; publishes the envelope</td></tr>
+        <tr><td class="d">pitch</td><td class="k">PitchShifter</td><td class="n">3</td><td>two crossfaded delay-line taps, semitones plus cents; no FFT</td></tr>
+        <tr><td class="d">modulation</td><td class="k">Phaser</td><td class="n">5</td><td>2–8 cascaded first-order allpasses under an LFO</td></tr>
+        <tr><td class="d">modulation</td><td class="k">Flanger</td><td class="n">5</td><td>0.5–10 ms modulated delay with feedback either sign</td></tr>
+        <tr><td class="d">modulation</td><td class="k">Chorus</td><td class="n">3</td><td>LFO-modulated short delay, no feedback</td></tr>
+        <tr><td class="d">modulation</td><td class="k">Tremolo</td><td class="n">3</td><td>amplitude LFO with a sine-to-square shape control</td></tr>
+        <tr><td class="d">time</td><td class="k">Delay</td><td class="n">5</td><td>up to 2 s with feedback, a lowpass in the feedback path and wow/flutter modulation</td></tr>
+        <tr><td class="d">time</td><td class="k">Reverb</td><td class="n">4</td><td>Freeverb-style comb + allpass network; room / plate / hall / spring change comb lengths and a wet-path bandpass, never a buffer size</td></tr>
+      </tbody>
+    </table></div>
+    <p>
+      <b>Biquad</b> (<code>include/Biquad.h</code>) is the shared building block under Tone, Amp and
+      EnvFilter: one Direct Form I second-order section with the RBJ cookbook formulas for low shelf, peaking,
+      high shelf and lowpass. DF1 was chosen because coefficients change while the filter is running (a knob
+      moves) and DF1 tolerates that where DF2 does not. Coefficients are recomputed only when a cached knob
+      value differs from the last one used, so the transcendentals run on the block after a knob moves and on
+      no other. Two things live <em>outside</em> the board on purpose: <b>Freeze</b>, a performance control that
+      must work on every preset rather than a tone stage that would silently do nothing on the presets whose
+      chain omits it, and the <b>Looper</b>, section 3.
+    </p>
+    <p>
+      The 70 board knobs plus six appended in <code>main.cpp</code> (master level, three freeze controls, two
+      looper controls) make 76 parameters, each described once as an id, group, label, range, getter and
+      setter. The web UI renders that table generically and never learns what a reverb is; adding a stage
+      changes <code>Pedalboard.cpp</code> and <code>Presets.cpp</code> and nothing in the server or the page.
+    </p>
+  </div>
+</section>
+
+<!-- ================================================================ 3 -->
+<section id="looper">
+  <h2>3 · Looper, Freeze, and the loop store</h2>
+  <p class="kicker">Two ways to hold sound, and where the takes go.</p>
+  <div class="body">
+    <p>
+      The <b>Looper</b> is a state machine, Empty → Recording → Playing ⇄ Overdubbing, that only ever changes
+      state on the audio thread at the top of <code>process()</code>. <code>on_trigger()</code>,
+      <code>clear()</code>, <code>seek()</code> and <code>set_paused()</code> from any other thread set a flag
+      and return. Its buffer is allocated once at construction, 120 s by default (about 23 MB of mono float at
+      48 kHz), because the callback may not grow it later. Two details are there to keep saving and loading
+      real-time-safe: <code>snapshot()</code> refuses while Recording or Overdubbing, the only states in which the
+      callback writes the buffer, so the web thread never copies from under a writer; and <code>load()</code>
+      copies the samples into a <em>spare</em> buffer on the web thread and the callback then swaps the two
+      vectors, a pointer exchange that neither allocates nor memcpys up to 23 MB inside a 5 ms window.
+      Overdub writes back <code>existing × decay + input</code>, scaled by decay only and never by the monitor
+      level, so turning the loop down cannot erase it a pass at a time.
+    </p>
+    <p>
+      <b>The change that made the demo possible.</b> Normally the looper is last, so it records the finished
+      tone. Since <code>ea810f1</code> (12 Sep 2026) the chain has a second order, chosen with
+      <code>--clean-loop</code> on the command line or <code>POST /api/looper?action=clean</code> from the page:
+      the looper moves to the front of <code>run_block</code>, records the untouched input, and its playback joins
+      the live signal <em>before</em> the board. One dry take can then be heard through every preset, which is
+      what the demo's re-amp player relies on and why the four demo loops are the store's "dry" takes. The
+      cost is stated in the code: Freeze then lands after the looper, so a frozen pad is no longer captured into
+      the loop.
+    </p>
+    <p>
+      <b>Freeze</b> is a spectral hold, not a grain looper. Capture takes a 4096-point FFT of the last moment
+      (with a second, overlapping frame to measure each bin's true phase advance), keeps the magnitudes, and
+      resynthesises every 1024 samples with fresh phase, overlap-added. Nothing is replayed, so nothing can
+      repeat; a looped 300 ms grain would re-trigger the pick attack three times a second. Shimmer sets how
+      random the phase is, decay whether the pad holds forever or fades. With one footswitch the browser picks
+      whether a stomp drives the looper or the freeze; a freeze press captures on the press edge, and a hold
+      over 400 ms releases on the way up, so tap = latch and hold = momentary without costing the press any
+      latency.
+    </p>
+    <p>
+      <b>LoopStore</b> writes mono 16-bit PCM WAV, so a take is worth something outside this program. Names
+      arrive from a browser and become paths, so anything outside <code>[A-Za-z0-9 _-]</code> is dropped and the
+      result capped at 64 characters; a file is written as <code>.part</code> and renamed, so a crash cannot leave
+      a half-file that lists as a loop; <code>duplicate()</code> is a byte copy under a derived free name and
+      never overwrites. Loading a loop recorded at a different rate is refused rather than resampled, because
+      playing 44.1 kHz through a 48 kHz stream shifts it up about a tone. This is the store on the Pi on
+      14 Sep 2026:
+    </p>
+    <div class="tbl"><table class="w-loops">
+      <thead><tr><th>Loop (<code>~/.config/guitar-pedal-cpp/loops/</code>)</th><th>Length</th><th>Size</th><th>Saved</th><th></th></tr></thead>
+      <tbody>
+        <tr><td class="k">dry mardy bum solo 1</td><td class="n">20.39 s</td><td class="n">1,957,932 B</td><td class="d">12 Sep 12:34</td><td class="d">in the demo</td></tr>
+        <tr><td class="k">dry mardy bum solo  chords 1</td><td class="n">20.39 s</td><td class="n">1,957,932 B</td><td class="d">12 Sep 12:34</td><td class="d">in the demo</td></tr>
+        <tr><td class="k">dry man who sold the world chorus</td><td class="n">8.68 s</td><td class="n">833,580 B</td><td class="d">12 Sep 12:20</td><td class="d">in the demo</td></tr>
+        <tr><td class="k">dry radiohead just</td><td class="n">6.29 s</td><td class="n">604,204 B</td><td class="d">12 Sep 12:16</td><td class="d">in the demo</td></tr>
+        <tr><td class="k">elliot smith passing feeling outro</td><td class="n">12.25 s</td><td class="n">1,176,108 B</td><td class="d">12 Sep 11:42</td><td class="d"></td></tr>
+        <tr><td class="k">elliot smith passing feeling verse</td><td class="n">11.79 s</td><td class="n">1,132,076 B</td><td class="d">12 Sep 11:38</td><td class="d"></td></tr>
+        <tr><td class="k">mardy bum chorus attempt 1</td><td class="n">9.55 s</td><td class="n">917,036 B</td><td class="d">31 Aug 23:48</td><td class="d">recorded through a preset</td></tr>
+        <tr><td class="k">mardy bum solo attempt 1</td><td class="n">21.08 s</td><td class="n">2,023,468 B</td><td class="d">31 Aug 23:45</td><td class="d">the longest in the store</td></tr>
+        <tr><td class="k">slow fuzzy man who sold</td><td class="n">13.22 s</td><td class="n">1,269,292 B</td><td class="d">31 Aug 23:33</td><td class="d">recorded through a preset</td></tr>
+        <tr><td class="k">overdrive man who sold</td><td class="n">9.01 s</td><td class="n">864,812 B</td><td class="d">31 Aug 23:30</td><td class="d">recorded through a preset</td></tr>
+        <tr><td class="k">funky man who sold</td><td class="n">14.69 s</td><td class="n">1,410,604 B</td><td class="d">31 Aug 23:23</td><td class="d">recorded through a preset</td></tr>
+        <tr><td class="k">JUST</td><td class="n">5.72 s</td><td class="n">549,420 B</td><td class="d">31 Aug 23:09</td><td class="d"></td></tr>
+      </tbody>
+    </table></div>
+    <p>
+      Twelve loops, 14,696,464 bytes, 2 min 33 s of guitar, every one mono 16-bit at 48 kHz (read from the
+      WAV headers, not assumed). The store lists newest first, which is why the pedal's Saved loops panel
+      reads as a history.
+    </p>
+  </div>
+</section>
+
+<!-- ================================================================ 4 -->
+<section id="presets">
+  <h2>4 · Presets, edits, notes, stats, setlist</h2>
+  <p class="kicker">What the pedal remembers, and in which file.</p>
+  <div class="body">
+    <p>
+      <code>src/Presets.cpp</code> is data, not mechanism: 38 presets as a table of id, name, a ten-character
+      LCD name, a blurb, the gear being approximated, a chain of stage ids and a settings list built by per-stage
+      helpers that cannot be called with a value missing. Two are defaults (Clean, Custom Amp), twelve are
+      attempts at specific records (Slowdive, Elliott Smith, The Strokes, Arctic Monkeys, The Voidz, Wednesday,
+      Led Zeppelin, Deftones, Velvet Underground, Cocteau Twins, Nirvana, Radiohead — Radiohead's is the longest
+      chain at seven stages), and 24 isolate one effect or one trick so a fault can be heard on its own.
+      <code>build_presets()</code> resolves every setting to a parameter index at startup and throws on a typo, so a
+      misnamed knob is a startup failure with a name in it rather than a slider that quietly does nothing.
+    </p>
+    <p>
+      Each preset carries a <b>measured output trim</b>, applied after the whole chain because the saturating
+      stages are level-dependent and trimming their input would change their sound. The table spans 0.120
+      (Cocteau Twins) to 2.951 (Detune), 27.8 dB, produced by <code>tools/preset_levels</code> (section 7) and
+      checked by a test that every preset has one.
+    </p>
+    <div class="tbl"><table class="w-kv">
+      <thead><tr><th>Store</th><th>Where</th><th>Format</th><th>On the Pi, 14 Sep 2026</th></tr></thead>
+      <tbody>
+        <tr><td>saved knob edits and notes</td><td class="k">presets.conf</td><td class="d">plain text: <code>[id]</code> blocks, <code>note …</code> lines, <code>param.id value</code> lines; written whole to <code>.tmp</code> and renamed</td><td class="n">187 B: one block, a note on <code>cocteau</code></td></tr>
+        <tr><td>per-preset running totals</td><td class="k">preset-levels.csv</td><td class="d">blocks, clips, out and in peak in dBFS, per preset played; flushed every 60 s and at exit</td><td class="n">75 B: Clean only — 49,537 blocks, 0 clips, out −16.2 / in −21.2 dBFS (12 Sep 12:56)</td></tr>
+        <tr><td>saved loops</td><td class="k">loops/*.wav</td><td class="d">mono 16-bit PCM</td><td class="n">12 files, 14.7 MB</td></tr>
+        <tr><td>setlist</td><td class="k">— (memory)</td><td class="d">an ordered list of preset indices behind a mutex; lost on restart</td><td class="n">n/a, not running</td></tr>
+      </tbody>
+    </table></div>
+    <p>
+      Edits are stored as a diff against the table, not a replacement: <code>select()</code> applies the
+      defaults first and the overrides on top, so a preset that gains a knob in a later build still gets a sane
+      value for it, and "revert" is a deletion rather than a second table of remembered values. A note is
+      deliberately not an edit; writing one does not make the UI claim the preset was modified. The file is plain
+      text so it diffs in git and can be fixed over ssh when something was saved unlistenable, and a block for a
+      preset that no longer exists is skipped rather than fatal.
+    </p>
+    <p>
+      <b>PresetStats</b> is the one per-preset record the callback writes: a fixed vector of atomic slots, one per
+      preset, bumped with the block's peaks and clip count that <code>record_block</code> had already computed. The
+      CSV it produces exists because a preset can be quietly unusable, loud enough that an ordinary pick attack
+      clips, and remembering which of 38 did that is not something a person does. <b>Setlist</b> exists because
+      cycling 38 presets by foot is unusable; it is written by the web thread, advanced by the footswitch
+      thread, and never touched by the audio thread, which is why a plain mutex is fine there.
+    </p>
+  </div>
+</section>
+
+<!-- ================================================================ 5 -->
+<section id="control">
+  <h2>5 · The control surface</h2>
+  <p class="kicker">GPIO through libgpiod v2, and what is actually wired.</p>
+  <div class="body">
+    <div class="tbl"><table class="w-kv">
+      <thead><tr><th>Line</th><th>Pin</th><th>Class</th><th>Role</th><th>State on the bench</th></tr></thead>
+      <tbody>
+        <tr><td class="k">GPIO17</td><td class="n">11</td><td class="k">GpioButton</td><td>looper footswitch, active-low with the internal pull-up; or the freeze switch when the page says so</td><td class="d">wired and tested: 6 stomps, 6 presses, no bounce</td></tr>
+        <tr><td class="k">GPIO22</td><td class="n">15</td><td class="k">GpioLed</td><td>looper LED: off / solid (recording) / 1 s blink (playing) / 200 ms blink (overdubbing)</td><td class="d">wired</td></tr>
+        <tr><td class="k">GPIO23</td><td class="n">16</td><td class="k">GpioLed</td><td>preset LED: two quick flashes on a preset change, one long one on a clear</td><td class="d">line opened, no lamp attached; the page names the preset anyway</td></tr>
+        <tr><td class="k">GPIO27</td><td class="n">13</td><td class="k">GpioButton + ClickDetector</td><td>utility switch: single click clears, double click steps the setlist; only requested under <code>--switches 2</code></td><td class="d">removed 31 Aug; both gestures live in the page</td></tr>
+        <tr><td class="k">GPIO5, 6, 13, 19, 26, 20</td><td class="n">29, 31, 33, 35, 37, 38</td><td class="k">Lcd1602</td><td>HD44780 in 4-bit mode: RS, E, D4–D7; write-only, R/W tied to ground so no 5 V line ever drives a Pi input</td><td class="d">blank since 31 Aug, unresolved; <code>--no-lcd</code> skips its twelve line requests on the bench</td></tr>
+      </tbody>
+    </table></div>
+    <p>
+      <b>GpioButton</b> polls its line every 5 ms on its own thread and reports a press only after the value
+      has been stable for 20 ms; it also reports the release with the debounced hold duration, which is what
+      the freeze's tap-versus-hold decision reads. The looper press fires on the press edge and always will,
+      because the instant the foot lands <em>is</em> the loop boundary. That is exactly why gestures that need
+      a timeout (<b>ClickDetector</b>, a 350 ms double-click window) were only ever put on the utility switch,
+      where being 350 ms late to clear a loop is inaudible. The class is still in the tree and tested; rewiring
+      it is one <code>make_unique</code> and one <code>set_handlers</code> in <code>main.cpp</code>.
+    </p>
+    <p>
+      <b>LedPattern</b> is pure logic: a steady base (off / solid / blink) plus a one-shot burst that overrides
+      it, evaluated by <code>value(now)</code>. No GPIO, no timer thread per LED, and the blink timing is
+      offline-testable. One <b>indicator thread</b> wakes every 20 ms, evaluates both patterns, pushes them at
+      the two <code>GpioLed</code>s (which only issue an ioctl when the value changes) and rewrites the LCD's two
+      rows, <code>LOOP: PLAY</code> and <code>FX: RADIOHED</code>, only when the text moved. <b>Lcd1602</b> never
+      reads the busy flag; every operation waits out the datasheet's worst case, hundreds of microseconds a
+      call, which is why it lives on that thread and could never live in the callback. The same two strings go
+      into every state frame, so the browser shows what the panel would show on a board with no panel.
+    </p>
+  </div>
+</section>
+
+<!-- ================================================================ 6 -->
+<section id="web">
+  <h2>6 · Telemetry and the web server</h2>
+  <p class="kicker">How the audio thread is observed without ever waiting on an observer.</p>
+  <div class="body">
+    <p>
+      <b>Telemetry</b> is the only surface the callback writes for anyone else, and everything it writes is a
+      relaxed atomic store into a preallocated member: input and output peak (instant attack, ~300 ms release)
+      and RMS (~150 ms), block count, xruns, output samples at or above 0.999, and the last / average / worst
+      block time in µs against a budget of <code>frames / rate</code>. The one item too big for an atomic is the
+      2048-sample waveform window (about 43 ms at 48 kHz, a few cycles of a low E). It uses a seqlock: the
+      writer bumps a counter to odd, copies both windows, bumps it to even, and never waits; the reader tries
+      up to four times and otherwise skips a UI frame. A stalled reader costs a dropped frame; a stalled writer
+      would cost a glitch, so the asymmetry runs the right way. <code>test_telemetry_scope_is_never_torn</code>
+      hammers it from two threads.
+    </p>
+    <p>
+      <b>WebServer</b> is 744 lines: one thread, one <code>poll()</code> loop, an <code>eventfd</code> so
+      <code>stop()</code> does not wait out a poll timeout, and no HTTP or JSON library. Small state is
+      <em>pushed</em> as a server-sent-events frame every 40 ms to every subscriber, and only built at all if
+      someone is subscribed; the bulkier waveform is <em>pulled</em> by the page as raw little-endian float32,
+      every fourth sample of the window (512 points, 4 KB), so a slow client throttles itself. Commands travel
+      as query strings, never bodies. Limits exist for the reason the header comment gives: a runaway client
+      must not be able to march the process into <code>EMFILE</code> and spin a thread at 100 % on a board
+      whose whole job is meeting an audio deadline. Requests over 64 KB, output buffers over 1 MB (a backgrounded
+      tab that stops draining its stream) and a 33rd connection are all dropped. The log keeps 200 entries and
+      sends the newest twelve per frame.
+    </p>
+    <div class="tbl"><table class="w-routes">
+      <thead><tr><th>Route</th><th>Method</th><th>Does</th><th>Reaches the engine through</th></tr></thead>
+      <tbody>
+        <tr><td class="k">/ , /index.html</td><td class="d">GET</td><td>the page, from <code>webui::kIndexHtml</code></td><td class="d">—</td></tr>
+        <tr><td class="k">/api/params</td><td class="d">GET</td><td>presets, devices, rate, buffer, scope points, the 76 parameter descriptors; fetched once</td><td class="d">—</td></tr>
+        <tr><td class="k">/api/state</td><td class="d">GET</td><td>one full state frame with the whole log</td><td class="d">Telemetry snapshot + the state provider</td></tr>
+        <tr><td class="k">/api/events</td><td class="d">GET</td><td>SSE stream of state frames at 25 Hz</td><td class="d">same</td></tr>
+        <tr><td class="k">/api/scope</td><td class="d">GET</td><td>2 × 512 float32, input then output</td><td class="d">Telemetry::read_scope (seqlock)</td></tr>
+        <tr><td class="k">/api/notes</td><td class="d">GET</td><td>every preset's note; fetched on load and after a save, not per frame</td><td class="d">Pedalboard::note</td></tr>
+        <tr><td class="k">/api/loops</td><td class="d">GET</td><td>the store's listing, newest first</td><td class="d">LoopStore::list (reads 44-byte headers)</td></tr>
+        <tr><td class="k">/api/preset</td><td class="d">POST</td><td><code>value=i</code> selects; also moves the setlist cursor to it</td><td class="d">Pedalboard::select (atomics)</td></tr>
+        <tr><td class="k">/api/param</td><td class="d">POST</td><td><code>id, value</code> sets one knob; 404 for an unknown id</td><td class="d">the stage's atomic setter</td></tr>
+        <tr><td class="k">/api/looper</td><td class="d">POST</td><td><code>action=trigger | clear | pause | seek | clean</code></td><td class="d">Looper pending flags; the clean_loop atomic</td></tr>
+        <tr><td class="k">/api/freeze</td><td class="d">POST</td><td>toggle, or <code>action=mode</code> to choose what the footswitch drives</td><td class="d">Freeze flags; the ControlMode atomic</td></tr>
+        <tr><td class="k">/api/loops</td><td class="d">POST</td><td><code>action=save | load | delete | duplicate</code>, 400 with a reason on failure</td><td class="d">LoopStore on the web thread; Looper::snapshot / load</td></tr>
+        <tr><td class="k">/api/preset/save · /reset · /reset-all</td><td class="d">POST</td><td>persist, drop, or drop every preset's edits</td><td class="d">Pedalboard file writes on the web thread</td></tr>
+        <tr><td class="k">/api/preset/note</td><td class="d">POST</td><td><code>index, value</code></td><td class="d">same file</td></tr>
+        <tr><td class="k">/api/setlist · /setlist/advance</td><td class="d">POST</td><td>replace the list; step it (the page never computes the next slot itself)</td><td class="d">Setlist (mutex) → Pedalboard::select</td></tr>
+        <tr><td class="k">/api/sim</td><td class="d">POST</td><td>the built-in generator on or off; ignored while the sound card owns the chain</td><td class="d">an atomic the sim thread reads</td></tr>
+        <tr><td class="k">/api/reset</td><td class="d">POST</td><td>zero the worst-block, clip and xrun counters</td><td class="d">Telemetry::reset_peaks</td></tr>
+      </tbody>
+    </table></div>
+    <p>
+      Nineteen routes in all. Every write goes through the same surfaces the footswitch thread uses, an atomic
+      or a pending flag; the browser is one more control thread and gets no privileged access. The page itself,
+      <code>web/index.html</code>, is turned into a raw string literal in a generated header by
+      <code>tools/embed_html.cmake</code> at build time, so the pedal deploys as one binary with no
+      <code>--ui-dir</code> to get wrong on the Pi, and editing the page triggers a rebuild. It binds
+      <code>0.0.0.0:8080</code> with no authentication, for the LAN and the bench only.
+    </p>
+  </div>
+</section>
+
+<!-- ================================================================ 7 -->
+<section id="build">
+  <h2>7 · Build, bench tools, tests</h2>
+  <p class="kicker">How it is proven before it is plugged in.</p>
+  <div class="body">
+    <div class="tbl"><table class="w-build">
+      <thead><tr><th>CMake target</th><th>Sources</th><th>Links</th><th>Exists</th></tr></thead>
+      <tbody>
+        <tr><td class="k">pedal_dsp</td><td>26 files: every stage, Freeze, Looper, LoopStore, Presets, PresetStats, Setlist, Telemetry, LedPattern, ClickDetector (+ GpioButton, GpioLed, Lcd1602 on Linux with libgpiod)</td><td class="d">libgpiod when present, defining <code>PEDAL_HAVE_GPIO</code></td><td class="d">everywhere</td></tr>
+        <tr><td class="k">pedal_audio</td><td><code>AudioDevice.cpp</code>: enumerate, resolve by id or name substring, prefer a duplex device over "default", negotiate one rate two devices share</td><td class="d">pedal_dsp + RtAudio</td><td class="d">everywhere</td></tr>
+        <tr><td class="k">guitar_pedal</td><td><code>main.cpp</code>, <code>WebServer.cpp</code>, the generated <code>UiPage.h</code></td><td class="d">pedal_audio</td><td class="d">the pedal</td></tr>
+        <tr><td class="k">audio_check</td><td><code>list · meter · tone · thru · fx</code>: proves each link of the audio path with no DSP in the way, and names the device it is actually talking to</td><td class="d">pedal_audio</td><td class="d">everywhere</td></tr>
+        <tr><td class="k">gpio_check</td><td><code>led · button · clicks · echo · gestures · lcd · all</code>: one piece of hardware at a time, no interface needed</td><td class="d">pedal_dsp</td><td class="d">Linux + libgpiod only</td></tr>
+        <tr><td class="k">preset_levels</td><td>runs six seconds of an identical decaying pluck through all 38 presets in 256-frame blocks and reports peak, RMS and clips; <code>--csv</code> feeds the trim table</td><td class="d">pedal_dsp</td><td class="d">everywhere</td></tr>
+        <tr><td class="k">offline_tests</td><td><code>tests/offline_tests.cpp</code>, 1,602 lines, registered with CTest</td><td class="d">pedal_dsp only, so it links with RtAudio nowhere near it</td><td class="d">everywhere</td></tr>
+      </tbody>
+    </table></div>
+    <p>
+      C++20, <code>-Wall -Wextra -Wpedantic</code>, and an <code>ENABLE_SANITIZERS</code> option for an
+      ASan + UBSan build (<code>~/guitar-pedal-cpp/build-asan/</code> on the Pi dates from 10 Sep). The Pi's
+      main build is Release, RtAudio 6.0.1, libgpiod 2.2.1; <code>AudioDevice.h</code> keeps the RtAudio 5
+      throwing API working behind a version check because older boards ship it. The audio_check tool
+      redirects stderr around RtAudio's constructor and prints the captured backend noise <em>after</em> the
+      device table, because on a headless Pi a dozen ALSA / JACK / Pulse probe complaints otherwise bury the
+      one answer the tool exists to give.
+    </p>
+    <p>
+      The test suite is 56 functions and 185 assertions: transparency at zero mix for every stage,
+      boundedness under feedback and full gain, a pitch shifter checked by zero-crossing rate, the looper's
+      full state machine including pause, seek, level-not-storage and a spare-buffer load, the seqlock under
+      contention, the click detector and LED timings, and the preset table's completeness. It needs no audio
+      hardware. Run on 14 Sep 2026 on the laptop against <code>c53a85f</code>: all 185 pass. (Apple clang 14
+      needed two scratch workarounds to compile it, neither of which is in the repo: the <code>merge()</code>
+      rename below, and a structured binding captured by a lambda in <code>Pedalboard::build_presets</code>,
+      which GCC 14 on the Pi accepts.) The last CTest run recorded on the Pi itself is from 30 Aug.
+    </p>
+    <div class="callout">
+      <b>Measured, but not today.</b> The only callback timing on record is the README's bench figure for the
+      shoegaze chain at 48 kHz / 256 frames with the generator, about 120 µs average per 5,333 µs buffer and
+      about 185 µs with the looper overdubbing, while serving three UI clients. It could not be re-measured on
+      14 Sep 2026 because the pedal was not running (section 8), and it excludes ALSA's own callback overhead
+      by construction.
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================ 8 -->
+<section id="live">
+  <h2>8 · The pedal itself, on 14 September 2026</h2>
+  <p class="kicker">Read over ssh, read-only. What was there and what was not.</p>
+  <div class="body">
+    <div class="tbl"><table class="w-kv">
+      <thead><tr><th>Question</th><th>Answer</th><th>From</th></tr></thead>
+      <tbody>
+        <tr><td>Is it running?</td><td><b>No.</b> No <code>guitar_pedal</code> in the process table; the Pi had been up 2 days 16 h.</td><td class="d"><code>ps</code>, <code>uptime</code></td></tr>
+        <tr><td>How is it launched?</td><td>By hand. There is no systemd unit (system or user), no unit file, and no crontab entry for it. The bench notes' recipe is <code>ssh -n pedal 'setsid sh -c "cd ~/guitar-pedal-cpp &amp;&amp; exec ./build/guitar_pedal --device &lt;id&gt;" &lt;/dev/null &gt;/tmp/pedal.log 2&gt;&amp;1 &amp;'</code>, stopped with <code>pkill -x guitar_pedal</code>. The device id is read from <code>audio_check list</code> each session because the Duo's id changes across boots.</td><td class="d"><code>systemctl list-units --all</code>, <code>systemctl --user</code>, <code>crontab -l</code>, the private bench notes</td></tr>
+        <tr><td>What is built?</td><td><code>~/guitar-pedal-cpp/build/</code> at <code>c53a85f</code>, Release: <code>guitar_pedal</code> (686 KB), <code>audio_check</code>, <code>gpio_check</code>, <code>preset_levels</code>, <code>offline_tests</code>, all from 12 Sep 12:37–12:38.</td><td class="d"><code>ls -la build</code>, <code>git log</code>, <code>CMakeCache.txt</code></td></tr>
+        <tr><td>Is the interface attached?</td><td><b>No.</b> <code>lsusb</code> shows only the root hubs; the only sound cards are the two HDMI outputs, and there is no capture device at all. With the Duo unplugged the pedal would start with "no capture device" and run its UI, switches and generator only.</td><td class="d"><code>lsusb</code>, <code>/proc/asound/cards</code>, <code>arecord -l</code></td></tr>
+        <tr><td>Which interface?</td><td>M-Audio M-Track Duo, USB Audio Class, one clock for both directions. It reports itself as <code>USB AUDIO  CODEC</code> (a TI PCM2900C), which is why <code>--device</code> takes a substring.</td><td class="d">the bench notes; not observable on the day</td></tr>
+        <tr><td>What is the header?</td><td><code>gpiochip0</code> is <code>pinctrl-rp1</code> with 54 lines, which is what <code>main.cpp</code> hardcodes. The user is in <code>gpio</code> and <code>audio</code>.</td><td class="d"><code>gpiodetect</code>, <code>id</code></td></tr>
+        <tr><td>What did the last session do?</td><td>Recorded the four "dry" loops between 12:16 and 12:34 on 12 Sep and played the Clean preset for 49,537 blocks (about 4.4 min at 256 frames) with an input peak of −21.2 dBFS and no clips; the CSV was last flushed at 12:56.</td><td class="d"><code>preset-levels.csv</code>, loop mtimes</td></tr>
+        <tr><td>What else is on the box?</td><td>1,167 MB of the 2,010 MB in use by other always-on services (ports 3000, 8000, 8001, 8787). The pedal's own footprint is dominated by the looper's two 23 MB buffers.</td><td class="d"><code>free -m</code>, <code>ss -ltn</code></td></tr>
+      </tbody>
+    </table></div>
+    <p>
+      Debian 13 (trixie), kernel 6.12.75, Raspberry Pi 5 Model B Rev 1.1, 2 GB. Nothing on the Pi was written,
+      started or restarted to produce this page.
+    </p>
+  </div>
+</section>
+
+<!-- ================================================================ 9 -->
+<section id="demo">
+  <h2>9 · This demo is the same code with the sound card swapped out</h2>
+  <p class="kicker">What is compiled, what is stood in for, and the one line that had to change.</p>
+  <div class="body">
+    <p>
+      The page behind the "← Pedal" link is <code>web/index.html</code> from the pedal repo, copied at build
+      time with three edits that <code>build.sh</code> refuses to apply unless each matches exactly once.
+      Everything that makes sound is the pedal's own C++, compiled unmodified from <code>~/guitar-pedal-cpp/src</code>
+      with Emscripten into a standalone WebAssembly module; the only new C++ is
+      <code>engine/engine.cpp</code>, which replaces what <code>main.cpp</code> does on the Pi (build the chain,
+      run one block of it) and swaps the sound card for a re-amp player.
+    </p>
+    <figure>
+      <div class="scroll"><div>
+<svg viewBox="0 0 1180 316" role="img" aria-labelledby="d2-title">
+<title id="d2-title">How the browser demo maps onto the same code</title>
+<defs><marker id="ah2" viewBox="0 0 8 8" refX="7.5" refY="4" markerWidth="5.5" markerHeight="5.5" orient="auto"><path d="M0 0 L8 4 L0 8 Z" class="head"/></marker></defs>
+<rect class="lane" x="8" y="8" width="700" height="300" rx="8"/>
+<text class="t-lane" x="20" y="30" font-size="9.5" letter-spacing="0.09em">MAIN THREAD · the page, unchanged but for three edits</text>
+<rect class="node" x="24" y="44" width="200" height="120" rx="6"/>
+<text class="t-title" x="34" y="62" font-size="10.5">The pedal&#x27;s own page</text>
+<text class="t-tag" x="214" y="62" font-size="8.5" text-anchor="end">3 edits</text>
+<text class="t-body" x="34" y="77" font-size="8.5">web/index.html from the pedal</text>
+<text class="t-body" x="34" y="90" font-size="8.5">repo, taken at build time with</text>
+<text class="t-body" x="34" y="103" font-size="8.5">three checked edits: the title,</text>
+<text class="t-body" x="34" y="116" font-size="8.5">a demo.css link, shim.js loaded</text>
+<text class="t-body" x="34" y="129" font-size="8.5">before its own script, and the</text>
+<text class="t-body" x="34" y="142" font-size="8.5">Simulate button never disabled</text>
+<rect class="node accent" x="248" y="44" width="220" height="200" rx="6"/>
+<text class="t-title accent" x="258" y="62" font-size="10.5">shim.js</text>
+<text class="t-tag" x="458" y="62" font-size="8.5" text-anchor="end">for WebServer.cpp</text>
+<text class="t-body" x="258" y="77" font-size="8.5">wraps window.fetch and</text>
+<text class="t-body" x="258" y="90" font-size="8.5">EventSource for /api/*</text>
+<text class="t-body" x="258" y="103" font-size="8.5">answers /api/params, /state,</text>
+<text class="t-body" x="258" y="116" font-size="8.5">/scope, /notes, /loops; POSTs</text>
+<text class="t-body" x="258" y="129" font-size="8.5">become port messages</text>
+<text class="t-body" x="258" y="142" font-size="8.5">keeps notes, setlist, saved</text>
+<text class="t-body" x="258" y="155" font-size="8.5">knobs and saved loops for</text>
+<text class="t-body" x="258" y="168" font-size="8.5">one visit (nothing on disk)</text>
+<text class="t-body" x="258" y="181" font-size="8.5">builds the demo bar and gate</text>
+<text class="t-body" x="258" y="194" font-size="8.5">runs a second engine copy on</text>
+<text class="t-body" x="258" y="207" font-size="8.5">this thread to time 40 blocks</text>
+<text class="t-body" x="258" y="220" font-size="8.5">every 500 ms (Deadline panel)</text>
+<rect class="node" x="492" y="44" width="196" height="96" rx="6"/>
+<text class="t-title" x="502" y="62" font-size="10.5">loops/*.wav</text>
+<text class="t-tag" x="678" y="62" font-size="8.5" text-anchor="end">4 takes</text>
+<text class="t-body" x="502" y="77" font-size="8.5">the dry takes from the Pi&#x27;s</text>
+<text class="t-body" x="502" y="90" font-size="8.5">loop store, decodeAudioData,</text>
+<text class="t-body" x="502" y="103" font-size="8.5">then copied into the engine&#x27;s</text>
+<text class="t-body" x="502" y="116" font-size="8.5">re-amp buffer so every preset</text>
+<text class="t-body" x="502" y="129" font-size="8.5">processes a real guitar</text>
+<path class="flow" d="M224,90 L244,90" marker-end="url(#ah2)"/>
+<path class="flow" d="M492,92 L472,92" marker-end="url(#ah2)"/>
+<text class="t-cap" x="24" y="280" font-size="8.5">Nothing on this side is the Pi&#x27;s WebServer.cpp or main.cpp. Everything that makes sound, on the right, is.</text>
+<rect class="lane" x="728" y="8" width="444" height="300" rx="8"/>
+<text class="t-lane" x="740" y="30" font-size="9.5" letter-spacing="0.09em">AUDIO THREAD · AudioWorklet</text>
+<rect class="node" x="744" y="44" width="412" height="66" rx="6"/>
+<text class="t-title" x="754" y="62" font-size="10.5">worklet.js · PedalProcessor</text>
+<text class="t-body" x="754" y="77" font-size="8.5">128 frames per process(); a state frame every 1/25 s and a scope</text>
+<text class="t-body" x="754" y="90" font-size="8.5">window every 1/15 s back over the port — the Pi&#x27;s rates; clock_time_get</text>
+<text class="t-body" x="754" y="103" font-size="8.5">is shimmed so the C++ steady_clock reads performance.now()</text>
+<rect class="node" x="744" y="126" width="412" height="160" rx="6"/>
+<text class="t-title" x="754" y="144" font-size="10.5">pedal-engine.wasm</text>
+<text class="t-tag" x="1146" y="144" font-size="8.5" text-anchor="end">emcc -O3 · standalone · 64 MB</text>
+<text class="t-body" x="754" y="159" font-size="8.5">engine.cpp (the glue, the demo&#x27;s only C++) + 22 of the pedal&#x27;s</text>
+<text class="t-body" x="754" y="172" font-size="8.5">sources compiled unmodified from ~/guitar-pedal-cpp/src:</text>
+<text class="t-body" x="754" y="185" font-size="8.5">Pedalboard and its 16 stages, Freeze, Looper, Telemetry, Presets</text>
+<text class="t-body" x="754" y="198" font-size="8.5">render(): reamp | sim | silence → board → freeze → looper</text>
+<text class="t-body" x="754" y="211" font-size="8.5">→ master level → Telemetry.record_block — run_block() minus the card</text>
+<text class="t-body" x="754" y="224" font-size="8.5">left out: RtAudio, GPIO, LCD, WebServer, LoopStore, Setlist, PresetStats</text>
+<text class="t-body" x="754" y="237" font-size="8.5">presets_prelude.h renames Presets.cpp&#x27;s merge() for clang/libc++</text>
+<path class="flow" d="M468,172 L718,172 L718,78 L740,78" marker-end="url(#ah2)"/>
+<text class="t-cap" x="480" y="186" font-size="8.5">MessagePort: commands →, state + scope ←</text>
+<path class="flow" d="M950,110 L950,122" marker-end="url(#ah2)"/>
+</svg>
+      </div></div>
+      <figcaption>
+        The left lane plays the part of <code>WebServer.cpp</code> and the disk; the right lane plays the part of
+        RtAudio's callback. The engine's chain order is the Pi's normal one (board, then freeze, then looper);
+        the loop goes into the <em>input</em>, which is what lets every preset process a real take.
+      </figcaption>
+    </figure>
+    <ul>
+      <li>
+        <b>Real:</b> the sixteen stages, the presets and their trims, Freeze, the Looper state machine,
+        Telemetry's meters and scope, the knob table the page renders, and the 25 Hz / 15 Hz update rates.
+        The browser's AudioWorklet hands over 128 frames at a time where the Pi hands over 256.
+      </li>
+      <li>
+        <b>Stood in for:</b> the web server (<code>shim.js</code> intercepts <code>fetch</code> and
+        <code>EventSource</code> for <code>/api/*</code> and answers the same JSON shapes), the loop store and the
+        settings file (kept in memory for one visit), GPIO, the LCD, and the sound card. The <code>gpio</code>
+        block of every state frame reports nothing wired.
+      </li>
+      <li>
+        <b>Measured differently:</b> browsers give the audio thread no high-resolution clock, so the engine's own
+        block timing would read as noise. A second copy of the same module runs on the main thread, mirrors every
+        preset and knob change, and every half second times 40 blocks of the test signal; that is the Deadline
+        panel's number, and it is a real measurement of what one block costs on your CPU.
+      </li>
+      <li>
+        <b>The one workaround:</b> <code>Presets.cpp</code> has a local helper <code>merge(Settings, Rest...)</code>
+        whose <code>std::vector</code> arguments make argument-dependent lookup find <code>std::merge</code> too.
+        GCC on the Pi accepts it; clang/libc++, which Emscripten uses, calls it ambiguous.
+        <code>engine/presets_prelude.h</code> is force-included for that one translation unit and renames the
+        helper with a macro after the standard headers are already in. The real fix is a rename in the pedal
+        repo, which is public and is not modified from here.
+      </li>
+    </ul>
+    <p>
+      The four loops the demo offers are the store's "dry" takes, recorded after the clean-loop change so
+      the effects you switch on are doing the work you hear. They arrive as the same WAV bytes, decoded by the
+      browser (resampled if the context is not at 48 kHz) and copied into the engine's re-amp buffer.
+    </p>
+  </div>
+</section>
+
+<!-- ================================================================ 10 -->
+<section id="readme">
+  <h2>10 · Where the README is behind the code</h2>
+  <p class="kicker">Read the code; the README is an older snapshot.</p>
+  <div class="body">
+    <ul>
+      <li><b>34 presets, 14 stages.</b> The table has 38 presets and the board has 16 stages (the README's list omits Wave Folder and Env Filter, and its preset count predates the four filter and folder presets). Several code comments still say 34 or 36 as well.</li>
+      <li><b>116 assertions.</b> 185 on 14 Sep 2026.</li>
+      <li><b>Six routes.</b> <code>WebServer.h</code>'s header comment; there are nineteen.</li>
+      <li><b>ALSA/JACK.</b> The I/O layer is RtAudio 6 over ALSA; nothing in the tree uses JACK.</li>
+      <li><b>Milestone 1 unchecked.</b> The clean passthrough exists as the Clean preset and as <code>audio_check thru</code>.</li>
+      <li><b>Milestone 8 "nothing is wired".</b> The looper switch on GPIO17 and the LED on GPIO22 have been wired and tested since 31 Aug; the LCD is the part still open.</li>
+      <li><b>Not mentioned at all:</b> Freeze, the clean-loop order, the loop store, pause and seek, notes, the setlist, PresetStats and the trim table, all of which post-date the README's last edit on 31 Aug.</li>
+    </ul>
+  </div>
+</section>
+</main>
+
+<script>
+  // Back to whichever portfolio sleeve sent you here, or the portfolio's front
+  // page — the same rule the demo bar in shim.js uses.
+  document.querySelectorAll('.demo-back').forEach((a) => a.addEventListener('click', (e) => {
+    const r = (() => { try { return new URL(document.referrer) } catch { return null } })();
+    if (r && r.origin === location.origin && !r.pathname.startsWith('/demos/')) { e.preventDefault(); history.back() }
+  }));
+</script>
+</body>
+</html>

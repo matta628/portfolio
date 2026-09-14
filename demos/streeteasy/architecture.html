@@ -1,0 +1,711 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>StreetEasy Scanner · Architecture</title>
+<style>
+  :root {
+    --bg: #eef0f3; --pane: #ffffff; --line: #e1e4e8; --line-2: #d0d5db;
+    --text: #1f2328; --dim: #59636e; --faint: #8b949e;
+    --accent: #1a73e8; --accent-soft: #e8f0fe; --unread: #1a73e8;
+    --ui: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--text); font: 14px/1.5 var(--ui); }
+
+  #demo-bar {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    padding: 7px 18px; background: #1f2328; color: #d1d7e0; font-size: 12.5px;
+  }
+  #demo-bar a { color: #fff; font-weight: 600; text-decoration: none; }
+  #demo-bar a:hover, #demo-bar a:focus-visible { text-decoration: underline; text-underline-offset: 3px; }
+  #demo-bar b { color: #fff; }
+
+  .doc { max-width: 1040px; margin: 0 auto; padding: 30px 24px 90px; }
+  header { border-bottom: 1px solid var(--line-2); padding-bottom: 20px; }
+  header h1 { margin: 0; font-size: 22px; font-weight: 650; letter-spacing: -0.01em; }
+  header .lede { max-width: 780px; margin: 10px 0 0; font-size: 14.5px; line-height: 1.6; }
+  .meta { display: flex; flex-wrap: wrap; gap: 6px 22px; margin-top: 12px; font-size: 12px; color: var(--faint); }
+  .meta code { color: var(--dim); }
+
+  .status {
+    margin: 22px 0 0; padding: 12px 16px; border-radius: 10px;
+    background: #fffbea; border: 1px solid #efe0a3; font-size: 13.5px; line-height: 1.55;
+  }
+  .status b { font-weight: 650; }
+
+  section { margin-top: 40px; }
+  section h2 { margin: 0; font-size: 16.5px; font-weight: 650; }
+  section .kicker { margin: 3px 0 0; font-size: 13px; color: var(--dim); }
+  section p, section ul { max-width: 800px; margin: 12px 0 0; line-height: 1.6; }
+  section ul { padding-left: 20px; }
+  section li { margin: 0 0 8px; }
+  section li b { font-weight: 650; }
+  code { font: 12px/1 var(--mono); background: #f0f2f5; border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; color: var(--text); }
+  td code, th code { background: none; border: 0; padding: 0; font-size: 12px; }
+
+  figure { margin: 16px 0 0; background: var(--pane); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+  figure .scroll { overflow-x: auto; }
+  figure .scroll > div { min-width: 980px; }
+  figure svg { display: block; width: 100%; height: auto; font-family: var(--ui); }
+  figcaption { margin: 10px 4px 0; font-size: 12px; line-height: 1.5; color: var(--dim); }
+
+  .tbl { margin: 14px 0 0; overflow-x: auto; background: var(--pane); border: 1px solid var(--line); border-radius: 10px; }
+  table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 13px; }
+  th { text-align: left; font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--faint); padding: 9px 12px; background: #f6f8fa; }
+  td { padding: 8px 12px; border-top: 1px solid var(--line); vertical-align: top; line-height: 1.45; }
+  td.m { font-family: var(--mono); font-size: 12px; white-space: nowrap; }
+  td.n { font-family: var(--mono); font-size: 12px; white-space: nowrap; color: var(--accent); }
+  td.d { color: var(--dim); }
+  .tbl + p { margin-top: 12px; }
+
+  @media (max-width: 760px) {
+    .doc { padding: 20px 16px 60px; }
+    header h1 { font-size: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="demo-bar">
+  <a href="/" id="to-portfolio">← Portfolio</a>
+  <a href="index.html">← Inbox</a>
+  <span><b>Architecture</b> · how the real scanner works, checked against its code and the Raspberry Pi it ran on, 14 Sep 2026.</span>
+</div>
+
+<main class="doc">
+<header>
+  <h1>Architecture</h1>
+  <p class="lede">
+    The scanner is one Python process on a Raspberry Pi. Every five minutes it asks
+    StreetEasy&rsquo;s own GraphQL API for rentals matching a saved search, works out which
+    results it has not seen, prices each new one by transit commute to two places and by
+    what is within a few blocks, and emails the survivors ranked by total commute. Its only
+    interface is email, in both directions: the mailbox that receives the alerts is polled
+    for replies, and a reply in plain English is turned by Claude into a change to the
+    search that takes effect on the next cycle, without a restart. Everything on this page
+    was read off the code at commit <code>bb5dc2e</code> and off the Pi on 14 September
+    2026, not off a README.
+  </p>
+  <div class="meta">
+    <span>Python 3.13 · curl_cffi · schedule · PyYAML · anthropic · Google Distance Matrix + Places · Gmail SMTP/IMAP · systemd</span>
+    <span>Raspberry Pi 5, 2 GB</span>
+    <span>as of commit <code>bb5dc2e</code></span>
+    <span>snapshot 14 Sep 2026</span>
+  </div>
+  <p class="status">
+    <b>Not running today.</b> It ran 4&ndash;14 April 2026 and 22&ndash;27 August 2026. The
+    systemd unit has been masked (a symlink to <code>/dev/null</code>) since 27 August 2026
+    at 17:29 EDT, the same minute as the last line in its log, and the Pi&rsquo;s ops notes
+    record that as a decision rather than a fault. Nothing below is live: the numbers are
+    what the stored state and the log say.
+  </p>
+</header>
+
+<!-- ------------------------------------------------------------------ 1 -->
+<section id="process">
+  <h2>1 · One process, two timers</h2>
+  <p class="kicker">What <code>src/main.py</code> does, and when.</p>
+  <p>
+    Startup sets up a rotating file log, emails an admin &ldquo;Scanner started&rdquo;
+    alert, runs the email check and one poll cycle immediately, then registers two jobs
+    with the <code>schedule</code> library &mdash; <code>check_email_commands()</code>
+    every 30 seconds and <code>run_cycle()</code> every
+    <code>poll_interval_seconds</code> (300 in the config) &mdash; and loops on
+    <code>run_pending()</code> with a one-second sleep. There is one thread. A reply that
+    asks for a resend runs the entire fetch-enrich-send path inline on the 30-second
+    timer, and the poll waits for it.
+  </p>
+  <p>
+    The config is re-read from disk at the top of every cycle. That is the whole
+    mechanism behind &ldquo;reply to change the search&rdquo;: the reply reader rewrites
+    <code>config.yaml</code>, and the next cycle picks it up. Only the poll interval is
+    read once, at startup.
+  </p>
+  <div class="tbl"><table>
+    <thead><tr><th>Run</th><th>From</th><th>To</th><th>Poll cycles</th><th>Emails sent</th><th>How it ended</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td class="m">4 Apr 2026 23:19</td><td class="m">14 Apr 2026 22:12</td><td class="n">2,861</td><td class="n">253</td>
+          <td class="d">the log just stops; the last two days were StreetEasy 403s (section 3). 23 restarts, 20 of them on 4&ndash;6 Apr while it was being built</td></tr>
+      <tr><td>2</td><td class="m">22 Aug 2026 23:31</td><td class="m">27 Aug 2026 17:29</td><td class="n">1,337</td><td class="n">12</td>
+          <td class="d">restarted eleven times on the afternoon of 27 Aug, then the unit was masked at 17:29. Zero 403s in this run</td></tr>
+    </tbody>
+  </table></div>
+  <p>
+    All times EDT, from <code>logs/scanner.log</code> on the Pi (51,131 lines, 4,198
+    cycles in all). The log is the only record: the systemd journal on the Pi holds the
+    current boot only, which began on 11 September.
+  </p>
+</section>
+
+<!-- ------------------------------------------------------------------ 2 -->
+<section id="cycle">
+  <h2>2 · The poll cycle</h2>
+  <p class="kicker">Nine steps, in this order, every 300 seconds.</p>
+  <p>
+    The order is about cost. Google is called in two phases with the cheap filters between
+    them (commit <code>b1b2259</code>, 6 Apr): the two commute calls come first, the commute
+    caps and the move-in window run on the result, and only listings that survive pay for
+    the four Places calls. Everything a step needs from a previous cycle lives in a JSON
+    file next to the code, so a restart loses nothing but the time.
+  </p>
+  <figure>
+    <div class="scroll"><div>
+<svg viewBox="0 0 1180 800" role="img" xmlns="http://www.w3.org/2000/svg">
+<title>One poll cycle of the StreetEasy scanner</title>
+<defs><marker id="ah1" viewBox="0 0 8 8" refX="7.5" refY="4" markerWidth="5.5" markerHeight="5.5" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#8b949e"/></marker></defs>
+<text x="16" y="24" fill="#8b949e" font-size="9" font-weight="600" letter-spacing="0.08em">EXTERNAL SERVICES</text>
+<text x="236" y="24" fill="#8b949e" font-size="9" font-weight="600" letter-spacing="0.08em">ONE POLL CYCLE · run_cycle() in src/main.py · every 300 s</text>
+<text x="776" y="24" fill="#8b949e" font-size="9" font-weight="600" letter-spacing="0.08em">STATE FILES NEXT TO THE CODE</text>
+<rect x="236" y="40" width="500" height="736" rx="8" fill="#f6f8fa" stroke="#d0d5db" stroke-width="1"/>
+<rect x="252" y="56" width="468" height="70" rx="6" fill="#ffffff" stroke="#d0d5db" stroke-width="1"/>
+<text x="262" y="74" fill="#1f2328" font-size="10.5" font-weight="600" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">fetch_listings()</text>
+<text x="710" y="74" fill="#8b949e" font-size="8.5" text-anchor="end">scraper.py</text>
+<text x="262" y="89" fill="#59636e" font-size="9">POST one GraphQL searchRentals query to api-v6.streeteasy.com — areas, price,</text>
+<text x="262" y="102" fill="#59636e" font-size="9">beds, baths and amenities as filters; perPage 500, sorted RECOMMENDED; sent by</text>
+<text x="262" y="115" fill="#59636e" font-size="9">curl_cffi impersonating Chrome 120 · 429 → skip the cycle · anything else → admin email</text>
+<rect x="252" y="136" width="468" height="70" rx="6" fill="#ffffff" stroke="#d0d5db" stroke-width="1"/>
+<text x="262" y="154" fill="#1f2328" font-size="10.5" font-weight="600" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">bathrooms_min</text>
+<text x="710" y="154" fill="#8b949e" font-size="8.5" text-anchor="end">main.py</text>
+<text x="262" y="169" fill="#59636e" font-size="9">client-side, because the code says the server ignores the bathrooms bound it is sent</text>
+<text x="262" y="182" fill="#59636e" font-size="9">— in 4,198 logged cycles it never removed a listing</text>
+<rect x="252" y="216" width="468" height="70" rx="6" fill="#ffffff" stroke="#d0d5db" stroke-width="1"/>
+<text x="262" y="234" fill="#1f2328" font-size="10.5" font-weight="600" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">filter_new()</text>
+<text x="710" y="234" fill="#8b949e" font-size="8.5" text-anchor="end">store.py</text>
+<text x="262" y="249" fill="#59636e" font-size="9">unseen ids, split by the gap since the last successful poll: ≤ 1 h → brand new,</text>
+<text x="262" y="262" fill="#59636e" font-size="9">&gt; 1 h (crash, block, restart) → backlog, so the email can say which · first run: all new</text>
+<rect x="252" y="296" width="468" height="70" rx="6" fill="#ffffff" stroke="#d0d5db" stroke-width="1"/>
+<text x="262" y="314" fill="#1f2328" font-size="10.5" font-weight="600" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">enrich_commute()</text>
+<text x="710" y="314" fill="#8b949e" font-size="8.5" text-anchor="end">enricher.py</text>
+<text x="262" y="329" fill="#59636e" font-size="9">2 Distance Matrix calls per uncached listing, mode=transit: one to home,</text>
+<text x="262" y="342" fill="#59636e" font-size="9">one to the office timed to arrive at HH:30 on the next weekday · cached</text>
+<text x="262" y="355" fill="#59636e" font-size="9">14 days per listing id · stops for the day once the counter reaches the daily cap</text>
+<rect x="252" y="376" width="468" height="70" rx="6" fill="#ffffff" stroke="#d0d5db" stroke-width="1"/>
+<text x="262" y="394" fill="#1f2328" font-size="10.5" font-weight="600" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">commute caps + move-in window</text>
+<text x="710" y="394" fill="#8b949e" font-size="8.5" text-anchor="end">main.py</text>
+<text x="262" y="409" fill="#59636e" font-size="9">office and home legs capped separately (a missing leg passes) · available_at</text>
+<text x="262" y="422" fill="#59636e" font-size="9">outside [min, max] dropped · both client-side: the GraphQL API rejected availableFrom</text>
+<text x="262" y="435" fill="#59636e" font-size="9">· over both runs: 49 listings cut by the caps, 515 by the window</text>
+<rect x="252" y="456" width="468" height="70" rx="6" fill="#ffffff" stroke="#d0d5db" stroke-width="1"/>
+<text x="262" y="474" fill="#1f2328" font-size="10.5" font-weight="600" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">enrich_nearby()</text>
+<text x="710" y="474" fill="#8b949e" font-size="8.5" text-anchor="end">enricher.py</text>
+<text x="262" y="489" fill="#59636e" font-size="9">4 Places Nearby Search calls per uncached listing — bar, restaurant, supermarket,</text>
+<text x="262" y="502" fill="#59636e" font-size="9">gym — by prominence within radius_meters, kept if rating ≥ min_rating, distance</text>
+<text x="262" y="515" fill="#59636e" font-size="9">by haversine · runs after the caps so a listing about to be dropped costs nothing</text>
+<rect x="252" y="536" width="468" height="70" rx="6" fill="#ffffff" stroke="#d0d5db" stroke-width="1"/>
+<text x="262" y="554" fill="#1f2328" font-size="10.5" font-weight="600" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">rank()</text>
+<text x="710" y="554" fill="#8b949e" font-size="8.5" text-anchor="end">filters.py</text>
+<text x="262" y="569" fill="#59636e" font-size="9">sort by office + home seconds, shortest first; listings with no commute data go</text>
+<text x="262" y="582" fill="#59636e" font-size="9">last, ordered by a price / preferred-area / washer-dryer score (0.5 / 0.3 / 0.2)</text>
+<text x="262" y="595" fill="#59636e" font-size="9">that otherwise decides nothing — the email footer still calls it the ranking</text>
+<rect x="252" y="616" width="468" height="70" rx="6" fill="#ffffff" stroke="#d0d5db" stroke-width="1"/>
+<text x="262" y="634" fill="#1f2328" font-size="10.5" font-weight="600" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">send_listings()</text>
+<text x="710" y="634" fill="#8b949e" font-size="8.5" text-anchor="end">notifier.py</text>
+<text x="262" y="649" fill="#59636e" font-size="9">one multipart email (plain text + inline-styled HTML) per cycle with anything new:</text>
+<text x="262" y="662" fill="#59636e" font-size="9">“N apartments found on StreetEasy”, prefixed [BACKLOG!] when a backlog section exists</text>
+<text x="262" y="675" fill="#59636e" font-size="9">· 265 sent over both runs: 253 in April, 12 in August</text>
+<rect x="252" y="696" width="468" height="70" rx="6" fill="#ffffff" stroke="#d0d5db" stroke-width="1"/>
+<text x="262" y="714" fill="#1f2328" font-size="10.5" font-weight="600" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">mark_seen() + record_successful_poll()</text>
+<text x="710" y="714" fill="#8b949e" font-size="8.5" text-anchor="end">store.py</text>
+<text x="262" y="729" fill="#59636e" font-size="9">every fetched id is remembered, not only the notified ones, capped at the last 10,000</text>
+<text x="262" y="742" fill="#59636e" font-size="9">· last_poll_at is what the next cycle’s brand-new / backlog split reads</text>
+<rect x="16" y="56" width="180" height="70" rx="6" fill="#ffffff" stroke="#d0d5db" stroke-width="1"/>
+<text x="26" y="74" fill="#1f2328" font-size="10.5" font-weight="600">StreetEasy</text>
+<text x="26" y="89" fill="#59636e" font-size="8.5">api-v6.streeteasy.com/</text>
+<text x="26" y="102" fill="#59636e" font-size="8.5">GraphQL: searchRentals</text>
+<text x="26" y="115" fill="#59636e" font-size="8.5">no login, no key, no cookies</text>
+<rect x="16" y="296" width="180" height="230" rx="6" fill="#ffffff" stroke="#d0d5db" stroke-width="1"/>
+<text x="26" y="314" fill="#1f2328" font-size="10.5" font-weight="600">Google Maps Platform</text>
+<text x="26" y="329" fill="#59636e" font-size="8.5">maps.googleapis.com</text>
+<text x="26" y="355" fill="#59636e" font-size="8.5">Distance Matrix API</text>
+<text x="26" y="368" fill="#59636e" font-size="8.5">mode=transit; arrival_time</text>
+<text x="26" y="381" fill="#59636e" font-size="8.5">on the office leg only</text>
+<text x="26" y="407" fill="#59636e" font-size="8.5">Places API, Nearby Search</text>
+<text x="26" y="420" fill="#59636e" font-size="8.5">type = bar / restaurant /</text>
+<text x="26" y="433" fill="#59636e" font-size="8.5">supermarket / gym</text>
+<text x="26" y="459" fill="#59636e" font-size="8.5">6 calls per new listing</text>
+<text x="26" y="472" fill="#59636e" font-size="8.5">against a 500-a-day counter</text>
+<rect x="16" y="616" width="180" height="70" rx="6" fill="#ffffff" stroke="#d0d5db" stroke-width="1"/>
+<text x="26" y="634" fill="#1f2328" font-size="10.5" font-weight="600">Gmail</text>
+<text x="26" y="649" fill="#59636e" font-size="8.5">SMTP on 587 with STARTTLS</text>
+<text x="26" y="662" fill="#59636e" font-size="8.5">an app password, not OAuth</text>
+<text x="26" y="675" fill="#59636e" font-size="8.5">the same mailbox replies land in</text>
+<rect x="16" y="696" width="180" height="70" rx="6" fill="none" stroke="#1a73e8" stroke-width="1" stroke-dasharray="4 3"/>
+<text x="26" y="714" fill="#1a73e8" font-size="10.5" font-weight="600">Claude</text>
+<text x="26" y="729" fill="#59636e" font-size="8.5">never called from this cycle —</text>
+<text x="26" y="742" fill="#59636e" font-size="8.5">only by the reply reader</text>
+<text x="26" y="755" fill="#59636e" font-size="8.5">(second diagram)</text>
+<path d="M196,91 L248,91" fill="none" stroke="#8b949e" stroke-width="1.2" marker-end="url(#ah1)"/>
+<text x="216" y="85" fill="#8b949e" font-size="8.5" text-anchor="middle">POST</text>
+<path d="M196,331 L248,331" fill="none" stroke="#8b949e" stroke-width="1.2" marker-end="url(#ah1)"/>
+<text x="216" y="325" fill="#8b949e" font-size="8.5" text-anchor="middle">2 calls</text>
+<path d="M196,491 L248,491" fill="none" stroke="#8b949e" stroke-width="1.2" marker-end="url(#ah1)"/>
+<text x="216" y="485" fill="#8b949e" font-size="8.5" text-anchor="middle">4 calls</text>
+<path d="M252,651 L200,651" fill="none" stroke="#8b949e" stroke-width="1.2" marker-end="url(#ah1)"/>
+<text x="216" y="645" fill="#8b949e" font-size="8.5" text-anchor="middle">SMTP</text>
+<rect x="776" y="56" width="388" height="72" rx="6" fill="#f6f8fa" stroke="#d0d5db" stroke-width="1"/>
+<text x="786" y="74" fill="#1f2328" font-size="10" font-weight="600" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">config.yaml + secrets.yaml</text>
+<text x="786" y="89" fill="#59636e" font-size="8.5">re-read at the top of every cycle, so an emailed change needs no restart</text>
+<text x="786" y="102" fill="#59636e" font-size="8.5">secrets.yaml is deep-merged over config.yaml and holds only the four secrets</text>
+<text x="786" y="115" fill="#59636e" font-size="8.5">config.yaml itself is committed — one reason the repo stays private</text>
+<rect x="776" y="216" width="388" height="72" rx="6" fill="#f6f8fa" stroke="#d0d5db" stroke-width="1"/>
+<text x="786" y="234" fill="#1f2328" font-size="10" font-weight="600" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">seen_listings.json</text>
+<text x="786" y="249" fill="#59636e" font-size="8.5">{ids: [...], last_poll_at} — 720 ids; last poll 27 Aug 2026, 17:29 EDT</text>
+<text x="786" y="262" fill="#59636e" font-size="8.5">written as .tmp then os.replace, so a crash mid-write cannot corrupt it</text>
+<text x="786" y="275" fill="#59636e" font-size="8.5">cleared when an email changes the search, so the next cycle re-sends a backlog</text>
+<rect x="776" y="330" width="388" height="64" rx="6" fill="#f6f8fa" stroke="#d0d5db" stroke-width="1"/>
+<text x="786" y="348" fill="#1f2328" font-size="10" font-weight="600" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">enrichment_cache.json</text>
+<text x="786" y="363" fill="#59636e" font-size="8.5">per listing id, 14-day TTL: 711 listings, all with commute, 376 with places</text>
+<text x="786" y="376" fill="#59636e" font-size="8.5">493 KB · commute and places are cached separately, so phase 2 can be skipped</text>
+<rect x="776" y="406" width="388" height="64" rx="6" fill="#f6f8fa" stroke="#d0d5db" stroke-width="1"/>
+<text x="786" y="424" fill="#1f2328" font-size="10" font-weight="600" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">api_call_count.json</text>
+<text x="786" y="439" fill="#59636e" font-size="8.5">{date, count}, reset when the date changes · cap 500 a day (config.py default)</text>
+<text x="786" y="452" fill="#59636e" font-size="8.5">32 calls on its last day, 27 Aug 2026 · cap hit 5 times, all on 5 Apr 2026</text>
+<rect x="776" y="500" width="388" height="64" rx="6" fill="none" stroke="#d0d5db" stroke-width="1" stroke-dasharray="4 3"/>
+<text x="786" y="518" fill="#1f2328" font-size="10" font-weight="600" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">neighborhood_map.json</text>
+<text x="786" y="533" fill="#59636e" font-size="8.5">349 StreetEasy areas (id, name, level, parent), api-internal.streeteasy.com</text>
+<text x="786" y="546" fill="#59636e" font-size="8.5">fetched once, 4 Apr 2026 · read by the reply reader only, never by this cycle</text>
+<rect x="776" y="588" width="388" height="64" rx="6" fill="#f6f8fa" stroke="#d0d5db" stroke-width="1"/>
+<text x="786" y="606" fill="#1f2328" font-size="10" font-weight="600" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">logs/scanner.log</text>
+<text x="786" y="621" fill="#59636e" font-size="8.5">RotatingFileHandler, 5 MB × 3 — 3.2 MB, 51,131 lines, 4 Apr → 27 Aug 2026</text>
+<text x="786" y="634" fill="#59636e" font-size="8.5">stdout also goes to journald via the unit; journal spans the current boot only</text>
+<text x="776" y="690" fill="#8b949e" font-size="8.5" font-style="italic">file facts read off the Pi on 14 Sep 2026</text>
+<path d="M772,92 L740,92" fill="none" stroke="#8b949e" stroke-width="1.2" marker-end="url(#ah1)"/>
+<path d="M772,251 L724,251" fill="none" stroke="#8b949e" stroke-width="1.2" marker-end="url(#ah1)"/>
+<path d="M720,331 L756,331 L756,362 L772,362" fill="none" stroke="#8b949e" stroke-width="1.2" marker-end="url(#ah1)"/>
+<path d="M720,491 L756,491 L756,438 L772,438" fill="none" stroke="#8b949e" stroke-width="1.2" marker-end="url(#ah1)"/>
+<path d="M720,731 L1172,731 L1172,276 L1168,276" fill="none" stroke="#8b949e" stroke-width="1.2" marker-end="url(#ah1)"/>
+<text x="946" y="724" fill="#8b949e" font-size="8.5" text-anchor="middle">mark_seen + last_poll_at → the same seen_listings.json</text>
+<text x="776" y="484" fill="#8b949e" font-size="8.5" font-style="italic">both Google steps read the cache first, then spend from the counter</text>
+</svg>
+    </div></div>
+    <figcaption>
+      Arrows on the left are network calls; on the right, file reads and writes. The dashed
+      file is one this cycle never touches. The long arrow at the bottom is the one loop in
+      the system: the ids written by the last step are what <code>filter_new()</code> reads
+      at the start of the next cycle. Counts are totals over both runs, from the log.
+    </figcaption>
+  </figure>
+  <p>
+    <b>Brand new versus backlog.</b> <code>store.py</code> keeps the timestamp of the last
+    successful poll. An unseen listing found within an hour of it &ldquo;just
+    appeared&rdquo;; one found after a longer gap (a crash, a block, a restart) could have
+    been up for days, so it goes in a separate <em>Backlog</em> section with a
+    <code>[BACKLOG!]</code> subject tag instead of pretending to be fresh. Every id the
+    API returned is remembered, not only the notified ones &mdash; a listing that failed
+    the commute cap is never re-evaluated either.
+  </p>
+  <div class="tbl"><table>
+    <thead><tr><th>Filter</th><th>Where</th><th>On what</th><th>Removed, both runs</th></tr></thead>
+    <tbody>
+      <tr><td>areas, price and bedroom bounds, bathrooms lower bound, amenities, <code>rentalStatus: ACTIVE</code></td><td>StreetEasy, in the query</td><td class="d">the API returned 111&ndash;359 listings a poll; 117 was the most common count</td><td class="n">&mdash;</td></tr>
+      <tr><td><code>bathrooms_min</code>, again</td><td>client, before dedup</td><td class="d">the code says the server does not enforce the bathrooms bound</td><td class="n">0</td></tr>
+      <tr><td><code>max_commute_minutes</code>, <code>max_home_commute_minutes</code></td><td>client, after the commute calls</td><td class="d">each leg capped on its own; a leg Google could not route passes</td><td class="n">49</td></tr>
+      <tr><td><code>available_date_min</code> / <code>_max</code></td><td>client</td><td class="d">the GraphQL API rejected <code>availableFrom</code> (122 errors on 5 Apr), so it moved here</td><td class="n">515</td></tr>
+    </tbody>
+  </table></div>
+  <p>
+    Over both runs the dedup step surfaced 735 unseen listings (395 brand new, 340
+    backlog); after the caps and the window, roughly 170 of them reached an email. The
+    window did most of the work because four of the surfaced batches were re-evaluations
+    of the whole current result set after a config change.
+  </p>
+  <p>
+    <b>Ranking.</b> <code>filters.rank()</code> sorts by office seconds plus home
+    seconds, shortest first; #1 in every email is the easiest place to get to and from.
+    It also computes a score &mdash; price closeness 0.5, preferred neighbourhood 0.3,
+    washer-dryer 0.2 &mdash; but that only orders the tail of listings Google could not
+    route. The email footer, &ldquo;Ranked by price &amp; neighborhood preference&rdquo;,
+    describes the score and is out of date.
+  </p>
+</section>
+
+<!-- ------------------------------------------------------------------ 3 -->
+<section id="streeteasy">
+  <h2>3 · Getting listings out of StreetEasy</h2>
+  <p class="kicker">There is no public API. The scanner uses the one the website uses.</p>
+  <p>
+    <code>scraper.py</code> POSTs a single GraphQL query, <code>searchRentals(input:
+    SearchRentalsInput!)</code>, to <code>api-v6.streeteasy.com</code> &mdash; the same
+    query the site&rsquo;s own search results page sends, which is what the
+    <code>apollographql-client-name: srp-frontend-service</code> header declares. It asks
+    for id, area name, availability date, bedroom and full/half bathroom counts, the
+    geo-point, price, status, street, unit and URL path, on both organic and featured
+    edges, plus <code>matchedAmenities</code>, which is how washer-dryer is detected.
+    Filters go in the request: area ids, price and bedroom bounds, a bathrooms lower bound,
+    required and optional amenity codes. It asks for 500 results on one page, sorted
+    <code>RECOMMENDED</code>; the search never returned more than 359. A 429 skips the
+    cycle; any other failure raises, and the cycle turns that into an admin alert email.
+  </p>
+  <p>
+    The query and the header set were lifted from a friend&rsquo;s scraper, kept in the
+    checkout under <code>friend_scraper_repo/</code>: a Node Discord bot that polls the
+    same endpoint into SQLite. It is gitignored, never imported and never run. Two of its
+    headers are what got the Pi blocked.
+  </p>
+  <div class="tbl"><table>
+    <thead><tr><th>When</th><th>What the log shows</th><th>What changed</th></tr></thead>
+    <tbody>
+      <tr><td class="m">4&ndash;6 Apr</td><td>the scraper used <code>requests</code> with a browser cookie string and user agent pasted into the secrets file; StreetEasy&rsquo;s cookies expire, and every expiry was &ldquo;HTTP 403 &mdash; cookies need to be refreshed&rdquo;</td><td class="d">an admin email command to paste a fresh cookie (used seven times on 6 Apr), a validity check, and de-duplication of the resulting alert spam &mdash; four commits in one evening</td></tr>
+      <tr><td class="m">6&ndash;13 Apr</td><td>287 cookie 403s a day, which is every cycle, for a week: 2,013 in all. The process was up and blind</td><td class="d">&mdash;</td></tr>
+      <tr><td class="m">13 Apr 11:17</td><td>switch to <code>curl_cffi</code> with <code>impersonate="chrome120"</code>: a real Chrome TLS fingerprint, no cookie, no user agent, no search token. The whole cookie-update path went with it, 217 lines</td><td class="d"><code>e6ab68e</code></td></tr>
+      <tr><td class="m">13 Apr 11:42</td><td>still 403 on the Pi, now with a PerimeterX challenge in the body</td><td class="d"><code>fcf5bab</code> removed the <code>app-version</code> and client-version headers inherited from the friend&rsquo;s scraper</td></tr>
+      <tr><td class="m">13&ndash;14 Apr</td><td>168 PerimeterX 403s in all, reaching twelve an hour &mdash; every cycle &mdash; through the afternoon of 14 Apr. The log ends at 22:12</td><td class="d">nothing further in the repo</td></tr>
+      <tr><td class="m">22&ndash;27 Aug</td><td>1,337 cycles, 111&ndash;132 listings a poll, not one 403</td><td class="d">same scraper, no changes between the runs</td></tr>
+    </tbody>
+  </table></div>
+  <p>
+    How the block lifted is not in the repo: nothing in the scraper changed between 14
+    April and 22 August. The likeliest reading is that the block was per-IP or time-limited
+    and lapsed on its own, but that cannot be verified from here. What can be said is that
+    the cookie-less, fingerprint-only approach held for the entire August run.
+  </p>
+</section>
+
+<!-- ------------------------------------------------------------------ 4 -->
+<section id="enrichment">
+  <h2>4 · Enrichment, its cache and its budget</h2>
+  <p class="kicker">Six Google calls per new listing, and the two files that keep that number small.</p>
+  <p>
+    <b>Commute.</b> Two Distance Matrix requests per listing, <code>mode=transit</code>,
+    origin the listing&rsquo;s geo-point, destination a configured address string. The
+    office leg carries an <code>arrival_time</code> of the next weekday at half past the
+    configured hour, so it is the actual morning commute rather than whatever transit
+    looked like when the scan happened to run; the home leg has no arrival time. Both
+    the display text (&ldquo;42 mins&rdquo;) and the seconds are kept, one for the email
+    and one for the caps and the ranking.
+  </p>
+  <p>
+    <b>Nearby.</b> Four Places Nearby Search requests &mdash; <code>bar</code>,
+    <code>restaurant</code>, <code>supermarket</code>, <code>gym</code> &mdash; within
+    <code>radius_meters</code>, ranked by prominence, dropped below
+    <code>min_rating</code>, the first <em>N</em> of each kept with a haversine distance
+    from the listing. The email shows ratings for bars and restaurants and not for
+    supermarkets and gyms.
+  </p>
+  <div class="tbl"><table>
+    <tbody>
+      <tr><td>Calls per uncached listing</td><td class="n">2 + 4</td><td class="d">commute first; places only for listings that pass the caps and the window</td></tr>
+      <tr><td><code>enrichment_cache.json</code></td><td class="n">711 listings</td><td class="d">all with commute, 376 with places; 493 KB; 14-day TTL per listing id; rewritten atomically after every listing</td></tr>
+      <tr><td><code>api_call_count.json</code></td><td class="n">32 on 27 Aug 2026</td><td class="d">a <code>{date, count}</code> pair that resets when the date changes; the cap is <code>daily_api_call_limit</code>, 500 by default</td></tr>
+      <tr><td>&ldquo;Daily API cap reached&rdquo;</td><td class="n">5 times</td><td class="d">all on the evening of 5 Apr 2026, before the cache existed (<code>ad63e4c</code> that night, the two-phase split the next day)</td></tr>
+    </tbody>
+  </table></div>
+  <p>
+    When the counter refuses, the enrichment loop breaks and the remaining listings go on
+    without commute data: they pass the caps (a missing leg passes) and land at the bottom
+    of the ranking. The cap was never reached again after the cache landed.
+  </p>
+  <p>
+    One thing to know before deploying it fresh: <code>enricher.py</code> imports plain
+    <code>requests</code>, which left <code>requirements.txt</code> when the scraper moved
+    to <code>curl_cffi</code>. Both venvs still have <code>requests 2.32.3</code> installed
+    from before, so it works; a clean <code>pip install -r requirements.txt</code> would not.
+  </p>
+</section>
+
+<!-- ------------------------------------------------------------------ 5 -->
+<section id="replies">
+  <h2>5 · Replies are the control plane</h2>
+  <p class="kicker">Every 30 seconds, <code>email_commands.py</code> reads the inbox the alerts were sent from.</p>
+  <p>
+    It logs in over IMAP with the same address and app password the notifier uses,
+    searches <code>UNSEEN</code>, and for each message: skips and marks read anything with
+    <code>[Scanner]</code> in the subject (its own admin alerts and their replies); skips
+    but leaves unread anything from an address outside the listing and admin recipient
+    lists; takes the first <code>text/plain</code> part, or tag-stripped HTML; and cuts
+    the body at the first quoted-reply marker. Three admin-only words are matched by regex
+    with no model call: <code>status</code> (last poll, seen count, the current search),
+    <code>logs</code> (a tail of the log file, up to 500 lines) and <code>restart</code>,
+    which replies and then calls <code>os._exit(1)</code> so that the unit&rsquo;s
+    <code>Restart=on-failure</code> brings the process back.
+  </p>
+  <p>
+    Everything else goes to Claude &mdash; <code>claude-haiku-4-5-20251001</code>,
+    <code>max_tokens</code> 2048, a system prompt listing the valid StreetEasy amenity
+    codes, and a user message that is the current search (area ids resolved to names) as
+    JSON followed by the email body. It returns <code>{intent, command, changes}</code>,
+    pulled out of the reply by a brace-counting extractor because the model does not
+    always return bare JSON.
+  </p>
+  <div class="tbl"><table>
+    <thead><tr><th>Intent</th><th>What happens</th><th>Reply</th></tr></thead>
+    <tbody>
+      <tr><td class="m">query</td><td>nothing changes</td><td class="d">the current search, formatted, with example commands</td></tr>
+      <tr><td class="m">resend</td><td>the whole cycle inline &mdash; fetch, bath filter, commute, caps, window, places, rank &mdash; ignoring the seen list</td><td class="d">&ldquo;Fetching current listings now&rdquo;, then a normal alert</td></tr>
+      <tr><td class="m">area_change</td><td>a second Claude call (<code>neighborhoods.resolve_command</code>) maps names to StreetEasy area ids and returns add / remove / set; <code>config.yaml</code> is rewritten and the seen list cleared</td><td class="d">&ldquo;Done! Added: &hellip;&rdquo; and the areas now searched</td></tr>
+      <tr><td class="m">config_change</td><td>price, bedroom and bathroom bounds, required and optional amenities, preferred areas, target price and both commute caps are applied from <code>changes</code>; rewrite and clear</td><td class="d">&ldquo;Config updated!&rdquo; with before &rarr; after lines and the full search</td></tr>
+      <tr><td class="m">mixed</td><td>both of the above</td><td class="d">both replies in one</td></tr>
+      <tr><td class="m">none</td><td>marked read</td><td class="d">no reply</td></tr>
+    </tbody>
+  </table></div>
+  <p>
+    <b>The area map.</b> Neighbourhood names have to become StreetEasy&rsquo;s numeric
+    area ids. <code>neighborhood_map.py</code> fetches the full <code>areas</code> list
+    (id, name, level, parent) from <code>api-internal.streeteasy.com</code> and caches it
+    as <code>neighborhood_map.json</code>: 349 areas, fetched on 4 April and not since.
+    Before the second Claude call, the command&rsquo;s words are substring-matched against
+    area names and the currently configured areas are added, so the model sees ten to
+    twenty candidates instead of 350; a &ldquo;set to&hellip;&rdquo; command sends the
+    whole list. <code>neighborhoods.py</code> is also the original command-line tool for
+    the same job, still runnable.
+  </p>
+  <p>
+    <b>Usage.</b> Eleven Claude-classified commands in the scanner&rsquo;s life &mdash;
+    five resends, two queries, two config changes, two mixed &mdash; all between 4 and 6
+    April 2026, while it was being built, and four seen-list clears. The reply thread in the
+    demo inbox is a reconstruction; the real reply wording is the table above.
+  </p>
+  <p>
+    <b>The August loop.</b> Two minutes after the second run started on 22 August, the
+    first unread message it found was another project&rsquo;s daily digest &mdash; the job
+    tracker mails the same inbox, from an authorised address. Its body matched
+    the admin <code>status</code> regex, so the scanner replied with a status summary. A
+    reply keeps the incoming subject and is sent from an address that is itself
+    authorised, and the summary begins with the word &ldquo;Scanner status&rdquo; &mdash;
+    so the reply came back as a new unread command. One reply per 30-second tick, 545 in
+    all, until 05:08 on 23 August when Gmail answered <code>550 5.4.5 Daily user sending
+    limit exceeded</code>. The loop guard added in April (<code>a47efd7</code>) recognises
+    the scanner&rsquo;s own mail by the <code>[Scanner]</code> subject prefix, which
+    admin replies do not carry. The scanner then ran normally for four more days; the
+    masking on the 27th is recorded as a separate decision.
+  </p>
+</section>
+
+<!-- ------------------------------------------------------------------ 6 -->
+<section id="pi">
+  <h2>6 · Running it on the Pi</h2>
+  <p class="kicker">What runs where, what talks to what, and what is on disk.</p>
+  <figure>
+    <div class="scroll"><div>
+<svg viewBox="0 0 1180 580" role="img" xmlns="http://www.w3.org/2000/svg">
+<title>Where the StreetEasy scanner runs, and how a reply changes it</title>
+<defs><marker id="ah2" viewBox="0 0 8 8" refX="7.5" refY="4" markerWidth="5.5" markerHeight="5.5" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#8b949e"/></marker></defs>
+<rect x="8" y="8" width="760" height="560" rx="8" fill="#f6f8fa" stroke="#d0d5db" stroke-width="1"/>
+<text x="20" y="30" fill="#8b949e" font-size="9.5" font-weight="600" letter-spacing="0.08em">RASPBERRY PI 5 · 2 GB · SHARED WITH TWO OTHER PROJECTS</text>
+<rect x="24" y="48" width="232" height="110" rx="6" fill="none" stroke="#d0d5db" stroke-width="1" stroke-dasharray="4 3"/>
+<text x="34" y="66" fill="#1f2328" font-size="10.5" font-weight="600">streeteasy-scanner.service</text>
+<text x="246" y="66" fill="#8b949e" font-size="8.5" text-anchor="end">MASKED</text>
+<text x="34" y="81" fill="#59636e" font-size="8.5">a system unit, not --user; runs as an</text>
+<text x="34" y="94" fill="#59636e" font-size="8.5">ordinary account from the checkout</text>
+<text x="34" y="107" fill="#59636e" font-size="8.5">Restart=on-failure, 30 s · MemoryMax=200M</text>
+<text x="34" y="120" fill="#59636e" font-size="8.5">stdout/stderr → journald</text>
+<text x="34" y="133" fill="#59636e" font-size="8.5">masked since 27 Aug 2026 — see below</text>
+<rect x="24" y="180" width="232" height="96" rx="6" fill="none" stroke="#d0d5db" stroke-width="1" stroke-dasharray="4 3"/>
+<text x="34" y="198" fill="#1f2328" font-size="10.5" font-weight="600">also on this Pi</text>
+<text x="34" y="213" fill="#59636e" font-size="8.5">Tastemaker: Docker + six cron entries</text>
+<text x="34" y="226" fill="#59636e" font-size="8.5">the job tracker: cron, every 2 minutes</text>
+<text x="34" y="239" fill="#59636e" font-size="8.5">the crontab has no StreetEasy line —</text>
+<text x="34" y="252" fill="#59636e" font-size="8.5">the unit was the only way it ran</text>
+<rect x="24" y="300" width="232" height="150" rx="6" fill="#ffffff" stroke="#d0d5db" stroke-width="1"/>
+<text x="34" y="318" fill="#1f2328" font-size="10.5" font-weight="600">what the config holds</text>
+<text x="34" y="333" fill="#59636e" font-size="8.5">search: price / beds / baths bounds, area</text>
+<text x="34" y="346" fill="#59636e" font-size="8.5">ids, amenities, commute caps, move-in window</text>
+<text x="34" y="359" fill="#59636e" font-size="8.5">ranking: preferred areas, target price</text>
+<text x="34" y="372" fill="#59636e" font-size="8.5">notifications: SMTP host and port, sender,</text>
+<text x="34" y="385" fill="#59636e" font-size="8.5">recipients · app password (secrets)</text>
+<text x="34" y="398" fill="#59636e" font-size="8.5">enrichment: the two destinations, arrival</text>
+<text x="34" y="411" fill="#59636e" font-size="8.5">hour, Places radius / rating / counts</text>
+<text x="34" y="424" fill="#59636e" font-size="8.5">Google key, Anthropic key (secrets)</text>
+<text x="24" y="475" fill="#8b949e" font-size="8.5" font-style="italic">the values never leave the Pi and the private</text>
+<text x="24" y="488" fill="#8b949e" font-size="8.5" font-style="italic">repo — this page describes the fields only</text>
+<rect x="280" y="48" width="472" height="246" rx="8" fill="#f6f8fa" stroke="#d0d5db" stroke-width="1"/>
+<text x="292" y="66" fill="#1f2328" font-size="10.5" font-weight="600">venv/bin/python src/main.py · one process, two timers</text>
+<rect x="296" y="80" width="440" height="52" rx="6" fill="#ffffff" stroke="#d0d5db" stroke-width="1"/>
+<text x="306" y="98" fill="#1f2328" font-size="10.5" font-weight="600" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">schedule.every(300).seconds → run_cycle(store)</text>
+<text x="306" y="113" fill="#59636e" font-size="8.5">the poll cycle in the first diagram · both timers share one while-True loop</text>
+<rect x="296" y="144" width="440" height="136" rx="6" fill="#ffffff" stroke="#1a73e8" stroke-width="1"/>
+<text x="306" y="162" fill="#1a73e8" font-size="10.5" font-weight="600" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">schedule.every(30).seconds → check_email_commands()</text>
+<text x="306" y="177" fill="#59636e" font-size="8.5">IMAP SEARCH UNSEEN on the sender’s own mailbox · skip subjects with [Scanner] (its own</text>
+<text x="306" y="190" fill="#59636e" font-size="8.5">alerts) · skip senders outside listing/admin recipients · strip quoted reply text</text>
+<text x="306" y="203" fill="#59636e" font-size="8.5">admin words, no model: status · restart (os._exit(1), the unit restarts it) · logs</text>
+<text x="306" y="216" fill="#59636e" font-size="8.5">otherwise Claude classifies the body against the current config into one of six</text>
+<text x="306" y="229" fill="#59636e" font-size="8.5">intents; area names become StreetEasy ids in a second call; changes are written</text>
+<text x="306" y="242" fill="#59636e" font-size="8.5">back to config.yaml and the seen list is cleared, so a fresh backlog goes out</text>
+<text x="306" y="255" fill="#59636e" font-size="8.5">the reply keeps the incoming subject — the gap behind the August loop (section 5)</text>
+<rect x="280" y="318" width="472" height="104" rx="6" fill="#ffffff" stroke="#d0d5db" stroke-width="1"/>
+<text x="290" y="336" fill="#1f2328" font-size="10.5" font-weight="600">state files next to the code</text>
+<text x="742" y="336" fill="#8b949e" font-size="8.5" text-anchor="end">ls, du on 14 Sep 2026</text>
+<text x="290" y="351" fill="#59636e" font-size="8.5">config.yaml (committed to the private repo) · secrets.yaml (gitignored)</text>
+<text x="290" y="364" fill="#59636e" font-size="8.5">seen_listings.json · enrichment_cache.json · api_call_count.json</text>
+<text x="290" y="377" fill="#59636e" font-size="8.5">neighborhood_map.json · logs/scanner.log (5 MB × 3) · venv/</text>
+<text x="290" y="390" fill="#59636e" font-size="8.5">109 MB in all, most of it the venv · every state write is tmp + os.replace</text>
+<path d="M256,80 L276,80" fill="none" stroke="#8b949e" stroke-width="1.2" marker-end="url(#ah2)"/>
+<path d="M380,294 L380,314" fill="none" stroke="#8b949e" stroke-width="1.2" marker-end="url(#ah2)"/>
+<path d="M620,294 L620,314" fill="none" stroke="#8b949e" stroke-width="1.2" marker-end="url(#ah2)"/>
+<text x="388" y="308" fill="#8b949e" font-size="8.5">seen · cache · counter · log</text>
+<text x="628" y="308" fill="#8b949e" font-size="8.5">config.yaml rewritten</text>
+<text x="24" y="548" fill="#8b949e" font-size="8.5" font-style="italic">checked on the Pi, 14 Sep 2026: unit masked, no process, journal empty, last log line 27 Aug 17:29 EDT</text>
+<rect x="792" y="48" width="372" height="128" rx="6" fill="#ffffff" stroke="#d0d5db" stroke-width="1"/>
+<text x="802" y="66" fill="#1f2328" font-size="10.5" font-weight="600">Fetched by the cycle</text>
+<text x="802" y="81" fill="#59636e" font-size="8.5">api-v6.streeteasy.com — searchRentals every 300 s, by curl_cffi</text>
+<text x="802" y="94" fill="#59636e" font-size="8.5">impersonating Chrome 120 · no cookies, no login, nothing to expire</text>
+<text x="802" y="107" fill="#59636e" font-size="8.5">api-internal.streeteasy.com — the 349-area list, fetched once</text>
+<text x="802" y="120" fill="#59636e" font-size="8.5">maps.googleapis.com — Distance Matrix + Places Nearby Search,</text>
+<text x="802" y="133" fill="#59636e" font-size="8.5">each behind the daily counter and the 14-day per-listing cache</text>
+<text x="802" y="146" fill="#59636e" font-size="8.5">(the enricher still uses plain requests; only the scraper moved)</text>
+<rect x="792" y="200" width="372" height="96" rx="6" fill="#ffffff" stroke="#d0d5db" stroke-width="1"/>
+<text x="802" y="218" fill="#1f2328" font-size="10.5" font-weight="600">Gmail — one mailbox, both directions</text>
+<text x="802" y="233" fill="#59636e" font-size="8.5">SMTP, STARTTLS on port 587, sends the alerts and the replies</text>
+<text x="802" y="246" fill="#59636e" font-size="8.5">IMAP imap.gmail.com:993 reads UNSEEN every 30 s</text>
+<text x="802" y="259" fill="#59636e" font-size="8.5">the sending address is itself an authorized sender — so a reply</text>
+<text x="802" y="272" fill="#59636e" font-size="8.5">the scanner writes can come back to it as a new command</text>
+<rect x="792" y="320" width="372" height="70" rx="6" fill="#ffffff" stroke="#d0d5db" stroke-width="1"/>
+<text x="802" y="338" fill="#1f2328" font-size="10.5" font-weight="600">the inbox, on a phone</text>
+<text x="802" y="353" fill="#59636e" font-size="8.5">alerts arrive minutes after a listing is posted; a reply in plain</text>
+<text x="802" y="366" fill="#59636e" font-size="8.5">English changes the search — no SSH, no restart, no UI to build</text>
+<rect x="792" y="414" width="372" height="108" rx="6" fill="#ffffff" stroke="#1a73e8" stroke-width="1"/>
+<text x="802" y="432" fill="#1a73e8" font-size="10.5" font-weight="600">Anthropic API · claude-haiku-4-5</text>
+<text x="802" y="447" fill="#59636e" font-size="8.5">call 1: {intent, command, changes} from the email body plus the</text>
+<text x="802" y="460" fill="#59636e" font-size="8.5">current search as JSON — area_change, config_change, mixed,</text>
+<text x="802" y="473" fill="#59636e" font-size="8.5">query, resend or none · call 2, areas only: names → ids from a</text>
+<text x="802" y="486" fill="#59636e" font-size="8.5">keyword-prefiltered list (~350 areas → 10–20) · both parsed by a</text>
+<text x="802" y="499" fill="#59636e" font-size="8.5">brace-counting JSON extractor · 11 commands ever, all 4–6 Apr 2026</text>
+<path d="M736,106 L788,106" fill="none" stroke="#8b949e" stroke-width="1.2" marker-end="url(#ah2)"/>
+<path d="M736,126 L760,126 L760,230 L788,230" fill="none" stroke="#8b949e" stroke-width="1.2" marker-end="url(#ah2)"/>
+<path d="M736,230 L788,230" fill="none" stroke="#8b949e" stroke-width="1.2" marker-end="url(#ah2)"/>
+<path d="M788,262 L740,262" fill="none" stroke="#8b949e" stroke-width="1.2" marker-end="url(#ah2)"/>
+<path d="M978,296 L978,316" fill="none" stroke="#8b949e" stroke-width="1.2" marker-end="url(#ah2)"/>
+<path d="M736,272 L760,272 L760,468 L788,468" fill="none" stroke="#8b949e" stroke-width="1.2" marker-end="url(#ah2)"/>
+<text x="780" y="224" fill="#8b949e" font-size="8.5" text-anchor="middle">SMTP</text>
+<text x="780" y="275" fill="#8b949e" font-size="8.5" text-anchor="middle">IMAP</text>
+<text x="986" y="310" fill="#8b949e" font-size="8.5">push</text>
+<text x="780" y="462" fill="#8b949e" font-size="8.5" text-anchor="middle">API</text>
+</svg>
+    </div></div>
+    <figcaption>
+      The Pi is shared: Tastemaker&rsquo;s pipelines and the job tracker&rsquo;s cron bursts
+      run on the same 2 GB, which is what <code>MemoryMax=200M</code> is for. The crontab has
+      no StreetEasy line; the unit was the only way the scanner ran, and it is masked.
+    </figcaption>
+  </figure>
+  <p>
+    <b>The unit.</b> <code>systemd/streeteasy-scanner.service</code> is a system-level
+    unit that runs <code>venv/bin/python src/main.py</code> from the checkout as an
+    ordinary user, after <code>network-online.target</code>, with
+    <code>Restart=on-failure</code> and a 30-second delay, output to the journal under its
+    own identifier, and a 200 MB memory ceiling. The emailed <code>restart</code> command
+    depends on that restart policy: it exits non-zero on purpose. The Pi&rsquo;s venv is
+    Python 3.13.5; the laptop&rsquo;s is 3.12.4.
+  </p>
+  <p>
+    <b>Config and secrets.</b> Two YAML files, deep-merged at load with the second winning.
+    <code>config.yaml</code> holds the search itself &mdash; price, bedroom and bathroom
+    bounds, area ids, amenity lists, the two commute caps, the move-in window &mdash; plus
+    ranking preferences, the notification host, port, sender and recipient lists, the poll
+    interval, and the enrichment block: the two destination addresses, the arrival hour,
+    the Places radius, rating floor and per-type counts, and the daily call cap.
+    <code>secrets.yaml</code> holds four values: the Gmail app password, the Anthropic
+    key, the Google key, and a StreetEasy cookie string nothing has read since 13 April.
+    <code>config.yaml</code> is committed and <code>secrets.yaml</code> is gitignored,
+    which is why the repository is private permanently &mdash; the search describes where
+    someone lives and works. This page describes the fields; none of the values appear
+    anywhere in the portfolio.
+  </p>
+  <div class="tbl"><table>
+    <thead><tr><th>On the Pi, 14 Sep 2026</th><th>State</th><th>Read from</th></tr></thead>
+    <tbody>
+      <tr><td><code>streeteasy-scanner.service</code></td><td>masked, inactive; no process</td><td class="d"><code>systemctl status</code>, <code>ps</code>, the symlink&rsquo;s mtime (27 Aug 17:29)</td></tr>
+      <tr><td><code>seen_listings.json</code></td><td class="n">720 ids</td><td class="d">last successful poll 27 Aug 2026 17:29:40 EDT</td></tr>
+      <tr><td><code>enrichment_cache.json</code></td><td class="n">711 listings · 493 KB</td><td class="d">entries dated 5 Apr to 27 Aug 2026</td></tr>
+      <tr><td><code>api_call_count.json</code></td><td class="n">{2026-08-27, 32}</td><td class="d">the laptop&rsquo;s copy still says 42 on 3 Apr, from the first day of development</td></tr>
+      <tr><td><code>neighborhood_map.json</code></td><td class="n">349 areas</td><td class="d">file dated 4 Apr 2026</td></tr>
+      <tr><td><code>logs/scanner.log</code></td><td class="n">3.2 MB · 51,131 lines</td><td class="d">4 Apr 23:19 to 27 Aug 17:29; never rotated (the limit is 5 MB)</td></tr>
+      <tr><td>the checkout</td><td class="n">109 MB</td><td class="d">almost all of it the venv; at commit <code>bb5dc2e</code>, clean, identical to the laptop</td></tr>
+      <tr><td><code>.pi-footprint.toml</code></td><td>tier <code>batch</code>, no services, no cron</td><td class="d">two ports reserved and unbound; demo strategy &ldquo;bespoke&rdquo; with <code>config.yaml</code> asserted absent from any publish</td></tr>
+    </tbody>
+  </table></div>
+  <p>
+    <b>Tests.</b> <code>test.py</code> holds twelve unit tests over the GraphQL parser
+    (half baths, washer-dryer detection, missing nodes, amenity upper-casing), the ranking
+    (commute order, partial legs, the score-only tail) and the bath filter, plus one live
+    test that hits the real API behind <code>--live</code>.
+  </p>
+</section>
+
+<!-- ------------------------------------------------------------------ 7 -->
+<section id="legacy">
+  <h2>7 · What is legacy, unused, or not quite true</h2>
+  <p class="kicker">Found while checking the code against itself and the log.</p>
+  <ul>
+    <li><b>The cookie era.</b> <code>secrets.yaml</code> on the Pi still carries a
+      <code>streeteasy.cookies</code> string. Nothing has read it since
+      <code>e6ab68e</code>; the config loader has no StreetEasy section at all.</li>
+    <li><b><code>friend_scraper_repo/</code>.</b> Present on disk, gitignored, not imported.
+      Its Discord bot, SQLite store and 30-second interval have nothing to do with this
+      scanner; only the query text and headers were borrowed, and two of the headers had to
+      be un-borrowed.</li>
+    <li><b>Dead methods.</b> <code>Enricher.enrich()</code> (the one-shot combination of the
+      two phases) has no callers. <code>NeighborhoodMap.find()</code>,
+      <code>.search()</code> and <code>.neighborhood_level_areas()</code> have none either,
+      and the last compares <code>level</code> to the string
+      <code>"neighborhood"</code> while the cached map&rsquo;s levels are the integers 0 to
+      5, so it could never return anything.</li>
+    <li><b>An undeclared dependency.</b> <code>enricher.py</code> needs
+      <code>requests</code>; <code>requirements.txt</code> no longer lists it (section 4).</li>
+    <li><b>Two stale sentences in the product.</b> The alert footer says the listings are
+      ranked by price and neighbourhood preference; they are ranked by commute. And the
+      reply to a config change promises &ldquo;a fresh backlog of current listings&rdquo;,
+      but the clear happens minutes after the last poll, so the re-send arrives labelled
+      <em>Just Posted</em>: the backlog label is only ever used after a real gap.</li>
+    <li><b>The loop guard.</b> Section 5. Skipping subjects that contain
+      <code>[Scanner]</code> covers admin alerts and not admin replies, and the sending
+      address is also an authorised sender.</li>
+    <li><b>The area map does not refresh itself.</b> Only the command-line tool&rsquo;s
+      <code>--refresh</code> flag re-fetches it. Any neighbourhood StreetEasy has added since
+      4 April is unknown to the reply reader.</li>
+    <li><b>The footprint file is slightly wrong.</b> <code>.pi-footprint.toml</code> calls
+      the project &ldquo;a polling script, not a standing service&rdquo;. It has a systemd
+      unit &mdash; a masked one.</li>
+    <li><b>Round-tripping the config.</b> Every emailed change rewrites
+      <code>config.yaml</code> with <code>yaml.dump</code>. Key order survives; comments do
+      not.</li>
+  </ul>
+</section>
+
+<!-- ------------------------------------------------------------------ 8 -->
+<section id="demo">
+  <h2>8 · This demo</h2>
+  <p class="kicker">Why the inbox next door is hand-made, and what in it is real.</p>
+  <p>
+    The scanner has no UI; its emails are the product. But a real alert lists exact
+    addresses with two commute times each, and two dozen of those triangulate a home and an
+    office. The config would do it in one line. So the demo is bespoke by design, and the
+    portfolio&rsquo;s publish step refuses to emit anything if a file named
+    <code>config.yaml</code> is in the tree.
+  </p>
+  <p>
+    <code>fuzz.py</code> starts from one real alert (5 April 2026, kept outside the
+    repository), parses the plain-text body, and rewrites it: addresses keep the street and
+    lose the number to the block (&ldquo;22xx&rdquo;, or &ldquo;56-xx&rdquo; in Queens) and
+    lose the unit; both commute times are replaced by transit-looking estimates from public
+    neighbourhood centroids to a fictional home and a fictional office (a linear function of
+    distance plus a deterministic jitter); the listings are re-ranked by the fictional total,
+    the same rule <code>rank()</code> uses, and dealt into eight daily emails of five or six,
+    never two units of one building in the same email. The script fails if any real address
+    string survives into <code>listings.json</code>. Prices, sizes, dates, washer-dryer and
+    the nearby bars, restaurants, supermarkets and gyms are public listing data and are
+    left as they were.
+  </p>
+  <p>
+    <code>index.html</code> rebuilds each email&rsquo;s HTML from the same inline-styled
+    template as <code>notifier.py</code>, with the office leg labelled generically. The reply
+    thread is written for the demo, and the pinned note is the pitch. What the demo cannot
+    show is everything above that is not a listing: the backlog section, the admin alerts,
+    the status and log replies, and two weeks of 403s.
+  </p>
+</section>
+</main>
+
+<script>
+  // Back to whichever portfolio sleeve sent you here, or the portfolio's front page.
+  document.getElementById('to-portfolio').addEventListener('click', (e) => {
+    const r = (() => { try { return new URL(document.referrer); } catch { return null; } })();
+    if (r && r.origin === location.origin && !r.pathname.startsWith('/demos/')) { e.preventDefault(); history.back(); }
+  });
+</script>
+</body>
+</html>

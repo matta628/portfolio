@@ -1,0 +1,3834 @@
+{
+ "emails": [
+  {
+   "found_at": "Mar 29, 2026 at 09:14 AM",
+   "listings": [
+    {
+     "neighborhood": "Williamsburg",
+     "has_washer_dryer": false,
+     "price": 3900,
+     "bedrooms": "2",
+     "bathrooms": "1",
+     "available_at": "2026-05-02",
+     "nearby_bars": [
+      {
+       "name": "Barcade",
+       "distance_mi": 0.31,
+       "rating": 4.5
+      },
+      {
+       "name": "Maison Premiere",
+       "distance_mi": 0.31,
+       "rating": 4.6
+      },
+      {
+       "name": "Duff's",
+       "distance_mi": 0.2,
+       "rating": 4.8
+      },
+      {
+       "name": "The Commodore",
+       "distance_mi": 0.17,
+       "rating": 4.4
+      },
+      {
+       "name": "Full Circle Bar",
+       "distance_mi": 0.07,
+       "rating": 4.4
+      }
+     ],
+     "nearby_restaurants": [
+      {
+       "name": "Pies 'n' Thighs",
+       "distance_mi": 0.24,
+       "rating": 4.4
+      },
+      {
+       "name": "Traif",
+       "distance_mi": 0.13,
+       "rating": 4.6
+      },
+      {
+       "name": "Maison Premiere",
+       "distance_mi": 0.31,
+       "rating": 4.6
+      },
+      {
+       "name": "The Commodore",
+       "distance_mi": 0.17,
+       "rating": 4.4
+      },
+      {
+       "name": "Kellogg’s Diner",
+       "distance_mi": 0.31,
+       "rating": 4.0
+      }
+     ],
+     "nearby_supermarkets": [
+      {
+       "name": "Foodtown of Williamsburg",
+       "distance_mi": 0.29
+      },
+      {
+       "name": "Whole Foods Market",
+       "distance_mi": 0.35
+      },
+      {
+       "name": "Quality Fresh Market",
+       "distance_mi": 0.36
+      }
+     ],
+     "nearby_gyms": [
+      {
+       "name": "Metropolitan Recreation Center",
+       "distance_mi": 0.3
+      },
+      {
+       "name": "April Nicole Studios",
+       "distance_mi": 0.29
+      }
+     ],
+     "address": "2xx South 2nd Street",
+     "commute_home": "24 mins",
+     "commute_office": "26 mins"
+    },
+    {
+     "neighborhood": "Stuyvesant Heights",
+     "has_washer_dryer": false,
+     "price": 3200,
+     "bedrooms": "2",
+     "bathrooms": "1",
+     "available_at": "2026-05-01",
+     "nearby_bars": [
+      {
+       "name": "Bossa Nova Civic Club",
+       "distance_mi": 0.34,
+       "rating": 4.3
+      },
+      {
+       "name": "SKYTOWN",
+       "distance_mi": 0.33,
+       "rating": 4.5
+      },
+      {
+       "name": "Happyfun Hideaway",
+       "distance_mi": 0.24,
+       "rating": 4.3
+      },
+      {
+       "name": "Marco's",
+       "distance_mi": 0.07,
+       "rating": 4.4
+      },
+      {
+       "name": "Buntopia",
+       "distance_mi": 0.17,
+       "rating": 4.7
+      }
+     ],
+     "nearby_restaurants": [
+      {
+       "name": "SKYTOWN",
+       "distance_mi": 0.33,
+       "rating": 4.5
+      },
+      {
+       "name": "BK Bagels",
+       "distance_mi": 0.12,
+       "rating": 4.2
+      },
+      {
+       "name": "Buntopia",
+       "distance_mi": 0.17,
+       "rating": 4.7
+      },
+      {
+       "name": "Little Mo",
+       "distance_mi": 0.22,
+       "rating": 4.5
+      },
+      {
+       "name": "El Regalo de Juquila",
+       "distance_mi": 0.24,
+       "rating": 4.3
+      }
+     ],
+     "nearby_supermarkets": [
+      {
+       "name": "FOOD BAZAAR",
+       "distance_mi": 0.29
+      },
+      {
+       "name": "Mr.Kiwi",
+       "distance_mi": 0.24
+      },
+      {
+       "name": "Deli minimarket Palmarejo",
+       "distance_mi": 0.12
+      }
+     ],
+     "nearby_gyms": [
+      {
+       "name": "GYM X Boxing",
+       "distance_mi": 0.16
+      },
+      {
+       "name": "BK Fit Studios - Bushwick",
+       "distance_mi": 0.16
+      }
+     ],
+     "address": "4xx Pulaski Street",
+     "commute_home": "19 mins",
+     "commute_office": "37 mins"
+    },
+    {
+     "neighborhood": "Stuyvesant Heights",
+     "has_washer_dryer": false,
+     "price": 3400,
+     "bedrooms": "2",
+     "bathrooms": "1",
+     "available_at": "2026-05-01",
+     "nearby_bars": [
+      {
+       "name": "The Office Brooklyn",
+       "distance_mi": 0.06,
+       "rating": 5.0
+      },
+      {
+       "name": "Korkscrew Bistro",
+       "distance_mi": 0.21,
+       "rating": 4.9
+      },
+      {
+       "name": "The Coyote Club",
+       "distance_mi": 0.28,
+       "rating": 4.5
+      }
+     ],
+     "nearby_restaurants": [
+      {
+       "name": "New Hardee",
+       "distance_mi": 0.05,
+       "rating": 4.4
+      },
+      {
+       "name": "Petisco Brazuca | Bed-Stuy",
+       "distance_mi": 0.05,
+       "rating": 4.2
+      },
+      {
+       "name": "BKLYN BLEND",
+       "distance_mi": 0.2,
+       "rating": 4.7
+      },
+      {
+       "name": "Rocco Pizza",
+       "distance_mi": 0.2,
+       "rating": 4.1
+      },
+      {
+       "name": "Mary's Coffee Shop",
+       "distance_mi": 0.09,
+       "rating": 4.2
+      }
+     ],
+     "nearby_supermarkets": [
+      {
+       "name": "Bravo Supermarkets",
+       "distance_mi": 0.03
+      },
+      {
+       "name": "Ideal Food Basket of Lafayette Ave",
+       "distance_mi": 0.18
+      },
+      {
+       "name": "Dekalb Fresh Market",
+       "distance_mi": 0.06
+      }
+     ],
+     "nearby_gyms": [
+      {
+       "name": "Brooklyn Stuy Dome Powered by Game Over",
+       "distance_mi": 0.08
+      },
+      {
+       "name": "Strong Evolution Gym",
+       "distance_mi": 0.08
+      }
+     ],
+     "address": "8xx De Kalb Avenue",
+     "commute_home": "19 mins",
+     "commute_office": "37 mins"
+    },
+    {
+     "neighborhood": "East Harlem",
+     "has_washer_dryer": false,
+     "price": 3350,
+     "bedrooms": "2",
+     "bathrooms": "1",
+     "available_at": "2026-05-01",
+     "nearby_bars": [
+      {
+       "name": "Barking Dog Restaurant",
+       "distance_mi": 0.32,
+       "rating": 4.2
+      },
+      {
+       "name": "East End Bar & Grill",
+       "distance_mi": 0.34,
+       "rating": 4.4
+      },
+      {
+       "name": "Earl's Beer and Cheese",
+       "distance_mi": 0.22,
+       "rating": 4.6
+      },
+      {
+       "name": "Merrion Square Pub",
+       "distance_mi": 0.32,
+       "rating": 4.1
+      },
+      {
+       "name": "Plue",
+       "distance_mi": 0.07,
+       "rating": 4.8
+      }
+     ],
+     "nearby_restaurants": [
+      {
+       "name": "Quechua Nostra",
+       "distance_mi": 0.17,
+       "rating": 4.2
+      },
+      {
+       "name": "Barking Dog Restaurant",
+       "distance_mi": 0.32,
+       "rating": 4.2
+      },
+      {
+       "name": "East End Bar & Grill",
+       "distance_mi": 0.34,
+       "rating": 4.4
+      },
+      {
+       "name": "Earl's Beer and Cheese",
+       "distance_mi": 0.22,
+       "rating": 4.6
+      },
+      {
+       "name": "La Fonda",
+       "distance_mi": 0.29,
+       "rating": 4.0
+      }
+     ],
+     "nearby_supermarkets": [
+      {
+       "name": "Cherry Valley Marketplace",
+       "distance_mi": 0.18
+      },
+      {
+       "name": "City Fresh Market",
+       "distance_mi": 0.31
+      },
+      {
+       "name": "Fine Fare Supermarkets",
+       "distance_mi": 0.21
+      }
+     ],
+     "nearby_gyms": [
+      {
+       "name": "Mind Your Body",
+       "distance_mi": 0.34
+      },
+      {
+       "name": "Perfect Parts Pilates",
+       "distance_mi": 0.23
+      }
+     ],
+     "address": "18xx 3rd Avenue",
+     "commute_home": "42 mins",
+     "commute_office": "23 mins"
+    },
+    {
+     "neighborhood": "South Harlem",
+     "has_washer_dryer": false,
+     "price": 3850,
+     "bedrooms": "2",
+     "bathrooms": "1",
+     "available_at": "2026-05-01",
+     "nearby_bars": [
+      {
+       "name": "Silvana",
+       "distance_mi": 0.21,
+       "rating": 4.4
+      },
+      {
+       "name": "Harlem Tavern",
+       "distance_mi": 0.23,
+       "rating": 4.1
+      },
+      {
+       "name": "Lido Harlem Restaurant",
+       "distance_mi": 0.24,
+       "rating": 4.5
+      },
+      {
+       "name": "The Nephew Supper Club",
+       "distance_mi": 0.34,
+       "rating": 4.1
+      },
+      {
+       "name": "Row House",
+       "distance_mi": 0.14,
+       "rating": 4.2
+      }
+     ],
+     "nearby_restaurants": [
+      {
+       "name": "Amy Ruth's",
+       "distance_mi": 0.26,
+       "rating": 4.3
+      },
+      {
+       "name": "Silvana",
+       "distance_mi": 0.21,
+       "rating": 4.4
+      },
+      {
+       "name": "Harlem Tavern",
+       "distance_mi": 0.23,
+       "rating": 4.1
+      },
+      {
+       "name": "Melba's Restaurant",
+       "distance_mi": 0.14,
+       "rating": 4.3
+      },
+      {
+       "name": "Lido Harlem Restaurant",
+       "distance_mi": 0.24,
+       "rating": 4.5
+      }
+     ],
+     "nearby_supermarkets": [
+      {
+       "name": "Lidl",
+       "distance_mi": 0.32
+      }
+     ],
+     "nearby_gyms": [
+      {
+       "name": "Liberated Fitness",
+       "distance_mi": 0.31
+      },
+      {
+       "name": "re-Creation Fitness + Recovery",
+       "distance_mi": 0.06
+      }
+     ],
+     "address": "2xx West 113th Street",
+     "commute_home": "47 mins",
+     "commute_office": "28 mins"
+    },
+    {
+     "neighborhood": "Central Harlem",
+     "has_washer_dryer": false,
+     "price": 2450,
+     "bedrooms": "2",
+     "bathrooms": "1",
+     "available_at": "2026-05-05",
+     "nearby_bars": [
+      {
+       "name": "Patrick's Place",
+       "distance_mi": 0.03,
+       "rating": 4.8
+      },
+      {
+       "name": "Lucille's Coffee and Cocktails",
+       "distance_mi": 0.07,
+       "rating": 4.7
+      },
+      {
+       "name": "PJs DiveBar",
+       "distance_mi": 0.21,
+       "rating": 5.0
+      },
+      {
+       "name": "The Oma Shop II Coffee + Lifestyle",
+       "distance_mi": 0.21,
+       "rating": 4.7
+      },
+      {
+       "name": "Legend's Lounge",
+       "distance_mi": 0.34,
+       "rating": 4.4
+      }
+     ],
+     "nearby_restaurants": [
+      {
+       "name": "Starbucks Coffee Company",
+       "distance_mi": 0.27,
+       "rating": 4.1
+      },
+      {
+       "name": "Famous Fish Market",
+       "distance_mi": 0.32,
+       "rating": 4.5
+      },
+      {
+       "name": "Benyam",
+       "distance_mi": 0.11,
+       "rating": 4.8
+      },
+      {
+       "name": "Eso Pesco",
+       "distance_mi": 0.16,
+       "rating": 4.2
+      },
+      {
+       "name": "Tsion Cafe",
+       "distance_mi": 0.19,
+       "rating": 4.6
+      }
+     ],
+     "nearby_supermarkets": [
+      {
+       "name": "Foodtown of St. Nicholas Ave",
+       "distance_mi": 0.18
+      },
+      {
+       "name": "Super Foodtown of Bradhurst",
+       "distance_mi": 0.3
+      }
+     ],
+     "nearby_gyms": [
+      {
+       "name": "New York Sports Club",
+       "distance_mi": 0.27
+      },
+      {
+       "name": "Brown Bag Fitness",
+       "distance_mi": 0.11
+      }
+     ],
+     "address": "3xx West 151st Street",
+     "commute_home": "49 mins",
+     "commute_office": "33 mins"
+    }
+   ]
+  },
+  {
+   "found_at": "Mar 30, 2026 at 06:41 PM",
+   "listings": [
+    {
+     "neighborhood": "East Village",
+     "has_washer_dryer": false,
+     "price": 3895,
+     "bedrooms": "2",
+     "bathrooms": "1",
+     "available_at": "2026-05-01",
+     "nearby_bars": [
+      {
+       "name": "Please Don't Tell",
+       "distance_mi": 0.11,
+       "rating": 4.3
+      },
+      {
+       "name": "The Mercury Lounge",
+       "distance_mi": 0.28,
+       "rating": 4.5
+      },
+      {
+       "name": "Cafe Mogador",
+       "distance_mi": 0.14,
+       "rating": 4.5
+      },
+      {
+       "name": "DROM",
+       "distance_mi": 0.04,
+       "rating": 4.1
+      },
+      {
+       "name": "Supper",
+       "distance_mi": 0.19,
+       "rating": 4.4
+      }
+     ],
+     "nearby_restaurants": [
+      {
+       "name": "Momofuku Noodle Bar",
+       "distance_mi": 0.26,
+       "rating": 4.5
+      },
+      {
+       "name": "Please Don't Tell",
+       "distance_mi": 0.11,
+       "rating": 4.3
+      },
+      {
+       "name": "Clinton St. Baking Company",
+       "distance_mi": 0.29,
+       "rating": 4.4
+      },
+      {
+       "name": "Cafe Mogador",
+       "distance_mi": 0.14,
+       "rating": 4.5
+      },
+      {
+       "name": "S'MAC",
+       "distance_mi": 0.33,
+       "rating": 4.5
+      }
+     ],
+     "nearby_supermarkets": [
+      {
+       "name": "Key Food Urban Marketplace",
+       "distance_mi": 0.12
+      },
+      {
+       "name": "Union Market",
+       "distance_mi": 0.25
+      },
+      {
+       "name": "بقال الرشيد جابر",
+       "distance_mi": 0.15
+      }
+     ],
+     "nearby_gyms": [
+      {
+       "name": "Russian & Turkish Baths",
+       "distance_mi": 0.19
+      },
+      {
+       "name": "CrossFit East River",
+       "distance_mi": 0.28
+      }
+     ],
+     "address": "9x Avenue A",
+     "commute_home": "28 mins",
+     "commute_office": "22 mins"
+    },
+    {
+     "neighborhood": "Bushwick",
+     "has_washer_dryer": false,
+     "price": 3600,
+     "bedrooms": "2",
+     "bathrooms": "1",
+     "available_at": "2026-05-01",
+     "nearby_bars": [
+      {
+       "name": "SKYTOWN",
+       "distance_mi": 0.3,
+       "rating": 4.5
+      },
+      {
+       "name": "Rebecca's",
+       "distance_mi": 0.34,
+       "rating": 4.5
+      },
+      {
+       "name": "La Lupe Cantina",
+       "distance_mi": 0.35,
+       "rating": 4.3
+      },
+      {
+       "name": "مكتب المساعده",
+       "distance_mi": 0.09,
+       "rating": 5.0
+      },
+      {
+       "name": "Homemade Taqueria Bushwick",
+       "distance_mi": 0.13,
+       "rating": 4.8
+      }
+     ],
+     "nearby_restaurants": [
+      {
+       "name": "J.K. & Sons",
+       "distance_mi": 0.08,
+       "rating": 4.4
+      },
+      {
+       "name": "SKYTOWN",
+       "distance_mi": 0.3,
+       "rating": 4.5
+      },
+      {
+       "name": "Milly's Pizzeria",
+       "distance_mi": 0.14,
+       "rating": 4.4
+      },
+      {
+       "name": "La Isla Cuchifritos",
+       "distance_mi": 0.12,
+       "rating": 4.2
+      },
+      {
+       "name": "Mirakuya 🇯🇵",
+       "distance_mi": 0.21,
+       "rating": 4.2
+      }
+     ],
+     "nearby_supermarkets": [
+      {
+       "name": "FOOD BAZAAR",
+       "distance_mi": 0.32
+      },
+      {
+       "name": "FOOD BAZAAR",
+       "distance_mi": 0.35
+      },
+      {
+       "name": "Green Corner Fish & Farmers Market",
+       "distance_mi": 0.06
+      }
+     ],
+     "nearby_gyms": [
+      {
+       "name": "Planet Fitness",
+       "distance_mi": 0.08
+      },
+      {
+       "name": "Goshin Ryu Martial Arts & Fitness",
+       "distance_mi": 0.33
+      }
+     ],
+     "address": "8xx Flushing Avenue",
+     "commute_home": "20 mins",
+     "commute_office": "36 mins"
+    },
+    {
+     "neighborhood": "Yorkville",
+     "has_washer_dryer": false,
+     "price": 3950,
+     "bedrooms": "2",
+     "bathrooms": "1",
+     "available_at": "2026-05-04",
+     "nearby_bars": [
+      {
+       "name": "Barking Dog Restaurant",
+       "distance_mi": 0.23,
+       "rating": 4.2
+      },
+      {
+       "name": "East End Bar & Grill",
+       "distance_mi": 0.22,
+       "rating": 4.4
+      },
+      {
+       "name": "The Auction House",
+       "distance_mi": 0.19,
+       "rating": 4.2
+      },
+      {
+       "name": "Third Avenue Ale House",
+       "distance_mi": 0.21,
+       "rating": 4.3
+      },
+      {
+       "name": "Bareburger",
+       "distance_mi": 0.28,
+       "rating": 4.4
+      }
+     ],
+     "nearby_restaurants": [
+      {
+       "name": "Cafe d’Alsace",
+       "distance_mi": 0.23,
+       "rating": 4.7
+      },
+      {
+       "name": "Naruto Ramen",
+       "distance_mi": 0.26,
+       "rating": 4.4
+      },
+      {
+       "name": "Barking Dog Restaurant",
+       "distance_mi": 0.23,
+       "rating": 4.2
+      },
+      {
+       "name": "East End Bar & Grill",
+       "distance_mi": 0.22,
+       "rating": 4.4
+      },
+      {
+       "name": "Pio Pio 3",
+       "distance_mi": 0.14,
+       "rating": 4.0
+      }
+     ],
+     "nearby_supermarkets": [
+      {
+       "name": "Fairway Market of 86th Street",
+       "distance_mi": 0.37
+      },
+      {
+       "name": "Key Food Supermarkets",
+       "distance_mi": 0.08
+      },
+      {
+       "name": "CTown Supermarkets",
+       "distance_mi": 0.18
+      }
+     ],
+     "nearby_gyms": [
+      {
+       "name": "92NY",
+       "distance_mi": 0.27
+      },
+      {
+       "name": "Asphalt Green - Upper East Side campus",
+       "distance_mi": 0.25
+      }
+     ],
+     "address": "3xx East 93rd Street",
+     "commute_home": "35 mins",
+     "commute_office": "24 mins"
+    },
+    {
+     "neighborhood": "Bushwick",
+     "has_washer_dryer": false,
+     "price": 3800,
+     "bedrooms": "2",
+     "bathrooms": "2",
+     "available_at": "2026-05-01",
+     "nearby_bars": [
+      {
+       "name": "Bossa Nova Civic Club",
+       "distance_mi": 0.32,
+       "rating": 4.3
+      },
+      {
+       "name": "Sunrise/Sunset",
+       "distance_mi": 0.13,
+       "rating": 4.3
+      },
+      {
+       "name": "Marco's",
+       "distance_mi": 0.31,
+       "rating": 4.4
+      },
+      {
+       "name": "The Buren",
+       "distance_mi": 0.14,
+       "rating": 4.0
+      },
+      {
+       "name": "El Monumento",
+       "distance_mi": 0.14,
+       "rating": 4.1
+      }
+     ],
+     "nearby_restaurants": [
+      {
+       "name": "Sunrise/Sunset",
+       "distance_mi": 0.13,
+       "rating": 4.3
+      },
+      {
+       "name": "BK Bagels",
+       "distance_mi": 0.24,
+       "rating": 4.2
+      },
+      {
+       "name": "Rosario Pizza",
+       "distance_mi": 0.35,
+       "rating": 4.5
+      },
+      {
+       "name": "Broadway Pizza",
+       "distance_mi": 0.2,
+       "rating": 4.7
+      },
+      {
+       "name": "All in one pizza",
+       "distance_mi": 0.3,
+       "rating": 4.1
+      }
+     ],
+     "nearby_supermarkets": [
+      {
+       "name": "Foodtown of Bushwick",
+       "distance_mi": 0.21
+      },
+      {
+       "name": "Fine Fare Supermarkets",
+       "distance_mi": 0.31
+      },
+      {
+       "name": "Jarabacoa Food Corporation",
+       "distance_mi": 0.31
+      }
+     ],
+     "nearby_gyms": [
+      {
+       "name": "GYM X Boxing",
+       "distance_mi": 0.31
+      }
+     ],
+     "address": "8xx Bushwick Avenue",
+     "commute_home": "25 mins",
+     "commute_office": "37 mins"
+    },
+    {
+     "neighborhood": "Central Harlem",
+     "has_washer_dryer": true,
+     "price": 3380,
+     "bedrooms": "2",
+     "bathrooms": "1",
+     "available_at": "2026-05-01",
+     "nearby_bars": [
+      {
+       "name": "Sylvia's Restaurant",
+       "distance_mi": 0.29,
+       "rating": 4.3
+      },
+      {
+       "name": "Red Rooster Harlem",
+       "distance_mi": 0.33,
+       "rating": 4.4
+      },
+      {
+       "name": "Corner Social",
+       "distance_mi": 0.33,
+       "rating": 4.3
+      },
+      {
+       "name": "Ginny's Supper Club",
+       "distance_mi": 0.32,
+       "rating": 4.5
+      },
+      {
+       "name": "Shrine",
+       "distance_mi": 0.35,
+       "rating": 4.5
+      }
+     ],
+     "nearby_restaurants": [
+      {
+       "name": "Sylvia's Restaurant",
+       "distance_mi": 0.29,
+       "rating": 4.3
+      },
+      {
+       "name": "Red Rooster Harlem",
+       "distance_mi": 0.33,
+       "rating": 4.4
+      },
+      {
+       "name": "Corner Social",
+       "distance_mi": 0.33,
+       "rating": 4.3
+      },
+      {
+       "name": "Ginny's Supper Club",
+       "distance_mi": 0.32,
+       "rating": 4.5
+      },
+      {
+       "name": "Jacob Soul Food Restaurant",
+       "distance_mi": 0.24,
+       "rating": 4.4
+      }
+     ],
+     "nearby_supermarkets": [
+      {
+       "name": "Express Deli Corp",
+       "distance_mi": 0.21
+      },
+      {
+       "name": "Food Dynasty Supermarkets",
+       "distance_mi": 0.16
+      },
+      {
+       "name": "Associated Fresh of 132nd St",
+       "distance_mi": 0.33
+      }
+     ],
+     "nearby_gyms": [
+      {
+       "name": "Harlem Holistic Center",
+       "distance_mi": 0.28
+      },
+      {
+       "name": "Hansborough Recreation Center",
+       "distance_mi": 0.16
+      }
+     ],
+     "address": "21xx 5th Avenue",
+     "commute_home": "46 mins",
+     "commute_office": "25 mins"
+    }
+   ]
+  },
+  {
+   "found_at": "Mar 31, 2026 at 11:02 PM",
+   "listings": [
+    {
+     "neighborhood": "Williamsburg",
+     "has_washer_dryer": true,
+     "price": 3748,
+     "bedrooms": "2",
+     "bathrooms": "1",
+     "available_at": "2026-05-02",
+     "nearby_bars": [
+      {
+       "name": "Bushwick Country Club",
+       "distance_mi": 0.35,
+       "rating": 4.5
+      },
+      {
+       "name": "The Anchored Inn",
+       "distance_mi": 0.29,
+       "rating": 4.5
+      },
+      {
+       "name": "duckduck",
+       "distance_mi": 0.04,
+       "rating": 4.4
+      },
+      {
+       "name": "Tradesman",
+       "distance_mi": 0.13,
+       "rating": 4.6
+      },
+      {
+       "name": "Sage",
+       "distance_mi": 0.36,
+       "rating": 4.3
+      }
+     ],
+     "nearby_restaurants": [
+      {
+       "name": "Dun-Well Doughnuts",
+       "distance_mi": 0.13,
+       "rating": 4.6
+      },
+      {
+       "name": "The Anchored Inn",
+       "distance_mi": 0.29,
+       "rating": 4.5
+      },
+      {
+       "name": "Bushwick Pita Palace",
+       "distance_mi": 0.16,
+       "rating": 4.0
+      },
+      {
+       "name": "Bahia",
+       "distance_mi": 0.27,
+       "rating": 4.5
+      },
+      {
+       "name": "Arcos de Puebla",
+       "distance_mi": 0.16,
+       "rating": 4.4
+      }
+     ],
+     "nearby_supermarkets": [
+      {
+       "name": "FOOD BAZAAR",
+       "distance_mi": 0.36
+      },
+      {
+       "name": "Moore Street Market",
+       "distance_mi": 0.3
+      },
+      {
+       "name": "Bravo Supermarkets",
+       "distance_mi": 0.25
+      }
+     ],
+     "nearby_gyms": [
+      {
+       "name": "Absolute Power Gym",
+       "distance_mi": 0.26
+      },
+      {
+       "name": "The Block: Neighborhood Yoga Studio & Cafe",
+       "distance_mi": 0.12
+      }
+     ],
+     "address": "1xx Meserole Street",
+     "commute_home": "21 mins",
+     "commute_office": "26 mins"
+    },
+    {
+     "neighborhood": "Stuyvesant Heights",
+     "has_washer_dryer": true,
+     "price": 3450,
+     "bedrooms": "2",
+     "bathrooms": "1",
+     "available_at": "2026-05-01",
+     "nearby_bars": [
+      {
+       "name": "Canticles Sober Lounge",
+       "distance_mi": 0.17,
+       "rating": 4.3
+      },
+      {
+       "name": "Buntopia",
+       "distance_mi": 0.34,
+       "rating": 4.7
+      },
+      {
+       "name": "The Office Brooklyn",
+       "distance_mi": 0.27,
+       "rating": 5.0
+      },
+      {
+       "name": "The Coyote Club",
+       "distance_mi": 0.32,
+       "rating": 4.5
+      },
+      {
+       "name": "Paragon",
+       "distance_mi": 0.35,
+       "rating": 4.4
+      }
+     ],
+     "nearby_restaurants": [
+      {
+       "name": "New Hardee",
+       "distance_mi": 0.31,
+       "rating": 4.4
+      },
+      {
+       "name": "Petisco Brazuca | Bed-Stuy",
+       "distance_mi": 0.31,
+       "rating": 4.2
+      },
+      {
+       "name": "Buntopia",
+       "distance_mi": 0.34,
+       "rating": 4.7
+      },
+      {
+       "name": "Popeyes Louisiana Kitchen",
+       "distance_mi": 0.36,
+       "rating": 4.0
+      },
+      {
+       "name": "Mary's Coffee Shop",
+       "distance_mi": 0.18,
+       "rating": 4.2
+      }
+     ],
+     "nearby_supermarkets": [
+      {
+       "name": "FOOD BAZAAR",
+       "distance_mi": 0.34
+      },
+      {
+       "name": "Bravo Supermarkets",
+       "distance_mi": 0.25
+      },
+      {
+       "name": "Ideal Food Basket of Lafayette Ave",
+       "distance_mi": 0.11
+      }
+     ],
+     "nearby_gyms": [
+      {
+       "name": "Brooklyn Stuy Dome Powered by Game Over",
+       "distance_mi": 0.25
+      },
+      {
+       "name": "Strong Evolution Gym",
+       "distance_mi": 0.18
+      }
+     ],
+     "address": "8xx Lafayette Avenue",
+     "commute_home": "18 mins",
+     "commute_office": "32 mins"
+    },
+    {
+     "neighborhood": "Bedford-Stuyvesant",
+     "has_washer_dryer": false,
+     "price": 3500,
+     "bedrooms": "2",
+     "bathrooms": "1",
+     "available_at": "2026-05-01",
+     "nearby_bars": [
+      {
+       "name": "Do or Dive Bar",
+       "distance_mi": 0.3,
+       "rating": 4.5
+      },
+      {
+       "name": "Doris",
+       "distance_mi": 0.22,
+       "rating": 4.5
+      },
+      {
+       "name": "Dynaco",
+       "distance_mi": 0.29,
+       "rating": 4.6
+      },
+      {
+       "name": "Bati Ethiopian Kitchen",
+       "distance_mi": 0.32,
+       "rating": 4.3
+      },
+      {
+       "name": "Tip-Top Bar & Grill",
+       "distance_mi": 0.18,
+       "rating": 4.5
+      }
+     ],
+     "nearby_restaurants": [
+      {
+       "name": "Napoleon’s",
+       "distance_mi": 0.1,
+       "rating": 4.4
+      },
+      {
+       "name": "Ali's Trinbago Roti Shop",
+       "distance_mi": 0.2,
+       "rating": 4.4
+      },
+      {
+       "name": "Bati Ethiopian Kitchen",
+       "distance_mi": 0.32,
+       "rating": 4.3
+      },
+      {
+       "name": "Tip-Top Bar & Grill",
+       "distance_mi": 0.18,
+       "rating": 4.5
+      },
+      {
+       "name": "Crown Fried Chicken & Pizza",
+       "distance_mi": 0.15,
+       "rating": 4.1
+      }
+     ],
+     "nearby_supermarkets": [
+      {
+       "name": "Diaby African Market",
+       "distance_mi": 0.14
+      },
+      {
+       "name": "LINCOLN MARKET",
+       "distance_mi": 0.16
+      },
+      {
+       "name": "Al-Baraka Halal Supermarket",
+       "distance_mi": 0.16
+      }
+     ],
+     "nearby_gyms": [
+      {
+       "name": "Planet Fitness",
+       "distance_mi": 0.15
+      },
+      {
+       "name": "Len3a",
+       "distance_mi": 0.15
+      }
+     ],
+     "address": "11xx Bedford Avenue",
+     "commute_home": "17 mins",
+     "commute_office": "36 mins"
+    },
+    {
+     "neighborhood": "Yorkville",
+     "has_washer_dryer": false,
+     "price": 3900,
+     "bedrooms": "2",
+     "bathrooms": "1",
+     "available_at": "2026-05-03",
+     "nearby_bars": [
+      {
+       "name": "Tiramisu",
+       "distance_mi": 0.27,
+       "rating": 4.5
+      },
+      {
+       "name": "Brandy's Piano Bar",
+       "distance_mi": 0.33,
+       "rating": 4.5
+      },
+      {
+       "name": "Dorrian's Red Hand (NYC)",
+       "distance_mi": 0.3,
+       "rating": 4.1
+      },
+      {
+       "name": "Heidelberg Restaurant",
+       "distance_mi": 0.24,
+       "rating": 4.5
+      },
+      {
+       "name": "The Penrose Bar",
+       "distance_mi": 0.36,
+       "rating": 4.4
+      }
+     ],
+     "nearby_restaurants": [
+      {
+       "name": "Cafe d’Alsace",
+       "distance_mi": 0.2,
+       "rating": 4.7
+      },
+      {
+       "name": "Naruto Ramen",
+       "distance_mi": 0.34,
+       "rating": 4.4
+      },
+      {
+       "name": "Tiramisu",
+       "distance_mi": 0.27,
+       "rating": 4.5
+      },
+      {
+       "name": "Pio Pio 3",
+       "distance_mi": 0.1,
+       "rating": 4.0
+      },
+      {
+       "name": "Dorrian's Red Hand (NYC)",
+       "distance_mi": 0.3,
+       "rating": 4.1
+      }
+     ],
+     "nearby_supermarkets": [
+      {
+       "name": "Fairway Market of 86th Street",
+       "distance_mi": 0.28
+      },
+      {
+       "name": "Key Food Supermarkets",
+       "distance_mi": 0.27
+      },
+      {
+       "name": "CTown Supermarkets",
+       "distance_mi": 0.07
+      }
+     ],
+     "nearby_gyms": [
+      {
+       "name": "Asphalt Green - Upper East Side campus",
+       "distance_mi": 0.18
+      },
+      {
+       "name": "Synergy Fitness Clubs",
+       "distance_mi": 0.28
+      }
+     ],
+     "address": "4xx East 89th Street",
+     "commute_home": "41 mins",
+     "commute_office": "26 mins"
+    },
+    {
+     "neighborhood": "Ocean Hill",
+     "has_washer_dryer": false,
+     "price": 3150,
+     "bedrooms": "2",
+     "bathrooms": "1",
+     "available_at": "2026-05-01",
+     "nearby_bars": [
+      {
+       "name": "The Daily Press, Coffee House and Bar",
+       "distance_mi": 0.25,
+       "rating": 4.4
+      },
+      {
+       "name": "Party Life Lounge & Bar",
+       "distance_mi": 0.16,
+       "rating": 4.7
+      },
+      {
+       "name": "All Night Skate",
+       "distance_mi": 0.28,
+       "rating": 4.7
+      },
+      {
+       "name": "AUX Karaoke Box",
+       "distance_mi": 0.29,
+       "rating": 4.8
+      },
+      {
+       "name": "Salud Bar & Grill",
+       "distance_mi": 0.32,
+       "rating": 4.5
+      }
+     ],
+     "nearby_restaurants": [
+      {
+       "name": "The Daily Press, Coffee House and Bar",
+       "distance_mi": 0.25,
+       "rating": 4.4
+      },
+      {
+       "name": "Halal Royal Crown Chicken & Pizza",
+       "distance_mi": 0.28,
+       "rating": 4.1
+      },
+      {
+       "name": "New Jin Bu",
+       "distance_mi": 0.09,
+       "rating": 4.0
+      },
+      {
+       "name": "Popeyes Louisiana Kitchen",
+       "distance_mi": 0.21,
+       "rating": 4.1
+      },
+      {
+       "name": "Armando's Pizza",
+       "distance_mi": 0.32,
+       "rating": 4.3
+      }
+     ],
+     "nearby_supermarkets": [
+      {
+       "name": "bp",
+       "distance_mi": 0.31
+      },
+      {
+       "name": "URBAN NATURAL VALLEY MARKET",
+       "distance_mi": 0.31
+      }
+     ],
+     "nearby_gyms": [
+      {
+       "name": "Outdoor gym",
+       "distance_mi": 0.31
+      }
+     ],
+     "address": "18xx Broadway",
+     "commute_home": "29 mins",
+     "commute_office": "40 mins"
+    },
+    {
+     "neighborhood": "Hamilton Heights",
+     "has_washer_dryer": true,
+     "price": 4000,
+     "bedrooms": "2",
+     "bathrooms": "1",
+     "available_at": "2026-05-05",
+     "nearby_bars": [
+      {
+       "name": "Harlem Public",
+       "distance_mi": 0.29,
+       "rating": 4.5
+      },
+      {
+       "name": "At The Wallace",
+       "distance_mi": 0.29,
+       "rating": 4.5
+      },
+      {
+       "name": "The Honey Well",
+       "distance_mi": 0.3,
+       "rating": 4.7
+      },
+      {
+       "name": "Patrick's Place",
+       "distance_mi": 0.2,
+       "rating": 4.8
+      },
+      {
+       "name": "Oh Craft! Beer & Wine",
+       "distance_mi": 0.25,
+       "rating": 4.8
+      }
+     ],
+     "nearby_restaurants": [
+      {
+       "name": "Starbucks Coffee Company",
+       "distance_mi": 0.32,
+       "rating": 4.1
+      },
+      {
+       "name": "Harlem Public",
+       "distance_mi": 0.29,
+       "rating": 4.5
+      },
+      {
+       "name": "Famous Fish Market",
+       "distance_mi": 0.31,
+       "rating": 4.5
+      },
+      {
+       "name": "Jimbo's Hamburger Palace",
+       "distance_mi": 0.37,
+       "rating": 4.1
+      },
+      {
+       "name": "Tsion Cafe",
+       "distance_mi": 0.12,
+       "rating": 4.6
+      }
+     ],
+     "nearby_supermarkets": [
+      {
+       "name": "Foodtown of St. Nicholas Ave",
+       "distance_mi": 0.14
+      },
+      {
+       "name": "Super Foodtown of Bradhurst",
+       "distance_mi": 0.36
+      },
+      {
+       "name": "PapaSito Foodmarkets",
+       "distance_mi": 0.33
+      }
+     ],
+     "nearby_gyms": [
+      {
+       "name": "New York Sports Club",
+       "distance_mi": 0.34
+      },
+      {
+       "name": "Mindful Movement Practice with Kyle",
+       "distance_mi": 0.12
+      }
+     ],
+     "address": "8xx Saint Nichlas Avenue",
+     "commute_home": "50 mins",
+     "commute_office": "29 mins"
+    }
+   ]
+  },
+  {
+   "found_at": "Apr 01, 2026 at 07:55 AM",
+   "listings": [
+    {
+     "neighborhood": "Bushwick",
+     "has_washer_dryer": false,
+     "price": 3600,
+     "bedrooms": "2",
+     "bathrooms": "1",
+     "available_at": "2026-05-01",
+     "nearby_bars": [
+      {
+       "name": "SKYTOWN",
+       "distance_mi": 0.3,
+       "rating": 4.5
+      },
+      {
+       "name": "Rebecca's",
+       "distance_mi": 0.34,
+       "rating": 4.5
+      },
+      {
+       "name": "La Lupe Cantina",
+       "distance_mi": 0.35,
+       "rating": 4.3
+      },
+      {
+       "name": "مكتب المساعده",
+       "distance_mi": 0.09,
+       "rating": 5.0
+      },
+      {
+       "name": "Homemade Taqueria Bushwick",
+       "distance_mi": 0.13,
+       "rating": 4.8
+      }
+     ],
+     "nearby_restaurants": [
+      {
+       "name": "J.K. & Sons",
+       "distance_mi": 0.08,
+       "rating": 4.4
+      },
+      {
+       "name": "SKYTOWN",
+       "distance_mi": 0.3,
+       "rating": 4.5
+      },
+      {
+       "name": "Milly's Pizzeria",
+       "distance_mi": 0.14,
+       "rating": 4.4
+      },
+      {
+       "name": "La Isla Cuchifritos",
+       "distance_mi": 0.12,
+       "rating": 4.2
+      },
+      {
+       "name": "Mirakuya 🇯🇵",
+       "distance_mi": 0.21,
+       "rating": 4.2
+      }
+     ],
+     "nearby_supermarkets": [
+      {
+       "name": "FOOD BAZAAR",
+       "distance_mi": 0.32
+      },
+      {
+       "name": "FOOD BAZAAR",
+       "distance_mi": 0.35
+      },
+      {
+       "name": "Green Corner Fish & Farmers Market",
+       "distance_mi": 0.06
+      }
+     ],
+     "nearby_gyms": [
+      {
+       "name": "Planet Fitness",
+       "distance_mi": 0.08
+      },
+      {
+       "name": "Goshin Ryu Martial Arts & Fitness",
+       "distance_mi": 0.33
+      }
+     ],
+     "address": "8xx Flushing Avenue",
+     "commute_home": "20 mins",
+     "commute_office": "36 mins"
+    },
+    {
+     "neighborhood": "Stuyvesant Heights",
+     "has_washer_dryer": false,
+     "price": 2875,
+     "bedrooms": "2",
+     "bathrooms": "1",
+     "available_at": "2026-05-01",
+     "nearby_bars": [
+      {
+       "name": "Sunrise/Sunset",
+       "distance_mi": 0.24,
+       "rating": 4.3
+      },
+      {
+       "name": "The Broadway",
+       "distance_mi": 0.04,
+       "rating": 4.5
+      },
+      {
+       "name": "The Buren",
+       "distance_mi": 0.07,
+       "rating": 4.0
+      },
+      {
+       "name": "Wonderville",
+       "distance_mi": 0.13,
+       "rating": 4.8
+      },
+      {
+       "name": "El Monumento",
+       "distance_mi": 0.13,
+       "rating": 4.1
+      }
+     ],
+     "nearby_restaurants": [
+      {
+       "name": "Sunrise/Sunset",
+       "distance_mi": 0.24,
+       "rating": 4.3
+      },
+      {
+       "name": "BK Bagels",
+       "distance_mi": 0.28,
+       "rating": 4.2
+      },
+      {
+       "name": "Toad Style",
+       "distance_mi": 0.32,
+       "rating": 4.4
+      },
+      {
+       "name": "King Food",
+       "distance_mi": 0.27,
+       "rating": 4.0
+      },
+      {
+       "name": "Broadway Pizza",
+       "distance_mi": 0.24,
+       "rating": 4.7
+      }
+     ],
+     "nearby_supermarkets": [
+      {
+       "name": "Foodtown of Bushwick",
+       "distance_mi": 0.08
+      },
+      {
+       "name": "Global Farm Marketplace",
+       "distance_mi": 0.28
+      },
+      {
+       "name": "Deli minimarket Palmarejo",
+       "distance_mi": 0.3
+      }
+     ],
+     "nearby_gyms": [
+      {
+       "name": "GYM X Boxing",
+       "distance_mi": 0.27
+      },
+      {
+       "name": "Noir Yoga",
+       "distance_mi": 0.36
+      }
+     ],
+     "address": "10xx Greene Avenue",
+     "commute_home": "20 mins",
+     "commute_office": "38 mins"
+    },
+    {
+     "neighborhood": "Flatbush",
+     "has_washer_dryer": true,
+     "price": 3795,
+     "bedrooms": "2",
+     "bathrooms": "2",
+     "available_at": "2026-05-01",
+     "nearby_bars": [
+      {
+       "name": "MangoSeed Restaurant",
+       "distance_mi": 0.32,
+       "rating": 4.4
+      },
+      {
+       "name": "The Rogers Garden",
+       "distance_mi": 0.05,
+       "rating": 4.5
+      },
+      {
+       "name": "The Deia",
+       "distance_mi": 0.15,
+       "rating": 4.3
+      },
+      {
+       "name": "Drip Beverage Lounge",
+       "distance_mi": 0.23,
+       "rating": 4.8
+      },
+      {
+       "name": "PiCH Restaurant and Lounge",
+       "distance_mi": 0.33,
+       "rating": 4.2
+      }
+     ],
+     "nearby_restaurants": [
+      {
+       "name": "MangoSeed Restaurant",
+       "distance_mi": 0.32,
+       "rating": 4.4
+      },
+      {
+       "name": "Akwaaba Restaurant",
+       "distance_mi": 0.16,
+       "rating": 4.4
+      },
+      {
+       "name": "Four Seasons",
+       "distance_mi": 0.25,
+       "rating": 4.7
+      },
+      {
+       "name": "Nostrand Donut Shop And Mexican Food",
+       "distance_mi": 0.27,
+       "rating": 4.2
+      },
+      {
+       "name": "Immaculee II Haitian Restaurant & Bakery",
+       "distance_mi": 0.31,
+       "rating": 4.3
+      }
+     ],
+     "nearby_supermarkets": [
+      {
+       "name": "CTown Supermarkets",
+       "distance_mi": 0.17
+      },
+      {
+       "name": "Brooklyn's Natural Deli",
+       "distance_mi": 0.34
+      },
+      {
+       "name": "Lincoln Market",
+       "distance_mi": 0.12
+      }
+     ],
+     "nearby_gyms": [
+      {
+       "name": "Retro Fitness",
+       "distance_mi": 0.3
+      },
+      {
+       "name": "Fringe Pilates",
+       "distance_mi": 0.12
+      }
+     ],
+     "address": "1xx Lenox Road",
+     "commute_home": "20 mins",
+     "commute_office": "40 mins"
+    },
+    {
+     "neighborhood": "Stuyvesant Heights",
+     "has_washer_dryer": false,
+     "price": 2800,
+     "bedrooms": "2",
+     "bathrooms": "1",
+     "available_at": "2026-05-01",
+     "nearby_bars": [
+      {
+       "name": "Cicchetti BK",
+       "distance_mi": 0.36,
+       "rating": 5.0
+      },
+      {
+       "name": "DeepDive BK",
+       "distance_mi": 0.37,
+       "rating": 5.0
+      }
+     ],
+     "nearby_restaurants": [
+      {
+       "name": "Mama Kitchen NY",
+       "distance_mi": 0.24,
+       "rating": 4.7
+      },
+      {
+       "name": "Xcellent Soul Food",
+       "distance_mi": 0.09,
+       "rating": 4.0
+      },
+      {
+       "name": "Chicken Plus",
+       "distance_mi": 0.15,
+       "rating": 5.0
+      },
+      {
+       "name": "Lords Lounge",
+       "distance_mi": 0.15,
+       "rating": 5.0
+      },
+      {
+       "name": "Dong Fang Kitchen",
+       "distance_mi": 0.22,
+       "rating": 4.2
+      }
+     ],
+     "nearby_supermarkets": [
+      {
+       "name": "MT Deli Grocery",
+       "distance_mi": 0.25
+      }
+     ],
+     "nearby_gyms": [
+      {
+       "name": "The Fit In: Pilates Reformed II",
+       "distance_mi": 0.36
+      }
+     ],
+     "address": "18xx Atlantic Avenue",
+     "commute_home": "24 mins",
+     "commute_office": "38 mins"
+    },
+    {
+     "neighborhood": "Bushwick",
+     "has_washer_dryer": false,
+     "price": 3400,
+     "bedrooms": "2",
+     "bathrooms": "1",
+     "available_at": "2026-05-05",
+     "nearby_bars": [
+      {
+       "name": "Molasses Books",
+       "distance_mi": 0.13,
+       "rating": 4.6
+      },
+      {
+       "name": "Heavy Woods",
+       "distance_mi": 0.34,
+       "rating": 4.4
+      },
+      {
+       "name": "ALPHAVILLE",
+       "distance_mi": 0.24,
+       "rating": 4.3
+      },
+      {
+       "name": "Bootleg Bar",
+       "distance_mi": 0.25,
+       "rating": 4.4
+      },
+      {
+       "name": "Merv’s Bar",
+       "distance_mi": 0.29,
+       "rating": 4.5
+      }
+     ],
+     "nearby_restaurants": [
+      {
+       "name": "Arepera Guacuco",
+       "distance_mi": 0.32,
+       "rating": 4.5
+      },
+      {
+       "name": "D' Montazo",
+       "distance_mi": 0.35,
+       "rating": 4.1
+      },
+      {
+       "name": "Mominette Bistro",
+       "distance_mi": 0.29,
+       "rating": 4.3
+      },
+      {
+       "name": "City Fresh Market - Bushwick",
+       "distance_mi": 0.27,
+       "rating": 4.2
+      },
+      {
+       "name": "Tony's Pizza",
+       "distance_mi": 0.17,
+       "rating": 4.6
+      }
+     ],
+     "nearby_supermarkets": [
+      {
+       "name": "City Fresh Market - Bushwick",
+       "distance_mi": 0.27
+      },
+      {
+       "name": "Key Food Supermarkets",
+       "distance_mi": 0.27
+      },
+      {
+       "name": "Knickerbocker Fresh Market",
+       "distance_mi": 0.05
+      }
+     ],
+     "nearby_gyms": [
+      {
+       "name": "New York Boxing Inc",
+       "distance_mi": 0.27
+      },
+      {
+       "name": "Brotherhood Boxing",
+       "distance_mi": 0.27
+      }
+     ],
+     "address": "3xx Knickerbocker Avenue",
+     "commute_home": "27 mins",
+     "commute_office": "36 mins"
+    }
+   ]
+  },
+  {
+   "found_at": "Apr 02, 2026 at 01:37 PM",
+   "listings": [
+    {
+     "neighborhood": "Stuyvesant Heights",
+     "has_washer_dryer": true,
+     "price": 3450,
+     "bedrooms": "2",
+     "bathrooms": "1",
+     "available_at": "2026-05-01",
+     "nearby_bars": [
+      {
+       "name": "The Office Brooklyn",
+       "distance_mi": 0.06,
+       "rating": 5.0
+      },
+      {
+       "name": "Korkscrew Bistro",
+       "distance_mi": 0.19,
+       "rating": 4.9
+      },
+      {
+       "name": "The Coyote Club",
+       "distance_mi": 0.28,
+       "rating": 4.5
+      }
+     ],
+     "nearby_restaurants": [
+      {
+       "name": "New Hardee",
+       "distance_mi": 0.02,
+       "rating": 4.4
+      },
+      {
+       "name": "Petisco Brazuca | Bed-Stuy",
+       "distance_mi": 0.03,
+       "rating": 4.2
+      },
+      {
+       "name": "BKLYN BLEND",
+       "distance_mi": 0.17,
+       "rating": 4.7
+      },
+      {
+       "name": "U Like",
+       "distance_mi": 0.36,
+       "rating": 4.1
+      },
+      {
+       "name": "Rocco Pizza",
+       "distance_mi": 0.17,
+       "rating": 4.1
+      }
+     ],
+     "nearby_supermarkets": [
+      {
+       "name": "Bravo Supermarkets",
+       "distance_mi": 0.04
+      },
+      {
+       "name": "Ideal Food Basket of Lafayette Ave",
+       "distance_mi": 0.2
+      },
+      {
+       "name": "Dekalb Fresh Market",
+       "distance_mi": 0.03
+      }
+     ],
+     "nearby_gyms": [
+      {
+       "name": "Brooklyn Stuy Dome Powered by Game Over",
+       "distance_mi": 0.09
+      },
+      {
+       "name": "Strong Evolution Gym",
+       "distance_mi": 0.11
+      }
+     ],
+     "address": "8xx Dekalb Avenue",
+     "commute_home": "23 mins",
+     "commute_office": "35 mins"
+    },
+    {
+     "neighborhood": "Stuyvesant Heights",
+     "has_washer_dryer": false,
+     "price": 2800,
+     "bedrooms": "2",
+     "bathrooms": "1",
+     "available_at": "2026-05-01",
+     "nearby_bars": [
+      {
+       "name": "Cicchetti BK",
+       "distance_mi": 0.36,
+       "rating": 5.0
+      },
+      {
+       "name": "DeepDive BK",
+       "distance_mi": 0.37,
+       "rating": 5.0
+      }
+     ],
+     "nearby_restaurants": [
+      {
+       "name": "Mama Kitchen NY",
+       "distance_mi": 0.24,
+       "rating": 4.7
+      },
+      {
+       "name": "Xcellent Soul Food",
+       "distance_mi": 0.09,
+       "rating": 4.0
+      },
+      {
+       "name": "Chicken Plus",
+       "distance_mi": 0.15,
+       "rating": 5.0
+      },
+      {
+       "name": "Lords Lounge",
+       "distance_mi": 0.15,
+       "rating": 5.0
+      },
+      {
+       "name": "Dong Fang Kitchen",
+       "distance_mi": 0.22,
+       "rating": 4.2
+      }
+     ],
+     "nearby_supermarkets": [
+      {
+       "name": "MT Deli Grocery",
+       "distance_mi": 0.25
+      }
+     ],
+     "nearby_gyms": [
+      {
+       "name": "The Fit In: Pilates Reformed II",
+       "distance_mi": 0.36
+      }
+     ],
+     "address": "18xx Atlantic Avenue",
+     "commute_home": "24 mins",
+     "commute_office": "38 mins"
+    },
+    {
+     "neighborhood": "Bushwick",
+     "has_washer_dryer": false,
+     "price": 3500,
+     "bedrooms": "2",
+     "bathrooms": "1.5",
+     "available_at": "2026-05-01",
+     "nearby_bars": [
+      {
+       "name": "Bootleg Bar",
+       "distance_mi": 0.1,
+       "rating": 4.4
+      },
+      {
+       "name": "Merv’s Bar",
+       "distance_mi": 0.13,
+       "rating": 4.5
+      },
+      {
+       "name": "Talon Bar",
+       "distance_mi": 0.25,
+       "rating": 4.3
+      },
+      {
+       "name": "El Mekkah Bar & Grill",
+       "distance_mi": 0.26,
+       "rating": 4.2
+      },
+      {
+       "name": "New Apolo",
+       "distance_mi": 0.11,
+       "rating": 4.2
+      }
+     ],
+     "nearby_restaurants": [
+      {
+       "name": "D' Montazo",
+       "distance_mi": 0.25,
+       "rating": 4.1
+      },
+      {
+       "name": "Tony's Pizza",
+       "distance_mi": 0.19,
+       "rating": 4.6
+      },
+      {
+       "name": "Burger King",
+       "distance_mi": 0.15,
+       "rating": 4.0
+      },
+      {
+       "name": "Merv’s Bar",
+       "distance_mi": 0.13,
+       "rating": 4.5
+      },
+      {
+       "name": "MR. CHIMI RESTAURANT",
+       "distance_mi": 0.14,
+       "rating": 4.1
+      }
+     ],
+     "nearby_supermarkets": [
+      {
+       "name": "FOOD BAZAAR",
+       "distance_mi": 0.34
+      },
+      {
+       "name": "Sea Town Fish & Meat Market",
+       "distance_mi": 0.14
+      },
+      {
+       "name": "Myrtle Ave Supermarket",
+       "distance_mi": 0.08
+      }
+     ],
+     "nearby_gyms": [
+      {
+       "name": "Mind Pilates - Bushwick",
+       "distance_mi": 0.24
+      }
+     ],
+     "address": "5xx Knickerbocker Avenue",
+     "commute_home": "27 mins",
+     "commute_office": "36 mins"
+    },
+    {
+     "neighborhood": "Flatbush",
+     "has_washer_dryer": true,
+     "price": 3800,
+     "bedrooms": "2",
+     "bathrooms": "2",
+     "available_at": "2026-05-01",
+     "nearby_bars": [
+      {
+       "name": "MangoSeed Restaurant",
+       "distance_mi": 0.13,
+       "rating": 4.4
+      },
+      {
+       "name": "The Westbury Inn",
+       "distance_mi": 0.29,
+       "rating": 4.3
+      },
+      {
+       "name": "PiCH Restaurant and Lounge",
+       "distance_mi": 0.1,
+       "rating": 4.2
+      },
+      {
+       "name": "Risbo",
+       "distance_mi": 0.24,
+       "rating": 4.5
+      },
+      {
+       "name": "ruth",
+       "distance_mi": 0.3,
+       "rating": 4.8
+      }
+     ],
+     "nearby_restaurants": [
+      {
+       "name": "MangoSeed Restaurant",
+       "distance_mi": 0.13,
+       "rating": 4.4
+      },
+      {
+       "name": "Four Seasons",
+       "distance_mi": 0.2,
+       "rating": 4.7
+      },
+      {
+       "name": "El Castillo de Jagua",
+       "distance_mi": 0.28,
+       "rating": 4.3
+      },
+      {
+       "name": "Zhu Lang Dian",
+       "distance_mi": 0.27,
+       "rating": 4.3
+      },
+      {
+       "name": "Brooklyn Pizza II",
+       "distance_mi": 0.3,
+       "rating": 4.0
+      }
+     ],
+     "nearby_supermarkets": [
+      {
+       "name": "Brooklyn's Natural Deli",
+       "distance_mi": 0.04
+      },
+      {
+       "name": "Target Grocery",
+       "distance_mi": 0.16
+      },
+      {
+       "name": "MUNDO SUPERMARKET",
+       "distance_mi": 0.28
+      }
+     ],
+     "nearby_gyms": [
+      {
+       "name": "Retro Fitness",
+       "distance_mi": 0.2
+      },
+      {
+       "name": "Fit4Dance",
+       "distance_mi": 0.29
+      }
+     ],
+     "address": "8xx Flatbush Avenue",
+     "commute_home": "19 mins",
+     "commute_office": "45 mins"
+    },
+    {
+     "neighborhood": "Hamilton Heights",
+     "has_washer_dryer": false,
+     "price": 2850,
+     "bedrooms": "2",
+     "bathrooms": "1",
+     "available_at": "2026-05-01",
+     "nearby_bars": [
+      {
+       "name": "Caridad Restaurant",
+       "distance_mi": 0.29,
+       "rating": 4.4
+      },
+      {
+       "name": "Harlem Public",
+       "distance_mi": 0.34,
+       "rating": 4.5
+      },
+      {
+       "name": "Picante",
+       "distance_mi": 0.36,
+       "rating": 4.0
+      },
+      {
+       "name": "The Honey Well",
+       "distance_mi": 0.33,
+       "rating": 4.7
+      },
+      {
+       "name": "At The Wallace",
+       "distance_mi": 0.34,
+       "rating": 4.5
+      }
+     ],
+     "nearby_restaurants": [
+      {
+       "name": "Starbucks Coffee Company",
+       "distance_mi": 0.19,
+       "rating": 4.1
+      },
+      {
+       "name": "Caridad Restaurant",
+       "distance_mi": 0.29,
+       "rating": 4.4
+      },
+      {
+       "name": "Jimbo's Hamburger Palace",
+       "distance_mi": 0.19,
+       "rating": 4.1
+      },
+      {
+       "name": "Londel's",
+       "distance_mi": 0.34,
+       "rating": 4.1
+      },
+      {
+       "name": "Famous Fish Market",
+       "distance_mi": 0.09,
+       "rating": 4.5
+      }
+     ],
+     "nearby_supermarkets": [
+      {
+       "name": "Foodtown of St. Nicholas Ave",
+       "distance_mi": 0.21
+      },
+      {
+       "name": "Super Foodtown of Bradhurst",
+       "distance_mi": 0.23
+      },
+      {
+       "name": "3550 Food Corporation",
+       "distance_mi": 0.26
+      }
+     ],
+     "nearby_gyms": [
+      {
+       "name": "New York Sports Club",
+       "distance_mi": 0.23
+      },
+      {
+       "name": "UpDog Studios",
+       "distance_mi": 0.13
+      }
+     ],
+     "address": "3xx Convent Avenue",
+     "commute_home": "55 mins",
+     "commute_office": "29 mins"
+    },
+    {
+     "neighborhood": "Hamilton Heights",
+     "has_washer_dryer": true,
+     "price": 3200,
+     "bedrooms": "2",
+     "bathrooms": "1",
+     "available_at": "2026-05-01",
+     "nearby_bars": [
+      {
+       "name": "Harlem Public",
+       "distance_mi": 0.3,
+       "rating": 4.5
+      },
+      {
+       "name": "At The Wallace",
+       "distance_mi": 0.3,
+       "rating": 4.5
+      },
+      {
+       "name": "The Honey Well",
+       "distance_mi": 0.3,
+       "rating": 4.7
+      },
+      {
+       "name": "Patrick's Place",
+       "distance_mi": 0.2,
+       "rating": 4.8
+      },
+      {
+       "name": "Oh Craft! Beer & Wine",
+       "distance_mi": 0.2,
+       "rating": 4.8
+      }
+     ],
+     "nearby_restaurants": [
+      {
+       "name": "Starbucks Coffee Company",
+       "distance_mi": 0.25,
+       "rating": 4.1
+      },
+      {
+       "name": "Harlem Public",
+       "distance_mi": 0.3,
+       "rating": 4.5
+      },
+      {
+       "name": "Famous Fish Market",
+       "distance_mi": 0.24,
+       "rating": 4.5
+      },
+      {
+       "name": "Jimbo's Hamburger Palace",
+       "distance_mi": 0.33,
+       "rating": 4.1
+      },
+      {
+       "name": "Tsion Cafe",
+       "distance_mi": 0.05,
+       "rating": 4.6
+      }
+     ],
+     "nearby_supermarkets": [
+      {
+       "name": "Foodtown of St. Nicholas Ave",
+       "distance_mi": 0.07
+      },
+      {
+       "name": "Super Foodtown of Bradhurst",
+       "distance_mi": 0.3
+      },
+      {
+       "name": "3550 Food Corporation",
+       "distance_mi": 0.34
+      }
+     ],
+     "nearby_gyms": [
+      {
+       "name": "New York Sports Club",
+       "distance_mi": 0.28
+      },
+      {
+       "name": "Mindful Movement Practice with Kyle",
+       "distance_mi": 0.06
+      }
+     ],
+     "address": "7xx Saint Nicholas Avenue",
+     "commute_home": "52 mins",
+     "commute_office": "32 mins"
+    }
+   ]
+  },
+  {
+   "found_at": "Apr 03, 2026 at 08:20 PM",
+   "listings": [
+    {
+     "neighborhood": "Stuyvesant Heights",
+     "has_washer_dryer": true,
+     "price": 3400,
+     "bedrooms": "2",
+     "bathrooms": "2",
+     "available_at": "2026-05-01",
+     "nearby_bars": [
+      {
+       "name": "House Party Cafe & Lounge",
+       "distance_mi": 0.31,
+       "rating": 4.5
+      },
+      {
+       "name": "Kalina",
+       "distance_mi": 0.19,
+       "rating": 4.4
+      },
+      {
+       "name": "Understudy Community Cocktails",
+       "distance_mi": 0.05,
+       "rating": 4.8
+      },
+      {
+       "name": "Harvest Valley Fruit & Juice Bar",
+       "distance_mi": 0.14,
+       "rating": 4.6
+      },
+      {
+       "name": "Le Fatima",
+       "distance_mi": 0.19,
+       "rating": 4.5
+      }
+     ],
+     "nearby_restaurants": [
+      {
+       "name": "Sofia & Grace Cookie Company",
+       "distance_mi": 0.12,
+       "rating": 4.6
+      },
+      {
+       "name": "Toad Style",
+       "distance_mi": 0.14,
+       "rating": 4.4
+      },
+      {
+       "name": "Grandchamps",
+       "distance_mi": 0.26,
+       "rating": 4.2
+      },
+      {
+       "name": "House Party Cafe & Lounge",
+       "distance_mi": 0.31,
+       "rating": 4.5
+      },
+      {
+       "name": "Kalina",
+       "distance_mi": 0.19,
+       "rating": 4.4
+      }
+     ],
+     "nearby_supermarkets": [
+      {
+       "name": "Organic Fresh Market",
+       "distance_mi": 0.18
+      },
+      {
+       "name": "Two Ways Supermarket",
+       "distance_mi": 0.25
+      },
+      {
+       "name": "Global Farm Marketplace",
+       "distance_mi": 0.25
+      }
+     ],
+     "nearby_gyms": [
+      {
+       "name": "Evolve With Us Wellness",
+       "distance_mi": 0.1
+      },
+      {
+       "name": "Noir Yoga",
+       "distance_mi": 0.11
+      }
+     ],
+     "address": "8xx Hancock Street",
+     "commute_home": "19 mins",
+     "commute_office": "33 mins"
+    },
+    {
+     "neighborhood": "Ridgewood",
+     "has_washer_dryer": true,
+     "price": 3400,
+     "bedrooms": "2",
+     "bathrooms": "1.5",
+     "available_at": "2026-05-01",
+     "nearby_bars": [
+      {
+       "name": "Super Pollo",
+       "distance_mi": 0.24,
+       "rating": 4.5
+      },
+      {
+       "name": "Coyote Bohemio",
+       "distance_mi": 0.18,
+       "rating": 4.1
+      },
+      {
+       "name": "The Bad Old Days",
+       "distance_mi": 0.21,
+       "rating": 4.5
+      },
+      {
+       "name": "Julia's",
+       "distance_mi": 0.23,
+       "rating": 4.7
+      },
+      {
+       "name": "Cassette",
+       "distance_mi": 0.24,
+       "rating": 4.6
+      }
+     ],
+     "nearby_restaurants": [
+      {
+       "name": "Tasty's Diner",
+       "distance_mi": 0.16,
+       "rating": 4.2
+      },
+      {
+       "name": "Super Pollo",
+       "distance_mi": 0.24,
+       "rating": 4.5
+      },
+      {
+       "name": "El Montañero 🇨🇴",
+       "distance_mi": 0.17,
+       "rating": 4.1
+      },
+      {
+       "name": "Yummy Chinese 美味",
+       "distance_mi": 0.07,
+       "rating": 4.1
+      },
+      {
+       "name": "Coyote Bohemio",
+       "distance_mi": 0.18,
+       "rating": 4.1
+      }
+     ],
+     "nearby_supermarkets": [
+      {
+       "name": "FOOD BAZAAR",
+       "distance_mi": 0.34
+      },
+      {
+       "name": "Biedronka",
+       "distance_mi": 0.35
+      },
+      {
+       "name": "SuperFresh Supermarket",
+       "distance_mi": 0.04
+      }
+     ],
+     "nearby_gyms": [
+      {
+       "name": "International Boxing & Fitness",
+       "distance_mi": 0.09
+      },
+      {
+       "name": "Everyone Yoga",
+       "distance_mi": 0.12
+      }
+     ],
+     "address": "56-xx Myrtle Avenue",
+     "commute_home": "26 mins",
+     "commute_office": "32 mins"
+    },
+    {
+     "neighborhood": "Bushwick",
+     "has_washer_dryer": false,
+     "price": 3650,
+     "bedrooms": "2",
+     "bathrooms": "1",
+     "available_at": "2026-05-01",
+     "nearby_bars": [
+      {
+       "name": "Bossa Nova Civic Club",
+       "distance_mi": 0.32,
+       "rating": 4.3
+      },
+      {
+       "name": "Sunrise/Sunset",
+       "distance_mi": 0.13,
+       "rating": 4.3
+      },
+      {
+       "name": "Marco's",
+       "distance_mi": 0.31,
+       "rating": 4.4
+      },
+      {
+       "name": "The Buren",
+       "distance_mi": 0.14,
+       "rating": 4.0
+      },
+      {
+       "name": "El Monumento",
+       "distance_mi": 0.14,
+       "rating": 4.1
+      }
+     ],
+     "nearby_restaurants": [
+      {
+       "name": "Sunrise/Sunset",
+       "distance_mi": 0.13,
+       "rating": 4.3
+      },
+      {
+       "name": "BK Bagels",
+       "distance_mi": 0.24,
+       "rating": 4.2
+      },
+      {
+       "name": "Rosario Pizza",
+       "distance_mi": 0.35,
+       "rating": 4.5
+      },
+      {
+       "name": "Broadway Pizza",
+       "distance_mi": 0.2,
+       "rating": 4.7
+      },
+      {
+       "name": "All in one pizza",
+       "distance_mi": 0.3,
+       "rating": 4.1
+      }
+     ],
+     "nearby_supermarkets": [
+      {
+       "name": "Foodtown of Bushwick",
+       "distance_mi": 0.21
+      },
+      {
+       "name": "Fine Fare Supermarkets",
+       "distance_mi": 0.31
+      },
+      {
+       "name": "Jarabacoa Food Corporation",
+       "distance_mi": 0.31
+      }
+     ],
+     "nearby_gyms": [
+      {
+       "name": "GYM X Boxing",
+       "distance_mi": 0.31
+      }
+     ],
+     "address": "8xx Bushwick Avenue",
+     "commute_home": "25 mins",
+     "commute_office": "37 mins"
+    },
+    {
+     "neighborhood": "Ocean Hill",
+     "has_washer_dryer": true,
+     "price": 3399,
+     "bedrooms": "2",
+     "bathrooms": "1",
+     "available_at": "2026-05-01",
+     "nearby_bars": [
+      {
+       "name": "The Daily Press, Coffee House and Bar",
+       "distance_mi": 0.19,
+       "rating": 4.4
+      },
+      {
+       "name": "All Night Skate",
+       "distance_mi": 0.13,
+       "rating": 4.7
+      },
+      {
+       "name": "AUX Karaoke Box",
+       "distance_mi": 0.2,
+       "rating": 4.8
+      },
+      {
+       "name": "The Tiny Cupboard Comedy Club & Game Bar",
+       "distance_mi": 0.25,
+       "rating": 4.8
+      },
+      {
+       "name": "Olmo",
+       "distance_mi": 0.26,
+       "rating": 4.8
+      }
+     ],
+     "nearby_restaurants": [
+      {
+       "name": "Halal Royal Crown Chicken & Pizza",
+       "distance_mi": 0.22,
+       "rating": 4.1
+      },
+      {
+       "name": "The Daily Press, Coffee House and Bar",
+       "distance_mi": 0.19,
+       "rating": 4.4
+      },
+      {
+       "name": "Armando's Pizza",
+       "distance_mi": 0.24,
+       "rating": 4.3
+      },
+      {
+       "name": "New Jin Bu",
+       "distance_mi": 0.27,
+       "rating": 4.0
+      },
+      {
+       "name": "Mr Taco",
+       "distance_mi": 0.13,
+       "rating": 4.2
+      }
+     ],
+     "nearby_supermarkets": [
+      {
+       "name": "America's Food Basket of Atlantic Ave",
+       "distance_mi": 0.32
+      },
+      {
+       "name": "URBAN NATURAL VALLEY MARKET",
+       "distance_mi": 0.24
+      },
+      {
+       "name": "Two Ways Supermarket",
+       "distance_mi": 0.3
+      }
+     ],
+     "nearby_gyms": [
+      {
+       "name": "Palma Pilates",
+       "distance_mi": 0.1
+      },
+      {
+       "name": "Outdoor gym",
+       "distance_mi": 0.1
+      }
+     ],
+     "address": "2xx Sumpter Street",
+     "commute_home": "25 mins",
+     "commute_office": "39 mins"
+    },
+    {
+     "neighborhood": "Central Harlem",
+     "has_washer_dryer": true,
+     "price": 4250,
+     "bedrooms": "2",
+     "bathrooms": "2",
+     "available_at": "2026-05-01",
+     "nearby_bars": [
+      {
+       "name": "Red Rooster Harlem",
+       "distance_mi": 0.35,
+       "rating": 4.4
+      },
+      {
+       "name": "Sylvia's Restaurant",
+       "distance_mi": 0.35,
+       "rating": 4.3
+      },
+      {
+       "name": "Ginny's Supper Club",
+       "distance_mi": 0.35,
+       "rating": 4.5
+      },
+      {
+       "name": "Lenox Lounge",
+       "distance_mi": 0.36,
+       "rating": 4.5
+      },
+      {
+       "name": "Teamworkon3 Juice",
+       "distance_mi": 0.26,
+       "rating": 4.4
+      }
+     ],
+     "nearby_restaurants": [
+      {
+       "name": "Red Rooster Harlem",
+       "distance_mi": 0.35,
+       "rating": 4.4
+      },
+      {
+       "name": "Sylvia's Restaurant",
+       "distance_mi": 0.35,
+       "rating": 4.3
+      },
+      {
+       "name": "Ginny's Supper Club",
+       "distance_mi": 0.35,
+       "rating": 4.5
+      },
+      {
+       "name": "Accra Express Restaurant",
+       "distance_mi": 0.08,
+       "rating": 4.4
+      },
+      {
+       "name": "Uptown Veg",
+       "distance_mi": 0.12,
+       "rating": 4.4
+      }
+     ],
+     "nearby_supermarkets": [
+      {
+       "name": "City Fresh Market",
+       "distance_mi": 0.37
+      },
+      {
+       "name": "FOOD BAZAAR",
+       "distance_mi": 0.24
+      }
+     ],
+     "nearby_gyms": [
+      {
+       "name": "Harlem Yoga Studio",
+       "distance_mi": 0.29
+      },
+      {
+       "name": "JDI Barbell Harlem",
+       "distance_mi": 0.22
+      }
+     ],
+     "address": "18xx Park Avenue",
+     "commute_home": "52 mins",
+     "commute_office": "32 mins"
+    }
+   ]
+  },
+  {
+   "found_at": "Apr 04, 2026 at 10:48 AM",
+   "listings": [
+    {
+     "neighborhood": "Bushwick",
+     "has_washer_dryer": false,
+     "price": 3522,
+     "bedrooms": "2",
+     "bathrooms": "1.5",
+     "available_at": "2026-05-01",
+     "nearby_bars": [
+      {
+       "name": "Merv’s Bar",
+       "distance_mi": 0.03,
+       "rating": 4.5
+      },
+      {
+       "name": "Talon Bar",
+       "distance_mi": 0.1,
+       "rating": 4.3
+      },
+      {
+       "name": "Bootleg Bar",
+       "distance_mi": 0.13,
+       "rating": 4.4
+      },
+      {
+       "name": "El Mekkah Bar & Grill",
+       "distance_mi": 0.13,
+       "rating": 4.2
+      },
+      {
+       "name": "New Apolo",
+       "distance_mi": 0.09,
+       "rating": 4.2
+      }
+     ],
+     "nearby_restaurants": [
+      {
+       "name": "D' Montazo",
+       "distance_mi": 0.1,
+       "rating": 4.1
+      },
+      {
+       "name": "Tony's Pizza",
+       "distance_mi": 0.19,
+       "rating": 4.6
+      },
+      {
+       "name": "Burger King",
+       "distance_mi": 0.19,
+       "rating": 4.0
+      },
+      {
+       "name": "Merv’s Bar",
+       "distance_mi": 0.03,
+       "rating": 4.5
+      },
+      {
+       "name": "Lucy's Vietnamese",
+       "distance_mi": 0.04,
+       "rating": 4.1
+      }
+     ],
+     "nearby_supermarkets": [
+      {
+       "name": "FOOD BAZAAR",
+       "distance_mi": 0.24
+      },
+      {
+       "name": "Sea Town Fish & Meat Market",
+       "distance_mi": 0.1
+      },
+      {
+       "name": "Myrtle Ave Supermarket",
+       "distance_mi": 0.07
+      }
+     ],
+     "nearby_gyms": [
+      {
+       "name": "Mind Pilates - Bushwick",
+       "distance_mi": 0.27
+      },
+      {
+       "name": "WolfMother Yoga - Heated Yoga, Sound Bath, Breathwork",
+       "distance_mi": 0.36
+      }
+     ],
+     "address": "2xx Irving Avenue",
+     "commute_home": "20 mins",
+     "commute_office": "35 mins"
+    },
+    {
+     "neighborhood": "Bushwick",
+     "has_washer_dryer": false,
+     "price": 3800,
+     "bedrooms": "2",
+     "bathrooms": "2",
+     "available_at": "2026-05-01",
+     "nearby_bars": [
+      {
+       "name": "Bossa Nova Civic Club",
+       "distance_mi": 0.32,
+       "rating": 4.3
+      },
+      {
+       "name": "Sunrise/Sunset",
+       "distance_mi": 0.13,
+       "rating": 4.3
+      },
+      {
+       "name": "Marco's",
+       "distance_mi": 0.31,
+       "rating": 4.4
+      },
+      {
+       "name": "The Buren",
+       "distance_mi": 0.14,
+       "rating": 4.0
+      },
+      {
+       "name": "El Monumento",
+       "distance_mi": 0.14,
+       "rating": 4.1
+      }
+     ],
+     "nearby_restaurants": [
+      {
+       "name": "Sunrise/Sunset",
+       "distance_mi": 0.13,
+       "rating": 4.3
+      },
+      {
+       "name": "BK Bagels",
+       "distance_mi": 0.24,
+       "rating": 4.2
+      },
+      {
+       "name": "Rosario Pizza",
+       "distance_mi": 0.35,
+       "rating": 4.5
+      },
+      {
+       "name": "Broadway Pizza",
+       "distance_mi": 0.2,
+       "rating": 4.7
+      },
+      {
+       "name": "All in one pizza",
+       "distance_mi": 0.3,
+       "rating": 4.1
+      }
+     ],
+     "nearby_supermarkets": [
+      {
+       "name": "Foodtown of Bushwick",
+       "distance_mi": 0.21
+      },
+      {
+       "name": "Fine Fare Supermarkets",
+       "distance_mi": 0.31
+      },
+      {
+       "name": "Jarabacoa Food Corporation",
+       "distance_mi": 0.31
+      }
+     ],
+     "nearby_gyms": [
+      {
+       "name": "GYM X Boxing",
+       "distance_mi": 0.31
+      }
+     ],
+     "address": "8xx Bushwick Avenue",
+     "commute_home": "25 mins",
+     "commute_office": "37 mins"
+    },
+    {
+     "neighborhood": "Flatbush",
+     "has_washer_dryer": true,
+     "price": 3800,
+     "bedrooms": "2",
+     "bathrooms": "2",
+     "available_at": "2026-05-01",
+     "nearby_bars": [
+      {
+       "name": "MangoSeed Restaurant",
+       "distance_mi": 0.13,
+       "rating": 4.4
+      },
+      {
+       "name": "The Westbury Inn",
+       "distance_mi": 0.29,
+       "rating": 4.3
+      },
+      {
+       "name": "PiCH Restaurant and Lounge",
+       "distance_mi": 0.1,
+       "rating": 4.2
+      },
+      {
+       "name": "Risbo",
+       "distance_mi": 0.24,
+       "rating": 4.5
+      },
+      {
+       "name": "ruth",
+       "distance_mi": 0.3,
+       "rating": 4.8
+      }
+     ],
+     "nearby_restaurants": [
+      {
+       "name": "MangoSeed Restaurant",
+       "distance_mi": 0.13,
+       "rating": 4.4
+      },
+      {
+       "name": "Four Seasons",
+       "distance_mi": 0.2,
+       "rating": 4.7
+      },
+      {
+       "name": "El Castillo de Jagua",
+       "distance_mi": 0.28,
+       "rating": 4.3
+      },
+      {
+       "name": "Zhu Lang Dian",
+       "distance_mi": 0.27,
+       "rating": 4.3
+      },
+      {
+       "name": "Brooklyn Pizza II",
+       "distance_mi": 0.3,
+       "rating": 4.0
+      }
+     ],
+     "nearby_supermarkets": [
+      {
+       "name": "Brooklyn's Natural Deli",
+       "distance_mi": 0.04
+      },
+      {
+       "name": "Target Grocery",
+       "distance_mi": 0.16
+      },
+      {
+       "name": "MUNDO SUPERMARKET",
+       "distance_mi": 0.28
+      }
+     ],
+     "nearby_gyms": [
+      {
+       "name": "Retro Fitness",
+       "distance_mi": 0.2
+      },
+      {
+       "name": "Fit4Dance",
+       "distance_mi": 0.29
+      }
+     ],
+     "address": "8xx Flatbush Avenue",
+     "commute_home": "19 mins",
+     "commute_office": "45 mins"
+    },
+    {
+     "neighborhood": "East Harlem",
+     "has_washer_dryer": false,
+     "price": 4000,
+     "bedrooms": "2",
+     "bathrooms": "1",
+     "available_at": "2026-05-01",
+     "nearby_bars": [
+      {
+       "name": "SAPOARA Restaurant & Bar",
+       "distance_mi": 0.24,
+       "rating": 4.5
+      },
+      {
+       "name": "Nocciola Ristorante",
+       "distance_mi": 0.27,
+       "rating": 4.5
+      },
+      {
+       "name": "El Kallejon",
+       "distance_mi": 0.34,
+       "rating": 4.6
+      },
+      {
+       "name": "Teddy's F&B Bar & Grill",
+       "distance_mi": 0.11,
+       "rating": 4.4
+      },
+      {
+       "name": "Dell'Aria - Italian Love for Coffee",
+       "distance_mi": 0.15,
+       "rating": 4.7
+      }
+     ],
+     "nearby_restaurants": [
+      {
+       "name": "Makana",
+       "distance_mi": 0.19,
+       "rating": 4.0
+      },
+      {
+       "name": "El Nuevo Caridad",
+       "distance_mi": 0.23,
+       "rating": 4.1
+      },
+      {
+       "name": "Ricardo Steakhouse",
+       "distance_mi": 0.13,
+       "rating": 4.5
+      },
+      {
+       "name": "Patsy's Pizzeria",
+       "distance_mi": 0.3,
+       "rating": 4.5
+      },
+      {
+       "name": "La Nostra Pizzeria",
+       "distance_mi": 0.11,
+       "rating": 4.5
+      }
+     ],
+     "nearby_supermarkets": [
+      {
+       "name": "Shop Fair of 110th Street",
+       "distance_mi": 0.3
+      },
+      {
+       "name": "City Fresh Market",
+       "distance_mi": 0.31
+      },
+      {
+       "name": "ALDI",
+       "distance_mi": 0.34
+      }
+     ],
+     "nearby_gyms": [
+      {
+       "name": "Dwight School Athletic Center",
+       "distance_mi": 0.13
+      },
+      {
+       "name": "Planet Fitness",
+       "distance_mi": 0.37
+      }
+     ],
+     "address": "3xx East 112th Street",
+     "commute_home": "41 mins",
+     "commute_office": "27 mins"
+    },
+    {
+     "neighborhood": "Manhattan Valley",
+     "has_washer_dryer": true,
+     "price": 3795,
+     "bedrooms": "2",
+     "bathrooms": "1",
+     "available_at": "2026-05-05",
+     "nearby_bars": [
+      {
+       "name": "Smoke Jazz & Supper Club",
+       "distance_mi": 0.37,
+       "rating": 4.5
+      },
+      {
+       "name": "Cafe du Soleil",
+       "distance_mi": 0.36,
+       "rating": 4.3
+      },
+      {
+       "name": "Ten Twenty Bar",
+       "distance_mi": 0.31,
+       "rating": 4.4
+      },
+      {
+       "name": "Suite",
+       "distance_mi": 0.28,
+       "rating": 4.1
+      },
+      {
+       "name": "Tartina",
+       "distance_mi": 0.33,
+       "rating": 4.3
+      }
+     ],
+     "nearby_restaurants": [
+      {
+       "name": "Awash Ethiopian Restaurant",
+       "distance_mi": 0.21,
+       "rating": 4.4
+      },
+      {
+       "name": "Thai Market",
+       "distance_mi": 0.24,
+       "rating": 4.3
+      },
+      {
+       "name": "Smoke Jazz & Supper Club",
+       "distance_mi": 0.37,
+       "rating": 4.5
+      },
+      {
+       "name": "Cafe du Soleil",
+       "distance_mi": 0.36,
+       "rating": 4.3
+      },
+      {
+       "name": "Roti Roll (Bombay Frankie)",
+       "distance_mi": 0.28,
+       "rating": 4.4
+      }
+     ],
+     "nearby_supermarkets": [
+      {
+       "name": "Associated Supermarket / Pizza Hut",
+       "distance_mi": 0.32
+      },
+      {
+       "name": "Los Vecinos Meat Market & Supermarket",
+       "distance_mi": 0.23
+      }
+     ],
+     "nearby_gyms": [
+      {
+       "name": "Liberated Fitness",
+       "distance_mi": 0.16
+      },
+      {
+       "name": "International Kinesiology & Training Institute - IKTI",
+       "distance_mi": 0.36
+      }
+     ],
+     "address": "5x West 106th Street",
+     "commute_home": "41 mins",
+     "commute_office": "29 mins"
+    },
+    {
+     "neighborhood": "Central Harlem",
+     "has_washer_dryer": false,
+     "price": 3450,
+     "bedrooms": "2",
+     "bathrooms": "1",
+     "available_at": "2026-05-01",
+     "nearby_bars": [
+      {
+       "name": "Red Rooster Harlem",
+       "distance_mi": 0.12,
+       "rating": 4.4
+      },
+      {
+       "name": "Sylvia's Restaurant",
+       "distance_mi": 0.1,
+       "rating": 4.3
+      },
+      {
+       "name": "Corner Social",
+       "distance_mi": 0.14,
+       "rating": 4.3
+      },
+      {
+       "name": "Ginny's Supper Club",
+       "distance_mi": 0.12,
+       "rating": 4.5
+      },
+      {
+       "name": "Lenox Lounge",
+       "distance_mi": 0.17,
+       "rating": 4.5
+      }
+     ],
+     "nearby_restaurants": [
+      {
+       "name": "Red Rooster Harlem",
+       "distance_mi": 0.12,
+       "rating": 4.4
+      },
+      {
+       "name": "Sylvia's Restaurant",
+       "distance_mi": 0.1,
+       "rating": 4.3
+      },
+      {
+       "name": "Corner Social",
+       "distance_mi": 0.14,
+       "rating": 4.3
+      },
+      {
+       "name": "Ginny's Supper Club",
+       "distance_mi": 0.12,
+       "rating": 4.5
+      },
+      {
+       "name": "Harlem Shake",
+       "distance_mi": 0.22,
+       "rating": 4.2
+      }
+     ],
+     "nearby_supermarkets": [
+      {
+       "name": "Express Deli Corp",
+       "distance_mi": 0.17
+      },
+      {
+       "name": "Whole Foods Market",
+       "distance_mi": 0.2
+      },
+      {
+       "name": "Trader Joe's",
+       "distance_mi": 0.23
+      }
+     ],
+     "nearby_gyms": [
+      {
+       "name": "Harlem Yoga Studio",
+       "distance_mi": 0.14
+      },
+      {
+       "name": "Harlem Holistic Center",
+       "distance_mi": 0.17
+      }
+     ],
+     "address": "3x West 127th Street",
+     "commute_home": "47 mins",
+     "commute_office": "26 mins"
+    }
+   ]
+  },
+  {
+   "found_at": "Apr 05, 2026 at 10:11 PM",
+   "listings": [
+    {
+     "neighborhood": "Ridgewood",
+     "has_washer_dryer": true,
+     "price": 3495,
+     "bedrooms": "2",
+     "bathrooms": "1",
+     "available_at": "2026-05-01",
+     "nearby_bars": [
+      {
+       "name": "Super Pollo",
+       "distance_mi": 0.13,
+       "rating": 4.5
+      },
+      {
+       "name": "Cozy Corner",
+       "distance_mi": 0.14,
+       "rating": 4.5
+      },
+      {
+       "name": "Cassette",
+       "distance_mi": 0.11,
+       "rating": 4.6
+      },
+      {
+       "name": "Julia's",
+       "distance_mi": 0.17,
+       "rating": 4.7
+      },
+      {
+       "name": "Coyote Bohemio",
+       "distance_mi": 0.34,
+       "rating": 4.1
+      }
+     ],
+     "nearby_restaurants": [
+      {
+       "name": "Tasty's Diner",
+       "distance_mi": 0.05,
+       "rating": 4.2
+      },
+      {
+       "name": "Super Pollo",
+       "distance_mi": 0.13,
+       "rating": 4.5
+      },
+      {
+       "name": "Corato II Pizza",
+       "distance_mi": 0.33,
+       "rating": 4.1
+      },
+      {
+       "name": "Cozy Corner",
+       "distance_mi": 0.14,
+       "rating": 4.5
+      },
+      {
+       "name": "Bamboo Tropical",
+       "distance_mi": 0.11,
+       "rating": 4.1
+      }
+     ],
+     "nearby_supermarkets": [
+      {
+       "name": "Biedronka",
+       "distance_mi": 0.19
+      },
+      {
+       "name": "Europa",
+       "distance_mi": 0.24
+      },
+      {
+       "name": "Fresh n save (Key Food)",
+       "distance_mi": 0.2
+      }
+     ],
+     "nearby_gyms": [
+      {
+       "name": "Everyone Yoga",
+       "distance_mi": 0.05
+      },
+      {
+       "name": "Daya Yoga Studio Ridgewood",
+       "distance_mi": 0.15
+      }
+     ],
+     "address": "58-xx 70th Avenue",
+     "commute_home": "26 mins",
+     "commute_office": "30 mins"
+    },
+    {
+     "neighborhood": "Flatbush",
+     "has_washer_dryer": true,
+     "price": 3995,
+     "bedrooms": "2",
+     "bathrooms": "2",
+     "available_at": "2026-05-01",
+     "nearby_bars": [
+      {
+       "name": "Camillo",
+       "distance_mi": 0.36,
+       "rating": 4.6
+      },
+      {
+       "name": "The Rogers Garden",
+       "distance_mi": 0.23,
+       "rating": 4.5
+      },
+      {
+       "name": "Market Bar",
+       "distance_mi": 0.23,
+       "rating": 4.3
+      },
+      {
+       "name": "The Deia",
+       "distance_mi": 0.25,
+       "rating": 4.3
+      },
+      {
+       "name": "ballers Chill Spot",
+       "distance_mi": 0.28,
+       "rating": 5.0
+      }
+     ],
+     "nearby_restaurants": [
+      {
+       "name": "Akwaaba Restaurant",
+       "distance_mi": 0.26,
+       "rating": 4.4
+      },
+      {
+       "name": "Snatch & Go Internet Juice Cafe & Bar",
+       "distance_mi": 0.31,
+       "rating": 4.5
+      },
+      {
+       "name": "Nostrand Donut Shop And Mexican Food",
+       "distance_mi": 0.25,
+       "rating": 4.2
+      },
+      {
+       "name": "Immaculee II Haitian Restaurant & Bakery",
+       "distance_mi": 0.2,
+       "rating": 4.3
+      },
+      {
+       "name": "fit food",
+       "distance_mi": 0.1,
+       "rating": 5.0
+      }
+     ],
+     "nearby_supermarkets": [
+      {
+       "name": "CTown Supermarkets",
+       "distance_mi": 0.11
+      },
+      {
+       "name": "Lincoln Market",
+       "distance_mi": 0.2
+      },
+      {
+       "name": "Associated Fresh",
+       "distance_mi": 0.32
+      }
+     ],
+     "nearby_gyms": [
+      {
+       "name": "Fringe Pilates",
+       "distance_mi": 0.24
+      },
+      {
+       "name": "Fringe Pilates",
+       "distance_mi": 0.24
+      }
+     ],
+     "address": "3xx Lenox Road",
+     "commute_home": "20 mins",
+     "commute_office": "40 mins"
+    },
+    {
+     "neighborhood": "Bushwick",
+     "has_washer_dryer": false,
+     "price": 3650,
+     "bedrooms": "2",
+     "bathrooms": "1",
+     "available_at": "2026-05-01",
+     "nearby_bars": [
+      {
+       "name": "Bossa Nova Civic Club",
+       "distance_mi": 0.32,
+       "rating": 4.3
+      },
+      {
+       "name": "Sunrise/Sunset",
+       "distance_mi": 0.13,
+       "rating": 4.3
+      },
+      {
+       "name": "Marco's",
+       "distance_mi": 0.31,
+       "rating": 4.4
+      },
+      {
+       "name": "The Buren",
+       "distance_mi": 0.14,
+       "rating": 4.0
+      },
+      {
+       "name": "El Monumento",
+       "distance_mi": 0.14,
+       "rating": 4.1
+      }
+     ],
+     "nearby_restaurants": [
+      {
+       "name": "Sunrise/Sunset",
+       "distance_mi": 0.13,
+       "rating": 4.3
+      },
+      {
+       "name": "BK Bagels",
+       "distance_mi": 0.24,
+       "rating": 4.2
+      },
+      {
+       "name": "Rosario Pizza",
+       "distance_mi": 0.35,
+       "rating": 4.5
+      },
+      {
+       "name": "Broadway Pizza",
+       "distance_mi": 0.2,
+       "rating": 4.7
+      },
+      {
+       "name": "All in one pizza",
+       "distance_mi": 0.3,
+       "rating": 4.1
+      }
+     ],
+     "nearby_supermarkets": [
+      {
+       "name": "Foodtown of Bushwick",
+       "distance_mi": 0.21
+      },
+      {
+       "name": "Fine Fare Supermarkets",
+       "distance_mi": 0.31
+      },
+      {
+       "name": "Jarabacoa Food Corporation",
+       "distance_mi": 0.31
+      }
+     ],
+     "nearby_gyms": [
+      {
+       "name": "GYM X Boxing",
+       "distance_mi": 0.31
+      }
+     ],
+     "address": "8xx Bushwick Avenue",
+     "commute_home": "25 mins",
+     "commute_office": "37 mins"
+    },
+    {
+     "neighborhood": "East Harlem",
+     "has_washer_dryer": true,
+     "price": 3000,
+     "bedrooms": "2",
+     "bathrooms": "1",
+     "available_at": "2026-05-01",
+     "nearby_bars": [
+      {
+       "name": "SAPOARA Restaurant & Bar",
+       "distance_mi": 0.06,
+       "rating": 4.5
+      },
+      {
+       "name": "Nocciola Ristorante",
+       "distance_mi": 0.21,
+       "rating": 4.5
+      },
+      {
+       "name": "El Kallejon",
+       "distance_mi": 0.28,
+       "rating": 4.6
+      },
+      {
+       "name": "SkyBox Sports Bar",
+       "distance_mi": 0.03,
+       "rating": 4.7
+      },
+      {
+       "name": "The Terrace",
+       "distance_mi": 0.08,
+       "rating": 4.7
+      }
+     ],
+     "nearby_restaurants": [
+      {
+       "name": "Makana",
+       "distance_mi": 0.03,
+       "rating": 4.0
+      },
+      {
+       "name": "El Nuevo Caridad",
+       "distance_mi": 0.17,
+       "rating": 4.1
+      },
+      {
+       "name": "Patsy's Pizzeria",
+       "distance_mi": 0.12,
+       "rating": 4.5
+      },
+      {
+       "name": "Ricardo Steakhouse",
+       "distance_mi": 0.3,
+       "rating": 4.5
+      },
+      {
+       "name": "La Nostra Pizzeria",
+       "distance_mi": 0.29,
+       "rating": 4.5
+      }
+     ],
+     "nearby_supermarkets": [
+      {
+       "name": "ALDI",
+       "distance_mi": 0.16
+      },
+      {
+       "name": "Shop Fair of 116th Street",
+       "distance_mi": 0.33
+      }
+     ],
+     "nearby_gyms": [
+      {
+       "name": "Planet Fitness",
+       "distance_mi": 0.21
+      },
+      {
+       "name": "Dwight School Athletic Center",
+       "distance_mi": 0.3
+      }
+     ],
+     "address": "22xx 1st Avenue",
+     "commute_home": "42 mins",
+     "commute_office": "27 mins"
+    },
+    {
+     "neighborhood": "Central Harlem",
+     "has_washer_dryer": true,
+     "price": 3600,
+     "bedrooms": "2",
+     "bathrooms": "1.5",
+     "available_at": "2026-05-15",
+     "nearby_bars": [
+      {
+       "name": "Red Rooster Harlem",
+       "distance_mi": 0.24,
+       "rating": 4.4
+      },
+      {
+       "name": "Sylvia's Restaurant",
+       "distance_mi": 0.2,
+       "rating": 4.3
+      },
+      {
+       "name": "Corner Social",
+       "distance_mi": 0.2,
+       "rating": 4.3
+      },
+      {
+       "name": "Ginny's Supper Club",
+       "distance_mi": 0.24,
+       "rating": 4.5
+      },
+      {
+       "name": "Shrine",
+       "distance_mi": 0.2,
+       "rating": 4.5
+      }
+     ],
+     "nearby_restaurants": [
+      {
+       "name": "Red Rooster Harlem",
+       "distance_mi": 0.24,
+       "rating": 4.4
+      },
+      {
+       "name": "Sylvia's Restaurant",
+       "distance_mi": 0.2,
+       "rating": 4.3
+      },
+      {
+       "name": "Corner Social",
+       "distance_mi": 0.2,
+       "rating": 4.3
+      },
+      {
+       "name": "Ginny's Supper Club",
+       "distance_mi": 0.24,
+       "rating": 4.5
+      },
+      {
+       "name": "Shrine",
+       "distance_mi": 0.2,
+       "rating": 4.5
+      }
+     ],
+     "nearby_supermarkets": [
+      {
+       "name": "Express Deli Corp",
+       "distance_mi": 0.1
+      },
+      {
+       "name": "Whole Foods Market",
+       "distance_mi": 0.27
+      },
+      {
+       "name": "Associated Supermarket of Adam Clayton Powell",
+       "distance_mi": 0.11
+      }
+     ],
+     "nearby_gyms": [
+      {
+       "name": "Harlem Holistic Center",
+       "distance_mi": 0.09
+      },
+      {
+       "name": "Planet Fitness",
+       "distance_mi": 0.27
+      }
+     ],
+     "address": "1xx West 130th Street",
+     "commute_home": "48 mins",
+     "commute_office": "28 mins"
+    }
+   ]
+  }
+ ]
+}

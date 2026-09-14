@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>StreetEasy Scanner · Demo</title>
+<style>
+  :root {
+    --bg: #eef0f3; --pane: #ffffff; --line: #e1e4e8; --line-2: #d0d5db;
+    --text: #1f2328; --dim: #59636e; --faint: #8b949e;
+    --accent: #1a73e8; --accent-soft: #e8f0fe; --unread: #1a73e8;
+    --ui: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body { background: var(--bg); color: var(--text); font: 14px/1.45 var(--ui); display: flex; flex-direction: column; }
+
+  #demo-bar {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    padding: 7px 18px; background: #1f2328; color: #d1d7e0; font-size: 12.5px;
+  }
+  #demo-bar a { color: #fff; font-weight: 600; text-decoration: none; }
+  #demo-bar a:hover, #demo-bar a:focus-visible { text-decoration: underline; text-underline-offset: 3px; }
+  #demo-bar b { color: #fff; }
+
+  .app { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(280px, 360px) 1fr; }
+
+  /* ---- inbox ---- */
+  .inbox { background: var(--pane); border-right: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; }
+  .inbox-head { display: flex; align-items: baseline; gap: 8px; padding: 18px 18px 10px; }
+  .inbox-head h1 { margin: 0; font-size: 20px; font-weight: 650; }
+  .inbox-head span { color: var(--faint); font-size: 12.5px; }
+  .msgs { list-style: none; margin: 0; padding: 0; overflow-y: auto; }
+  .msg {
+    display: grid; grid-template-columns: 10px 1fr auto; gap: 2px 10px; align-items: baseline;
+    width: 100%; padding: 12px 18px 12px 12px;
+    border: 0; border-bottom: 1px solid var(--line); background: none; text-align: left;
+    font: inherit; color: inherit; cursor: pointer;
+  }
+  .msg:hover { background: #f6f8fa; }
+  .msg:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .msg.open { background: var(--accent-soft); }
+  .msg .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--unread); align-self: center; grid-row: 1; }
+  .msg.read .dot { visibility: hidden; }
+  .msg .from { grid-column: 2; font-weight: 650; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .msg.read .from { font-weight: 500; }
+  .msg .when { grid-column: 3; color: var(--faint); font-size: 12px; white-space: nowrap; }
+  .msg .subj { grid-column: 2 / 4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .msg:not(.read) .subj { font-weight: 600; }
+  .msg .snip { grid-column: 2 / 4; color: var(--dim); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .msg .count { color: var(--faint); font-weight: 400; margin-left: 4px; }
+
+  /* ---- reading pane ---- */
+  .reader { min-height: 0; overflow-y: auto; }
+  .reader-inner { max-width: 820px; margin: 0 auto; padding: 22px 28px 60px; }
+  .back { display: none; margin-bottom: 10px; border: 0; background: none; color: var(--accent); font: 600 14px var(--ui); padding: 4px 0; cursor: pointer; }
+  .reader h2 { margin: 0 0 16px; font-size: 21px; font-weight: 600; line-height: 1.3; }
+  .mail { background: var(--pane); border: 1px solid var(--line); border-radius: 10px; margin-bottom: 14px; overflow: hidden; }
+  .head { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+  .avatar { flex: none; width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; font-size: 19px; background: #e6f4ea; }
+  .avatar.me { background: #fde7d9; font: 700 14px var(--ui); color: #b4500e; }
+  .who { min-width: 0; flex: 1; }
+  .who .name { font-weight: 650; }
+  .who .addr { color: var(--faint); font-size: 12.5px; }
+  .who .to { color: var(--dim); font-size: 12.5px; }
+  .head time { color: var(--faint); font-size: 12.5px; white-space: nowrap; align-self: flex-start; }
+  .body-frame { display: block; width: 100%; border: 0; min-height: 200px; }
+  .body-text { margin: 0; padding: 16px 18px 18px; white-space: pre-wrap; font: 14px/1.55 var(--ui); }
+  .caption { color: var(--faint); font-size: 12px; margin: -4px 2px 14px; }
+  .body-note { padding: 16px 20px 18px; font-size: 14.5px; line-height: 1.6; }
+  .body-note p { margin: 0 0 10px; }
+  .body-note ul { margin: 0 0 12px; padding-left: 20px; }
+  .body-note li { margin: 0 0 7px; }
+  .body-note .muted { color: var(--faint); font-size: 12.5px; margin: 0; }
+  .msg.pinned { background: #fffbea; }
+  .msg.pinned.open { background: #fff3c4; }
+
+  @media (max-width: 760px) {
+    .app { grid-template-columns: 1fr; }
+    .app.reading .inbox { display: none; }
+    .app:not(.reading) .reader { display: none; }
+    .back { display: inline-block; }
+    .reader-inner { padding: 14px 16px 48px; }
+    .head { padding: 12px 14px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="demo-bar">
+  <a href="/" id="to-portfolio">← Portfolio</a>
+  <span><b>Demo</b> · real listings from my April 2026 alerts, spread over a week. Addresses are blurred to the block and the commute times are made up.</span>
+  <a href="architecture.html">Architecture</a>
+</div>
+
+<div class="app" id="app">
+  <nav class="inbox" aria-label="Inbox">
+    <div class="inbox-head"><h1>Inbox</h1><span id="inbox-count"></span></div>
+    <ul class="msgs" id="msgs"></ul>
+  </nav>
+  <main class="reader" id="reader" aria-live="polite">
+    <div class="reader-inner" id="reader-inner"></div>
+  </main>
+</div>
+
+<script>
+(async () => {
+  const { emails } = await (await fetch('listings.json')).json();
+  const SENDER = { name: 'StreetEasy Scanner', addr: 'scanner@raspberry-pi' };
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const money = (n) => '$' + n.toLocaleString('en-US');
+
+  // ---- the scanner's email, rebuilt from src/notifier.py --------------------
+  const placeList = (places, rating = true) => !places || !places.length ? 'none found' :
+    places.map((p) => `${esc(p.name)} (${p.distance_mi}mi${rating && p.rating ? ' ★' + p.rating : ''})`).join(' · ');
+
+  function card(i, l) {
+    const wd = l.has_washer_dryer ? "<span style='color: #27ae60; font-size: 12px;'> ✓ Washer/dryer in unit</span>" : '';
+    const commute = [`❤️ <strong>Travel to partner:</strong> ${l.commute_home}`, `🏢 <strong>To the office:</strong> ${l.commute_office}`];
+    const rows = [['🍺', 'Bars/Clubs', l.nearby_bars, true], ['🍽️', 'Restaurants', l.nearby_restaurants, true],
+                  ['🛒', 'Supermarkets', l.nearby_supermarkets, false], ['🏋️', 'Gyms', l.nearby_gyms, false]]
+      .filter((r) => r[2] && r[2].length)
+      .map(([e, label, places, rating]) => `<div style='margin: 3px 0;'>${e} <strong>${label}:</strong> ${placeList(places, rating)}</div>`)
+      .join('');
+    return `
+    <div style="border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px; margin-bottom: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+                <span style="color: #aaa; font-size: 12px;">#${i}</span>
+                <span style="display: block; font-size: 17px; font-weight: bold; color: #1a73e8; margin: 2px 0;">${esc(l.address)}</span>
+                <span style="color: #666; font-size: 13px;">${esc(l.neighborhood)}${wd}</span>
+            </div>
+            <div style="text-align: right; white-space: nowrap; margin-left: 16px;">
+                <div style="font-size: 20px; font-weight: bold; color: #222;">${money(l.price)}<span style="font-size: 13px; color: #888;">/mo</span></div>
+                <div style="font-size: 13px; color: #666;">${l.bedrooms}BR / ${l.bathrooms}BA</div>
+                <div style="font-size: 12px; color: #aaa;">Avail. ${esc(l.available_at)}</div>
+            </div>
+        </div>
+        <p style='margin: 6px 0; color: #444; font-size: 13px;'>${commute.join(' &nbsp;·&nbsp; ')}</p>
+        ${rows ? `<div style='margin-top: 8px; font-size: 12px; color: #555;'>${rows}</div>` : ''}
+    </div>`;
+  }
+
+  function alertHtml(listings, foundAt) {
+    const n = listings.length;
+    return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>
+    <body style="font-family: Arial, sans-serif; max-width: 680px; margin: 0 auto; padding: 20px; color: #333;">
+        <h2 style="margin-bottom: 4px;">🏠 ${n} Apartment${n > 1 ? 's' : ''} Found on StreetEasy</h2>
+        <p style="color: #999; margin-top: 0; font-size: 13px;">Found at ${foundAt}</p>
+        <div style="margin-bottom: 24px;">
+            <div style="font-size: 13px; font-weight: bold; color: #1a73e8; letter-spacing: 0.5px;
+                        border-bottom: 2px solid #1a73e8; padding-bottom: 6px; margin-bottom: 12px;">
+                🆕 Just Posted
+            </div>
+            ${listings.map((l, i) => card(i + 1, l)).join('')}
+        </div>
+        <p style="color: #bbb; font-size: 11px; margin-top: 24px; border-top: 1px solid #eee; padding-top: 12px;">
+            Sent by your StreetEasy scanner · Ranked by price &amp; neighborhood preference
+        </p>
+    </body></html>`;
+  }
+
+  // ---- the mailbox --------------------------------------------------------
+  // "Apr 05, 2026 at 10:11 PM" (the email body's format) -> "Apr 5, 2026, 10:11 PM"
+  const clientTime = (foundAt) => foundAt.replace(/ 0(\d),/, ' $1,').replace(' at ', ', ').replace(/, 0(\d):/, ', $1:');
+  const alert = ({ found_at: foundAt, listings }) => ({
+    subject: `🏠 ${listings.length} apartment${listings.length > 1 ? 's' : ''} found on StreetEasy`,
+    when: clientTime(foundAt),
+    snippet: `${listings[0].address} — ${listings[0].neighborhood} · ${money(listings[0].price)}/mo · ${listings[0].bedrooms}BR`,
+    parts: [{ from: SENDER, when: clientTime(foundAt), html: alertHtml(listings, foundAt) }],
+  });
+  const alerts = emails.map(alert).reverse();   // newest first, like any inbox
+  const thread = {
+    subject: 'Re: ' + alerts[0].subject,
+    when: 'Apr 5, 2026, 10:26 PM',
+    snippet: "Done. Here's what changed: Areas: + Astoria · Required amenities: none → washer/dryer",
+    caption: 'The scanner reads replies in plain English, works out what you meant, updates its own search, and answers.',
+    parts: [
+      { from: { name: 'Me', addr: '', me: true }, when: 'Apr 5, 2026, 10:24 PM',
+        text: 'can you add astoria to the search? and only send me places with laundry in the unit' },
+      { from: SENDER, when: 'Apr 5, 2026, 10:26 PM',
+        text: "Done. Here's what changed:\n\n  Areas: + Astoria\n  Required amenities: none → washer/dryer\n\nThe next scan runs within the hour. Reply any time to change the search." },
+    ],
+  };
+  const readme = {
+    pinned: true,
+    subject: "Why not just use StreetEasy's alerts?",
+    when: 'Pinned',
+    snippet: 'StreetEasy will email you new listings. I wanted to know whether I would actually want to live there.',
+    parts: [{ from: { name: 'Me', addr: '', me: true, to: 'anyone reading' }, when: 'Pinned', note: `
+      <p>StreetEasy will happily email you new listings. I wanted to know, before opening one, whether I'd
+         actually want to live there. So the scanner:</p>
+      <ul>
+        <li><b>Checks every 5 minutes</b> and emails in the same pass, so a new listing is in my inbox
+            minutes after it goes up.</li>
+        <li><b>Works out the transit commute to the two places that matter</b>, my partner's place and the office,
+            timed for a weekday 9:30 arrival rather than whenever the scan happened to run.</li>
+        <li><b>Filters on what the site can't</b>: a cap on each commute, a move-in window, minimum bathrooms.</li>
+        <li><b>Ranks by combined commute</b>, so #1 is always the easiest place to get to and from.</li>
+        <li><b>Adds the neighborhood</b>: the bars and restaurants within a few blocks with their ratings,
+            the nearest supermarkets and gyms.</li>
+        <li><b>Takes plain-English replies</b>. Tell it "add Astoria, laundry in unit only" and it
+            rewrites its own search, no restart.</li>
+        <li><b>Never repeats itself</b>: it remembers what it has sent, flags listings that went up while it
+            was offline, and emails me if StreetEasy starts refusing it.</li>
+      </ul>
+      <p class="muted">Runs on a Raspberry Pi. Python, Google Maps and Places for the commute and neighborhood
+         data, Claude for reading replies.</p>` }],
+  };
+  const mailbox = [readme, thread, ...alerts];
+
+  // ---- rendering ----------------------------------------------------------
+  const app = document.getElementById('app');
+  const list = document.getElementById('msgs');
+  const inner = document.getElementById('reader-inner');
+  const read = new Set();
+  let openIndex = -1;
+  document.getElementById('inbox-count').textContent = mailbox.length + ' messages';
+
+  function renderList() {
+    list.innerHTML = mailbox.map((m, i) => `
+      <li><button class="msg${m.pinned ? ' pinned' : ''}${read.has(i) ? ' read' : ''}${i === openIndex ? ' open' : ''}" data-i="${i}">
+        <span class="dot" aria-hidden="true"></span>
+        <span class="from">${m.pinned ? '📌 Me' : m.parts.length > 1 ? 'me, Scanner<span class="count">2</span>' : esc(m.parts[0].from.name)}</span>
+        <span class="when">${esc(m.when.replace(/, 2026/, ''))}</span>
+        <span class="subj">${esc(m.subject)}</span>
+        <span class="snip">${esc(m.snippet)}</span>
+      </button></li>`).join('');
+    list.querySelectorAll('.msg').forEach((b) => { b.onclick = () => openMail(Number(b.dataset.i)); });
+  }
+
+  function partHtml(p) {
+    const who = p.from.me
+      ? `<div class="avatar me" aria-hidden="true">M</div><div class="who"><div class="name">Me</div><div class="to">to ${esc(p.from.to || SENDER.name)}</div></div>`
+      : `<div class="avatar" aria-hidden="true">🏠</div><div class="who"><div class="name">${esc(p.from.name)}</div><div class="addr">&lt;${esc(p.from.addr)}&gt;</div><div class="to">to me</div></div>`;
+    const body = p.html
+      ? `<iframe class="body-frame" title="Email body" sandbox="allow-same-origin" srcdoc="${esc(p.html)}"></iframe>`
+      : p.note ? `<div class="body-note">${p.note}</div>`   // written here, trusted
+      : `<pre class="body-text">${esc(p.text)}</pre>`;
+    return `<article class="mail"><div class="head">${who}<time>${esc(p.when)}</time></div>${body}</article>`;
+  }
+
+  function fit(frame) {
+    const doc = frame.contentDocument;
+    if (doc && doc.body) frame.style.height = doc.documentElement.scrollHeight + 'px';
+  }
+
+  function openMail(i) {
+    openIndex = i;
+    read.add(i);
+    const m = mailbox[i];
+    inner.innerHTML = `<button class="back" id="back">← Inbox</button><h2>${esc(m.subject)}</h2>` +
+      (m.caption ? `<p class="caption">${esc(m.caption)}</p>` : '') + m.parts.map(partHtml).join('');
+    inner.querySelectorAll('iframe').forEach((f) => {
+      f.addEventListener('load', () => { fit(f); setTimeout(() => fit(f), 150); });
+    });
+    document.getElementById('back').onclick = () => { app.classList.remove('reading'); openIndex = -1; renderList(); };
+    app.classList.add('reading');
+    document.getElementById('reader').scrollTop = 0;
+    renderList();
+  }
+  addEventListener('resize', () => inner.querySelectorAll('iframe').forEach(fit));
+
+  renderList();
+  // A phone starts on the inbox; anything wider opens the newest alert.
+  if (!matchMedia('(max-width: 760px)').matches) openMail(mailbox.indexOf(alerts[0]));
+
+  // Back to whichever portfolio sleeve sent you here, or the portfolio's front page.
+  document.getElementById('to-portfolio').addEventListener('click', (e) => {
+    const r = (() => { try { return new URL(document.referrer); } catch { return null; } })();
+    if (r && r.origin === location.origin && !r.pathname.startsWith('/demos/')) { e.preventDefault(); history.back(); }
+  });
+})();
+</script>
+</body>
+</html>

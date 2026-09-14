@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MA-008 · Out of Focus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Instrument+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/chrome.css">
+<style>
+  /* The one pressing that prints on white: everything else in the run is a
+     night sleeve, and this photograph is all sky. */
+  :root {
+    --card: #fbf9f4;
+    --ink: #16222e;
+    --muted: #64768a;
+    --sky: #2f74c4;
+    --seed: #b9a98c;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--card); color: var(--ink); }
+  body {
+    font: 400 14px/1.45 'Instrument Sans', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    background: linear-gradient(178deg, #ffffff 0%, #f4f1e9 58%, #eae5da 100%);
+  }
+
+  #sheet {
+    min-height: 100svh;
+    display: grid; grid-template-rows: auto 1fr;
+    gap: 18px;
+    padding: 22px clamp(16px, 3vw, 40px) 34px;
+  }
+
+  header {
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 18px;
+    font: 700 11px/1.5 'Courier Prime', ui-monospace, monospace;
+    letter-spacing: .18em; text-transform: uppercase; color: var(--muted);
+  }
+  header b { color: var(--ink); }
+  header .ttl {
+    font: italic 400 27px/1 'Instrument Serif', Georgia, serif;
+    letter-spacing: 0; text-transform: none; color: var(--ink);
+  }
+  header .where { margin-left: auto; font-size: 10px; color: #8a99a8; }
+
+  #frame {
+    display: grid; grid-template-columns: minmax(0, 1fr) 250px;
+    align-items: start; justify-items: center;
+    gap: clamp(20px, 3vw, 46px);
+  }
+
+  /* ---------- the photograph ---------- */
+  #stage {
+    position: relative;
+    margin: 0;            /* <figure> ships with 40px side margins */
+    width: min(100%, calc((100svh - 190px) * 4 / 3), 1180px);
+    aspect-ratio: 4 / 3;
+    box-shadow: 0 22px 50px -20px rgba(22, 34, 46, .45), 0 1px 3px rgba(22, 34, 46, .18);
+  }
+  #stage > img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  /* a white veil, not a black one — this print stays bright while you read it */
+  #stage::after {
+    content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    background: rgba(246, 249, 252, .34);
+    opacity: 0; transition: opacity .45s ease;
+  }
+  #stage.naming::after, #stage.reading::after { opacity: 1; }
+
+  /* ---------- the towers, coming out of the haze ---------- */
+  /* A hard, flat line around the silhouette with the light bleeding outward —
+     the outline a game puts round a thing you can pick up. It reads against
+     this pale sky because the line is dark and the bloom under it is bright,
+     so the tower gets an edge the lens never gave it.
+     Selectors go by class, not element: two of these regions are a <path> of
+     several buildings rather than a single <polygon>. */
+  .hits { position: absolute; inset: 0; z-index: 2; width: 100%; height: 100%; }
+  .hits .grab { fill: rgba(255, 255, 255, .001); cursor: pointer; }
+  .hits .lit {
+    pointer-events: none;
+    /* The towers were never traceable — haze puts them within a few points of
+       the sky in every channel — so an outline was drawing a hard edge around a
+       guess. A blurred wash suits a photograph that is out of focus anyway. On
+       a pale sky the falloff has to be saturated rather than white. */
+    /* No stroke on this theme. An edge is a claim about where a building ends,
+       and behind that haze nobody can make it — the fill and its bloom say
+       "this one" without drawing a line anybody can check. Kept tight enough
+       that the gap between the two on the left still reads. */
+    fill: rgba(47, 116, 196, .3);
+    stroke: none;
+    opacity: 0;
+    filter: blur(.3px)
+            drop-shadow(0 0 1.1px rgba(64, 150, 255, .85))
+            drop-shadow(0 0 3.4px rgba(29, 90, 166, .55));
+    transition: opacity .42s ease;
+  }
+  .hit.on .lit { opacity: 1; animation: pickup 3s ease-in-out infinite; }
+  @keyframes pickup { 0%, 100% { opacity: .82; } 50% { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) {
+    .hit.on .lit { animation: none; opacity: 1; }
+  }
+
+  /* ---------- the names ---------- */
+  .names { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+  .names .name {
+    position: absolute;
+    left: var(--x); top: var(--y);
+    width: max-content; max-width: min(290px, 42%);
+    padding: 8px 13px 9px;
+    transform: translate(-50%, 0) translateY(6px);
+    background: rgba(251, 249, 244, .93);
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+    box-shadow: 0 12px 28px -12px rgba(22, 34, 46, .5), 0 0 0 1px rgba(22, 34, 46, .12) inset;
+    opacity: 0;
+    transition: opacity .26s ease, transform .34s cubic-bezier(.2, .7, .2, 1);
+  }
+  .names .name.side-left { transform: translate(-12%, 0) translateY(6px); }
+  .names .name.side-right { transform: translate(-88%, 0) translateY(6px); }
+  .names .name.on { opacity: 1; transform: translate(-50%, 0); }
+  .names .name.side-left.on { transform: translate(-12%, 0); }
+  .names .name.side-right.on { transform: translate(-88%, 0); }
+  .names .name.grabby { pointer-events: auto; }
+
+  .names .name .no { margin: 0; font: 700 9.5px/1 'Courier Prime', monospace; letter-spacing: .2em; color: var(--sky); }
+  .names .name .nm { margin: 5px 0 0; font-weight: 600; font-size: 15.5px; }
+  .names .name .more {
+    display: grid; grid-template-rows: 0fr;
+    transition: grid-template-rows .42s cubic-bezier(.2, .7, .2, 1);
+  }
+  .names .name .more > .inner { overflow: hidden; min-height: 0; display: flex; flex-direction: column; }
+  .names .name.open .more { grid-template-rows: 1fr; }
+  .names .name .kit { margin: 9px 0 0; font: 400 11px/1.4 'Courier Prime', monospace; letter-spacing: .04em; color: #8a7f6a; }
+  .names .name .blurb { margin: 8px 0 0; font-size: 13px; line-height: 1.5; color: #3b4b5c; }
+  .names .name .blurb + .blurb { margin-top: 7px; }
+  .names .name .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 13px; }
+  .enter {
+    display: inline-flex; align-items: center; gap: .5em;
+    padding: 9px 13px 8px;
+    background: var(--sky); color: #f4f9ff;
+    font: 600 12px/1 'Instrument Sans', sans-serif; letter-spacing: .03em;
+    text-decoration: none; transition: background .2s, transform .2s;
+  }
+  .enter:hover, .enter:focus-visible { background: #3f8ae0; transform: translateY(-1px); }
+  .enter.ghost { background: none; color: var(--sky); box-shadow: inset 0 0 0 1.5px currentColor; }
+  .enter.ghost:hover { background: rgba(47, 116, 196, .1); }
+
+  /* ---------- the tracklist ---------- */
+  #index { width: 250px; justify-self: stretch; padding-top: 2px; }
+  #index h2 {
+    margin: 0 0 4px;
+    font: 700 10px/1.5 'Courier Prime', monospace; letter-spacing: .2em; text-transform: uppercase; color: #8a99a8;
+  }
+  .tracks { list-style: none; margin: 0; padding: 0; }
+  .tracks li { border-bottom: 1px solid rgba(22, 34, 46, .13); }
+  .tracks li:first-child { border-top: 1px solid rgba(22, 34, 46, .13); }
+  .tracks button {
+    display: grid; grid-template-columns: 30px 1fr; align-items: baseline;
+    width: 100%; padding: 9px 0 8px;
+    border: 0; background: none; text-align: left; cursor: pointer; font: inherit; color: inherit;
+  }
+  .tracks .no { font: 700 10px/1 'Courier Prime', monospace; letter-spacing: .1em; color: #8a99a8; }
+  .tracks .nm { font-weight: 500; font-size: 14px; transition: color .2s; }
+  .tracks .nick { grid-column: 2; font: italic 400 13px/1.3 'Instrument Serif', Georgia, serif; color: var(--muted); }
+  .tracks button:hover .nm, .tracks button.on .nm { color: var(--sky); }
+  .tracks button:focus-visible { outline: 2px dashed var(--sky); outline-offset: 2px; }
+  #index .hint {
+    margin: 14px 0 0;
+    font: 700 9.5px/1.5 'Courier Prime', monospace; letter-spacing: .15em; text-transform: uppercase; color: #9aa7b4;
+  }
+  #index .hint .touch { display: none; }
+  @media (hover: none) { #index .hint .fine { display: none; } #index .hint .touch { display: inline; } }
+
+  /* the fixed sleeve switcher lives in the top right — keep out of its lane */
+  @media (min-width: 861px) { #sheet { padding-right: 176px; } }
+
+  @media (max-width: 860px) {
+    #frame { grid-template-columns: 1fr; justify-items: stretch; gap: 20px; }
+    #stage { width: 100%; }
+    #index { width: auto; }
+    header .where { margin-left: 0; width: 100%; }
+    .names .name { max-width: 62%; }
+    .names .name .nm { font-size: 14px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hits polygon.lit, .names .name, .names .name .more, #stage::after { transition-duration: .01s; }
+  }
+</style>
+</head>
+<body data-pressing="out-of-focus">
+
+<main id="sheet">
+  <header>
+    <span><b>MA-008</b> · Matt Aguilar</span>
+    <span class="ttl">Out of Focus</span>
+    <span class="where">Central Park · the skyline behind the weeds</span>
+  </header>
+
+  <div id="frame">
+    <figure id="stage">
+      <img src="skyline.jpg" width="1600" height="1200"
+           alt="The Midtown skyline seen from Central Park through a bank of out-of-focus seed heads, the sun flaring behind the tallest tower.">
+      <svg width="0" height="0" aria-hidden="true" style="position:absolute">
+        <defs>
+          <linearGradient id="resolve" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0"   stop-color="#5b7fa8" stop-opacity=".28"/>
+            <stop offset=".45" stop-color="#33526f" stop-opacity=".62"/>
+            <stop offset="1"   stop-color="#2c4a66" stop-opacity=".30"/>
+          </linearGradient>
+          <!-- blurred well past the trace, so no edge of it can ever read -->
+          <filter id="haze" x="-60%" y="-60%" width="220%" height="220%">
+            <feGaussianBlur stdDeviation="2.1"/>
+          </filter>
+        </defs>
+      </svg>
+    </figure>
+
+    <aside id="index">
+      <h2>The towers</h2>
+      <div id="tracklist"></div>
+      <p class="hint"><span class="fine">Hover a tower to name it · click for the credit</span><span class="touch">Tap a tower for the credit</span></p>
+    </aside>
+  </div>
+</main>
+
+<script src="../shared/projects.js"></script>
+<script src="../shared/hotspots.js"></script>
+<script src="../shared/sleeves.js"></script>
+<script>
+(() => {
+  // Percentages of the photograph. Four towers picked out of the skyline, left
+  // to right — each one traced down to where the seed heads swallow it.
+  //
+  // The tall one on the left is a pair, not one building — a tall tower, a gap,
+  // and its shorter neighbour — so it is given as two rings and lights as one
+  // region. The blur is lighter on this theme than the others for that reason:
+  // soften it much further and the gap between them closes up.
+  //
+  // The first and last are segmented off the photograph itself. The middle two
+  // never could be: haze puts them within a few points of the sky in every
+  // channel (B-R of 87 and 93, against sky at 91-102), so there is no edge in
+  // the pixels to find. They are Matt's own markings instead — drawn over the
+  // photo by hand, then hulled, which is why they are honest blocks rather
+  // than silhouettes. `jobs` is two buildings standing together and is given
+  // as two rings.
+  window.photoSleeve({
+    mount: '#stage',
+    tracks: '#tracklist',
+    photo: [1600, 1200],
+    regions: [
+      {
+        id: 'tastemaker', nick: 'the tall pair, in the sun',
+        points: [
+          [[14.7, 0.1], [15.53, 0.1], [16.65, 2.3], [15.38, 45.39],
+           [14.1, 43.89], [11.55, 39.08], [11.55, 30.26], [13.13, 8.82],
+           [13.65, 4.91]],
+          [[18.0, 22.04], [20.48, 22.65], [21.01, 25.95], [20.63, 49.0],
+           [19.43, 48.4], [16.13, 44.39], [15.75, 40.28], [16.8, 26.05]],
+        ],
+        label: [26.5, 12], side: 'left',
+      },
+      {
+        id: 'pedal', nick: 'flat top, middle distance',
+        points: [[47.64, 33.77], [48.39, 35.17], [48.69, 37.98], [48.09, 46.29],
+                 [39.53, 45.59], [37.96, 44.59], [37.81, 39.28], [38.86, 34.67]],
+        label: [43, 27], side: 'center',
+      },
+      {
+        id: 'jobs', nick: 'the two behind the weeds',
+        points: [
+          [[70.44, 37.27], [72.92, 37.68], [74.04, 41.08], [73.14, 48.1],
+           [72.47, 48.9], [70.97, 48.7], [68.04, 47.39], [67.74, 39.38]],
+          [[64.44, 38.08], [65.94, 39.88], [66.39, 42.79], [66.24, 47.9],
+           [65.42, 49.4], [63.77, 50.1], [63.02, 46.79], [63.17, 39.78]],
+        ],
+        label: [68.5, 31], side: 'center',
+      },
+      {
+        id: 'streeteasy', nick: 'the pointed one, far right',
+        points: [[90.5, 12.55], [91.7, 14.6], [92.9, 17.2], [93.12, 17.92],
+                 [93.62, 43.5], [93.25, 44.42], [91.5, 44.5], [91.0, 43.83],
+                 [87.75, 43.5], [87.38, 40.83], [87.69, 40.17], [87.56, 23.67],
+                 [87.3, 16.25], [88.5, 15.0], [89.7, 13.5]],
+        label: [82, 25], side: 'right',
+      },
+    ],
+  });
+})();
+</script>
+</body>
+</html>

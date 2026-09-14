@@ -1,0 +1,30 @@
+[
+  {
+    "name": "man who sold the world chorus",
+    "file": "dry man who sold the world chorus.wav",
+    "seconds": 8.68,
+    "frames": 416768,
+    "rate": 48000
+  },
+  {
+    "name": "mardy bum solo 1",
+    "file": "dry mardy bum solo 1.wav",
+    "seconds": 20.39,
+    "frames": 978944,
+    "rate": 48000
+  },
+  {
+    "name": "mardy bum solo chords 1",
+    "file": "dry mardy bum solo  chords 1.wav",
+    "seconds": 20.39,
+    "frames": 978944,
+    "rate": 48000
+  },
+  {
+    "name": "radiohead just",
+    "file": "dry radiohead just.wav",
+    "seconds": 6.29,
+    "frames": 302080,
+    "rate": 48000
+  }
+]

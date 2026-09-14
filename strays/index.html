@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MA-007 · Strays</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Instrument+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/chrome.css">
+<style>
+  :root {
+    --dust: #14120f;
+    --paper: #f2ece1;
+    --sun: #ffcf6b;
+    --stone: #a89c8a;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--dust); color: var(--paper); }
+  body {
+    font: 400 14px/1.45 'Instrument Sans', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    /* hot limestone in shade */
+    background: radial-gradient(ellipse 90% 70% at 50% 0%, #241f18 0%, #14120f 60%, #0c0b09 100%);
+  }
+
+  #sheet {
+    min-height: 100svh;
+    display: grid; grid-template-rows: auto 1fr;
+    gap: 18px;
+    padding: 22px clamp(16px, 3vw, 40px) 34px;
+  }
+
+  header {
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 18px;
+    font: 700 11px/1.5 'Courier Prime', ui-monospace, monospace;
+    letter-spacing: .18em; text-transform: uppercase; color: #8d8474;
+  }
+  header b { color: var(--paper); }
+  header .ttl {
+    font: italic 400 27px/1 'Instrument Serif', Georgia, serif;
+    letter-spacing: 0; text-transform: none; color: var(--paper);
+  }
+  header .where { margin-left: auto; font-size: 10px; color: #6a6355; }
+
+  #frame {
+    display: grid; grid-template-columns: minmax(0, 1fr) 250px;
+    align-items: start; justify-items: center;
+    gap: clamp(20px, 3vw, 46px);
+  }
+
+  /* ---------- the photograph ---------- */
+  #stage {
+    position: relative;
+    margin: 0;            /* <figure> ships with 40px side margins */
+    width: min(100%, calc((100svh - 190px) * 1541 / 869), 1180px);
+    aspect-ratio: 1541 / 869;
+    box-shadow: 0 26px 60px -18px rgba(0, 0, 0, .85), 0 2px 0 rgba(255, 255, 255, .06) inset;
+  }
+  #stage > img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  #stage::after {
+    content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    background: rgba(12, 10, 8, .46);
+    opacity: 0; transition: opacity .45s ease;
+  }
+  #stage.naming::after, #stage.reading::after { opacity: 1; }
+
+  /* ---------- four cats, outlined ---------- */
+  .hits { position: absolute; inset: 0; z-index: 2; width: 100%; height: 100%; }
+  .hits polygon.grab { fill: rgba(255, 255, 255, .001); cursor: pointer; }
+  .hits polygon.lit {
+    pointer-events: none;
+    /* A halo, not an outline. The cats are already white, so almost nothing goes
+       inside and the whole effect is light spilling off the edge — blurred, so
+       it never reads as a line drawn around an animal. */
+    fill: rgba(255, 240, 210, .08);
+    stroke: var(--sun); stroke-opacity: .85; stroke-width: .6;
+    stroke-linejoin: round; stroke-linecap: round;
+    opacity: 0;
+    filter: blur(.38px)
+            drop-shadow(0 0 1.2px rgba(255, 207, 107, .9))
+            drop-shadow(0 0 3.8px rgba(255, 186, 74, .55));
+    transition: opacity .42s ease;
+  }
+  .hit.on polygon.lit { opacity: 1; animation: pickup 3s ease-in-out infinite; }
+  @keyframes pickup { 0%, 100% { opacity: .82; } 50% { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) {
+    .hit.on polygon.lit { animation: none; opacity: 1; }
+  }
+
+  /* ---------- the names ---------- */
+  .names { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+  .names .name {
+    position: absolute;
+    left: var(--x); top: var(--y);
+    width: max-content; max-width: min(300px, 33%);
+    padding: 8px 13px 9px;
+    /* the plaque floats just above the cat's ears */
+    transform: translate(-50%, -100%) translateY(-2px);
+    background: rgba(16, 13, 10, .88);
+    -webkit-backdrop-filter: blur(7px); backdrop-filter: blur(7px);
+    box-shadow: 0 10px 26px -10px rgba(0, 0, 0, .85), 0 0 0 1px rgba(255, 207, 107, .22) inset;
+    opacity: 0;
+    transition: opacity .26s ease, transform .4s cubic-bezier(.2, .7, .2, 1),
+                left .42s cubic-bezier(.2, .7, .2, 1), top .42s cubic-bezier(.2, .7, .2, 1);
+  }
+  .names .name.on { opacity: 1; transform: translate(-50%, -100%) translateY(-10px); }
+  .names .name.grabby { pointer-events: auto; }
+
+  /* Every inch of this photograph has a cat or a rock in it, so the opened
+     credit slides down out of the way and reads from the corner instead. */
+  .names .name.open, .names .name.open.on {
+    left: 65%; top: 97%;
+    transform: translate(0, -100%);
+    max-width: min(310px, 34%);
+  }
+
+  .names .name .no { margin: 0; font: 700 9.5px/1 'Courier Prime', monospace; letter-spacing: .2em; color: var(--sun); }
+  .names .name .nm { margin: 5px 0 0; font-weight: 600; font-size: 15.5px; }
+  .names .name .more {
+    display: grid; grid-template-rows: 0fr;
+    transition: grid-template-rows .42s cubic-bezier(.2, .7, .2, 1);
+  }
+  .names .name .more > .inner { overflow: hidden; min-height: 0; display: flex; flex-direction: column; }
+  .names .name.open .more { grid-template-rows: 1fr; }
+  .names .name .kit { margin: 9px 0 0; font: 400 11px/1.4 'Courier Prime', monospace; letter-spacing: .04em; color: var(--stone); }
+  .names .name .blurb { margin: 8px 0 0; font-size: 13px; line-height: 1.5; color: #ded6c8; }
+  .names .name .blurb + .blurb { margin-top: 7px; }
+  .names .name .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 13px; }
+  .enter {
+    display: inline-flex; align-items: center; gap: .5em;
+    padding: 9px 13px 8px;
+    background: var(--sun); color: #241a06;
+    font: 600 12px/1 'Instrument Sans', sans-serif; letter-spacing: .03em;
+    text-decoration: none; transition: background .2s, transform .2s;
+  }
+  .enter:hover, .enter:focus-visible { background: #ffdf9a; transform: translateY(-1px); }
+  .enter.ghost { background: none; color: var(--sun); box-shadow: inset 0 0 0 1.5px currentColor; }
+  .enter.ghost:hover { background: rgba(255, 207, 107, .14); }
+
+  /* ---------- the tracklist ---------- */
+  #index { width: 250px; justify-self: stretch; padding-top: 2px; }
+  #index h2 {
+    margin: 0 0 4px;
+    font: 700 10px/1.5 'Courier Prime', monospace; letter-spacing: .2em; text-transform: uppercase; color: #6a6355;
+  }
+  .tracks { list-style: none; margin: 0; padding: 0; }
+  .tracks li { border-bottom: 1px solid rgba(220, 205, 180, .15); }
+  .tracks li:first-child { border-top: 1px solid rgba(220, 205, 180, .15); }
+  .tracks button {
+    display: grid; grid-template-columns: 30px 1fr; align-items: baseline;
+    width: 100%; padding: 9px 0 8px;
+    border: 0; background: none; text-align: left; cursor: pointer; font: inherit; color: inherit;
+  }
+  .tracks .no { font: 700 10px/1 'Courier Prime', monospace; letter-spacing: .1em; color: #6a6355; }
+  .tracks .nm { font-weight: 500; font-size: 14px; transition: color .2s; }
+  .tracks .nick { grid-column: 2; font: italic 400 13px/1.3 'Instrument Serif', Georgia, serif; color: #8d8474; }
+  .tracks button:hover .nm, .tracks button.on .nm { color: var(--sun); }
+  .tracks button:focus-visible { outline: 2px dashed var(--sun); outline-offset: 2px; }
+  #index .hint {
+    margin: 14px 0 0;
+    font: 700 9.5px/1.5 'Courier Prime', monospace; letter-spacing: .15em; text-transform: uppercase; color: #5c5648;
+  }
+  #index .hint .touch { display: none; }
+  @media (hover: none) { #index .hint .fine { display: none; } #index .hint .touch { display: inline; } }
+
+  /* the fixed sleeve switcher lives in the top right — keep out of its lane */
+  @media (min-width: 861px) { #sheet { padding-right: 176px; } }
+
+  @media (max-width: 860px) {
+    #frame { grid-template-columns: 1fr; justify-items: stretch; gap: 20px; }
+    #stage { width: 100%; }
+    #index { width: auto; }
+    header .where { margin-left: 0; width: 100%; }
+    .names .name { max-width: 54%; }
+    .names .name.open, .names .name.open.on { left: 50%; transform: translate(-50%, -100%); max-width: 84%; }
+    .names .name .nm { font-size: 14px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hits polygon.lit, .names .name, .names .name .more, #stage::after { transition-duration: .01s; }
+  }
+</style>
+</head>
+<body data-pressing="strays">
+
+<main id="sheet">
+  <header>
+    <span><b>MA-007</b> · Matt Aguilar</span>
+    <span class="ttl">Strays</span>
+    <span class="where">Four of them · one tin of tuna · no fixed address</span>
+  </header>
+
+  <div id="frame">
+    <figure id="stage">
+      <img src="strays.jpg" width="1541" height="869"
+           alt="Four white stray kittens in a gap in a limestone wall: two sitting in front, one half-hidden behind, and one standing on a plank with its mouth open.">
+    </figure>
+
+    <aside id="index">
+      <h2>The litter</h2>
+      <div id="tracklist"></div>
+      <p class="hint"><span class="fine">Hover a cat to name it · click for the credit</span><span class="touch">Tap a cat for the credit</span></p>
+    </aside>
+  </div>
+</main>
+
+<script src="../shared/projects.js"></script>
+<script src="../shared/hotspots.js"></script>
+<script src="../shared/sleeves.js"></script>
+<script>
+(() => {
+  // Percentages of the photograph, traced round each cat: ears first, then down
+  // the flank to the paws. Left to right, front row first — which is also the
+  // order they'd get to the tin.
+  window.photoSleeve({
+    mount: '#stage',
+    tracks: '#tracklist',
+    photo: [1541, 869],
+    regions: [
+      {
+        id: 'tastemaker', nick: 'front left, unimpressed',
+        points: [[12.46, 45.34], [13.37, 48.79], [12.59, 56.39], [14.02, 62.6], [14.73, 78.14],
+                 [14.08, 81.82], [14.6, 87.8], [12.52, 91.6], [12.85, 93.67], [16.29, 92.06],
+                 [19.21, 93.9], [19.53, 91.14], [20.77, 92.41], [27.45, 92.75], [27.26, 89.41],
+                 [25.63, 88.84], [26.28, 86.77], [25.24, 80.78], [26.22, 79.75], [24.66, 78.6],
+                 [26.02, 73.42], [22.26, 59.61], [21.8, 50.75], [22.39, 49.94], [21.16, 47.53],
+                 [19.34, 49.94], [14.6, 48.45]],
+        label: [17.5, 44],
+      },
+      {
+        id: 'pedal', nick: 'front center, standing',
+        points: [[30.43, 44.88], [29.79, 45.34], [30.3, 48.1], [29.59, 50.52], [30.3, 52.47],
+                 [29.72, 56.62], [30.5, 57.88], [28.23, 66.97], [28.75, 87.69], [27.71, 93.21],
+                 [28.94, 94.02], [30.5, 91.83], [30.95, 78.37], [32.9, 76.52], [33.55, 79.75],
+                 [32.58, 81.82], [31.86, 92.52], [32.64, 94.02], [34.65, 94.02], [35.17, 83.66],
+                 [37.44, 70.54], [37.05, 60.76], [39.78, 52.59], [39.33, 49.48], [40.3, 45.57],
+                 [39.58, 45.22], [39.65, 46.95], [37.44, 49.37], [32.58, 49.02]],
+        label: [34.5, 44.5],
+      },
+      {
+        id: 'jobs', nick: 'up on the plank, shouting',
+        points: [[72.55, 32.22], [71.45, 32.22], [70.41, 33.83], [67.03, 33.6], [65.8, 31.53],
+                 [65.15, 31.42], [65.41, 37.4], [63.66, 37.51], [62.69, 38.32], [61.39, 40.28],
+                 [59.44, 45.22], [59.31, 50.06], [60.35, 50.75], [60.87, 57.31], [63.34, 55.01],
+                 [63.47, 56.39], [64.89, 57.42], [66.0, 57.31], [66.19, 58.46], [67.42, 59.49],
+                 [67.75, 55.58], [67.42, 54.89], [67.49, 52.82], [69.89, 47.41], [70.41, 41.89],
+                 [71.19, 41.31], [72.1, 38.78]],
+        label: [68, 30.5],
+      },
+      {
+        id: 'streeteasy', nick: 'the one hanging back',
+        points: [[56.33, 48.56], [55.94, 48.56], [54.9, 50.63], [52.5, 50.52], [52.11, 49.83],
+                 [51.01, 49.6], [51.01, 50.75], [51.65, 52.93], [51.72, 55.58], [52.89, 57.31],
+                 [52.89, 63.87], [54.12, 63.41], [54.12, 62.26], [54.45, 61.45], [55.42, 61.33],
+                 [55.87, 60.87], [56.07, 58.92], [56.59, 58.92], [57.11, 59.38], [57.75, 60.99],
+                 [58.66, 60.87], [58.47, 59.03], [57.69, 56.96], [57.56, 56.04], [56.2, 54.43],
+                 [56.2, 52.59], [56.65, 51.32], [56.65, 49.37]],
+        label: [54.5, 49],
+      },
+    ],
+  });
+})();
+</script>
+</body>
+</html>
