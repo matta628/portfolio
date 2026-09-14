@@ -77,9 +77,7 @@
     stroke: var(--sun); stroke-opacity: .85; stroke-width: .6;
     stroke-linejoin: round; stroke-linecap: round;
     opacity: 0;
-    filter: blur(.38px)
-            drop-shadow(0 0 1.2px rgba(255, 207, 107, .9))
-            drop-shadow(0 0 3.8px rgba(255, 186, 74, .55));
+    filter: url(#halo);
     transition: opacity .42s ease;
   }
   .hit.on polygon.lit { opacity: 1; animation: pickup 3s ease-in-out infinite; }
@@ -182,6 +180,21 @@
 </style>
 </head>
 <body data-pressing="strays">
+    <!-- The glow lives in an SVG filter rather than CSS filter functions: Safari
+         does not soften SVG strokes through CSS `filter`, so on an iPhone every
+         trace came out as a hard drawn line. An SVG filter is scaled with the
+         drawing by every engine. Radii are the old CSS ones, halved for
+         stdDeviation. -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+      <defs>
+        <filter id="halo" filterUnits="userSpaceOnUse" x="-40" y="-40" width="180" height="400"
+                color-interpolation-filters="sRGB">
+          <feGaussianBlur in="SourceGraphic" stdDeviation=".38" result="soft"/>
+          <feDropShadow in="soft" dx="0" dy="0" stdDeviation="0.6" flood-color="#ffcf6b" flood-opacity="0.9" result="near"/>
+          <feDropShadow in="near" dx="0" dy="0" stdDeviation="1.9" flood-color="#ffba4a" flood-opacity="0.55"/>
+        </filter>
+      </defs>
+    </svg>
 
 <main id="sheet">
   <header>

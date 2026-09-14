@@ -89,15 +89,6 @@
 }
 .art-in-rainbows i:nth-child(even) { -webkit-mask-position: 3px 0; mask-position: 3px 0; }
 
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(4, 1fr);
-  gap: 3px 4px;
-  padding: 11px 5px 6px;
-  background:
-    linear-gradient(180deg, #cfd2cb 0 3px, #3f3630 3px 8px, transparent 8px),
-    #8a7764;
-}
 
 /* the photographic sleeves are just their own picture, cropped square */
 .art img { display: block; width: 100%; height: 100%; object-fit: cover; }

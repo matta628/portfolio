@@ -83,9 +83,7 @@
        follows the roofline, and it never follows it that closely. Blurring the
        stroke into its own glow says "this one" without making a claim about
        where the boundary is. */
-    filter: blur(.34px)
-            drop-shadow(0 0 1.1px rgba(217, 180, 106, .85))
-            drop-shadow(0 0 3.4px rgba(224, 83, 58, .5));
+    filter: url(#pickup);
     transition: opacity .42s ease;
   }
   .hit.on .lit { opacity: 1; animation: pickup 3s ease-in-out infinite; }
@@ -179,6 +177,21 @@
 </style>
 </head>
 <body data-pressing="five-storeys">
+    <!-- The glow lives in an SVG filter rather than CSS filter functions: Safari
+         does not soften SVG strokes through CSS `filter`, so on an iPhone every
+         trace came out as a hard drawn line. An SVG filter is scaled with the
+         drawing by every engine. Radii are the old CSS ones, halved for
+         stdDeviation. -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+      <defs>
+        <filter id="pickup" filterUnits="userSpaceOnUse" x="-40" y="-40" width="180" height="400"
+                color-interpolation-filters="sRGB">
+          <feGaussianBlur in="SourceGraphic" stdDeviation=".34" result="soft"/>
+          <feDropShadow in="soft" dx="0" dy="0" stdDeviation="0.55" flood-color="#d9b46a" flood-opacity="0.85" result="near"/>
+          <feDropShadow in="near" dx="0" dy="0" stdDeviation="1.7" flood-color="#e0533a" flood-opacity="0.5"/>
+        </filter>
+      </defs>
+    </svg>
 
 <main id="sheet">
   <header>

@@ -83,7 +83,7 @@
     /* drawn on from the trunk outwards, the way sap would go */
     stroke-dasharray: 100; stroke-dashoffset: 100;
     opacity: 0;
-    filter: drop-shadow(0 0 1.4px rgba(245, 189, 94, .85));
+    filter: url(#limb);
     transition: opacity .3s ease, stroke-dashoffset .85s cubic-bezier(.25, .8, .3, 1);
   }
   .hit.on .lit { opacity: .62; stroke-dashoffset: 0; }
@@ -97,8 +97,7 @@
     stroke-linecap: round; stroke-linejoin: round;
     stroke-dasharray: 8 92; stroke-dashoffset: 100;
     opacity: 0;
-    filter: drop-shadow(0 0 1.1px rgba(255, 226, 156, 1))
-            drop-shadow(0 0 3.6px rgba(245, 189, 94, .85));
+    filter: url(#current);
     transition: opacity .3s ease;
   }
   .hit.on .spark { opacity: 1; animation: current 1.45s linear infinite; }
@@ -213,6 +212,24 @@
 </style>
 </head>
 <body data-pressing="great-elm">
+    <!-- The glow lives in an SVG filter rather than CSS filter functions: Safari
+         does not soften SVG strokes through CSS `filter`, so on an iPhone every
+         trace came out as a hard drawn line. An SVG filter is scaled with the
+         drawing by every engine. Radii are the old CSS ones, halved for
+         stdDeviation. -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+      <defs>
+        <filter id="limb" filterUnits="userSpaceOnUse" x="-40" y="-40" width="180" height="400"
+                color-interpolation-filters="sRGB">
+          <feDropShadow in="SourceGraphic" dx="0" dy="0" stdDeviation="0.7" flood-color="#f5bd5e" flood-opacity="0.85"/>
+        </filter>
+        <filter id="current" filterUnits="userSpaceOnUse" x="-40" y="-40" width="180" height="400"
+                color-interpolation-filters="sRGB">
+          <feDropShadow in="SourceGraphic" dx="0" dy="0" stdDeviation="0.55" flood-color="#ffe29c" flood-opacity="1" result="near"/>
+          <feDropShadow in="near" dx="0" dy="0" stdDeviation="1.8" flood-color="#f5bd5e" flood-opacity="0.85"/>
+        </filter>
+      </defs>
+    </svg>
 
 <main id="sheet">
   <header>
