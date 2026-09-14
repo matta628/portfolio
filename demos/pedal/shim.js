@@ -8,7 +8,12 @@
 //     (notes, setlist, saved edits, saved loops), which lasts one visit.
 //
 // The input is a re-amp player: one of the loops I recorded on the pedal,
-// fed into the input jack so every preset processes it.
+// fed into the input jack so every preset processes it. The page's Looper
+// panel is that player's transport (pause, scrub) and its Saved loops list
+// and the Input menu in the demo bar are two views of the same choice. The
+// pedal's own recording, saving and dry/wet switch are off here: overdubbing a
+// loop onto itself sounds like nothing anyone would want, and the built-in
+// test signal is not worth a visitor's time.
 (() => {
   const HERE = new URL('.', document.currentScript.src);
   const asset = (p) => new URL(p, HERE).href;
@@ -76,6 +81,12 @@
     source = s;
     post({ cmd: 'source', source: s === 'sim' ? 1 : s === 'reamp' ? 2 : 0 });
     syncBar();
+  }
+
+  function unplug() {
+    reampName = null;
+    setSource('none');
+    note('input unplugged');
   }
 
   // ------------------------------------------------------------ bench --
@@ -168,7 +179,7 @@
   function paramsJson() {
     return {
       presets: info.presets.map(({ id, name, blurb, gear }) => ({ id, name, blurb, gear })),
-      device_in: 'Re-amp: my recorded loops',
+      device_in: 'A loop I recorded on the pedal (stands in for the M-Track Duo)',
       device_out: 'Your speakers (Web Audio)',
       sample_rate: ctx.sampleRate,
       buffer_frames: 128,
@@ -187,9 +198,11 @@
       looper: s.looper,
       loop_frames: s.loop_frames,
       loop_position: s.loop_position,
+      loop_paused: !!s.loop_paused,
+      clean_loop: false,
       audio_running: true,
       audio_status: '',
-      simulator: source === 'sim',
+      simulator: false,
       lcd: ['LOOP: ' + s.looper, 'FX:   ' + p.short_name],
       preset_modified: overrides.has(s.preset),
       comp_reduction_db: s.comp_reduction_db,
@@ -243,8 +256,15 @@
       return ok;
     }
     if (isPost && path === '/api/looper') {
-      if (q.get('action') === 'trigger') { post({ cmd: 'trigger' }); note('web: looper trigger'); }
-      if (q.get('action') === 'clear') { post({ cmd: 'clear' }); note('web: loop cleared'); }
+      const a = q.get('action');
+      if (a === 'trigger') note('web: looper trigger — recording is off in this demo; the loop is the input');
+      else if (a === 'clear') unplug();
+      else if (a === 'pause') {
+        const on = q.get('value') === '1';
+        post({ cmd: 'pause', on });
+        note(on ? 'web: input paused' : 'web: input resumed');
+      } else if (a === 'seek') post({ cmd: 'seek', frame: Number(q.get('frame')) || 0 });
+      else if (a === 'clean') note('web: dry/wet is fixed in this demo; every loop is a dry take');
       return ok;
     }
     if (isPost && path === '/api/freeze') {
@@ -258,12 +278,7 @@
       }
       return ok;
     }
-    if (isPost && path === '/api/sim') {
-      const on = q.get('on') === '1' || q.get('on') === 'true';
-      setSource(on ? 'sim' : (reampName ? 'reamp' : 'none'));
-      note(on ? 'web: simulator on' : 'web: simulator off');
-      return ok;
-    }
+    if (isPost && path === '/api/sim') { note('web: the test signal is off in this demo'); return ok; }
     if (isPost && path === '/api/reset') { post({ cmd: 'resetPeaks' }); note('web: counters reset'); return ok; }
     if (isPost && path === '/api/preset/save') {
       const groups = new Set(info.presets[cur].groups);
@@ -295,22 +310,7 @@
     if (isPost && path === '/api/loops') {
       const action = q.get('action'), name = q.get('name') || '';
       if (action === 'load') { const err = await plugIn(name); return err ? fail(err) : ok; }
-      if (action === 'delete') {
-        loops = loops.filter((l) => l.name !== name);
-        note('loop deleted: ' + name + ' (for this visit)');
-        return ok;
-      }
-      if (action === 'save') {
-        const clean = name.replace(/[^A-Za-z0-9 _-]/g, '').trim();
-        if (!clean) return fail('that name has nothing usable in it');
-        const samples = await new Promise((r) => { snapshotWaiter = r; post({ cmd: 'snapshot' }); });
-        if (!samples) return fail('nothing to save -- record a loop, and stop recording before saving');
-        loops = loops.filter((l) => l.name !== clean);
-        loops.unshift({ name: clean, seconds: samples.length / ctx.sampleRate, frames: samples.length, rate: ctx.sampleRate, samples });
-        note('loop saved: ' + clean + ' (kept for this visit)');
-        return ok;
-      }
-      return fail('unknown action');
+      return fail('Not in this demo: the saved loops are the ones I recorded on the pedal. Pick one and it plays into the input.');
     }
     return { __status: 404, ok: false };
   }
@@ -359,32 +359,100 @@
 
   function syncBar() {
     const opts = loops.map((l) => `<option value="loop:${encodeURIComponent(l.name)}">${l.name.replace(/</g, '&lt;')}</option>`);
-    sel.innerHTML = opts.join('') + '<option value="sim">Built-in test signal</option><option value="none">Nothing (silence)</option>';
-    sel.value = source === 'reamp' && reampName ? 'loop:' + encodeURIComponent(reampName) : source;
+    sel.innerHTML = opts.join('') + '<option value="none">Nothing (silence)</option>';
+    sel.value = source === 'reamp' && reampName ? 'loop:' + encodeURIComponent(reampName) : 'none';
+    syncList();
   }
   sel.addEventListener('change', async () => {
     const v = sel.value;
     if (v.startsWith('loop:')) await plugIn(decodeURIComponent(v.slice(5)));
-    else { setSource(v); note(v === 'sim' ? 'web: simulator on' : 'input unplugged'); }
+    else unplug();
   });
+
+  // The page's Saved loops list is rebuilt from scratch after every action, so
+  // it is re-marked whenever it changes: the playing loop is highlighted, and
+  // the buttons that would write to the pedal's disk are greyed.
+  function syncList() {
+    document.querySelectorAll('#loops-list .loop-row').forEach((row) => {
+      const name = row.querySelector('.nm') && row.querySelector('.nm').textContent;
+      row.classList.toggle('playing', source === 'reamp' && name === reampName);
+      row.querySelectorAll('button').forEach((b) => {
+        if (b.textContent === 'load') b.classList.add('load-btn');
+        else { b.disabled = true; b.classList.add('demo-off'); }
+      });
+    });
+  }
+  const list = document.getElementById('loops-list');
+  if (list) new MutationObserver(syncList).observe(list, { childList: true });
+
+  // The pedal's own controls that have no meaning here stay on the page, greyed,
+  // so the panel still reads as the real one.
+  for (const id of ['btn-trigger', 'btn-loop-save', 'btn-clean-loop']) {
+    const b = document.getElementById(id);
+    if (b) { b.disabled = true; b.classList.add('demo-off'); }
+  }
+  const paneHint = document.querySelector('#pane-looper .hint');
+  if (paneHint) paneHint.innerHTML =
+    'In this demo the loop you picked <b>is</b> the input: it plays into the pedal, so every preset ' +
+    'processes it. Pause it, click the bar to scrub, or switch loops from the <b>Input</b> menu at the top ' +
+    'or the <b>Saved loops</b> list. Recording, saving and the dry/wet switch belong to the real pedal and are off here.';
+  const loopsEmpty = document.getElementById('loops-empty');
+  if (loopsEmpty) loopsEmpty.textContent = 'Loading the loops I recorded on the pedal…';
 
   const gate = document.createElement('div');
   gate.id = 'demo-gate';
   gate.innerHTML = `
     <div class="gate-card" role="dialog" aria-modal="true" aria-labelledby="gate-title">
       <h2 id="gate-title">Plug in</h2>
-      <p>This is the control page for my guitar pedal. Everything you hear runs through the pedal's own
-         C++ signal chain, compiled to WebAssembly, right here in your browser.</p>
-      <p>You don't have my guitar, so pick one of the loops I recorded on the pedal and it goes into the
-         input. Then flip through the presets, move the knobs, or record over it with the looper.
-         Headphones help.</p>
+      <p>This is the control page for my guitar pedal. On my desk it is a Raspberry Pi 5 with an
+         M-Audio M-Track Duo plugged into it: the guitar goes into the Duo, the Pi runs the pedal's
+         C++ signal chain, and the sound comes back out of the Duo's headphone jack. The footswitch and
+         its LED are wired straight to the Pi's GPIO pins — I bought the switch and wired it up myself.</p>
+      <svg class="gate-rig" viewBox="0 0 460 150" role="img" aria-label="Guitar into the M-Track Duo, USB to the Raspberry Pi and back, headphones out of the Duo; footswitch and LED on the Pi's GPIO pins">
+        <defs><marker id="rig-ah" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L8 4L0 8Z" fill="var(--accent-line)"/></marker></defs>
+        <g fill="var(--panel-2)" stroke="var(--line-2)">
+          <rect x="6" y="44" width="72" height="40" rx="6"/>
+          <rect x="120" y="30" width="122" height="68" rx="6"/>
+          <rect x="296" y="18" width="158" height="92" rx="6"/>
+          <rect x="120" y="116" width="122" height="26" rx="6"/>
+          <rect x="296" y="124" width="70" height="20" rx="5"/>
+          <rect x="384" y="124" width="70" height="20" rx="5"/>
+        </g>
+        <g font-family="var(--ui)" font-size="10.5" fill="var(--text)" text-anchor="middle">
+          <text x="42" y="68">guitar</text>
+          <text x="181" y="52" font-weight="600">M-Audio M-Track Duo</text>
+          <text x="181" y="68" fill="var(--dim)" font-size="9.5">USB audio, in and out</text>
+          <text x="181" y="84" fill="var(--dim)" font-size="9.5">headphones on the front</text>
+          <text x="375" y="42" font-weight="600">Raspberry Pi 5</text>
+          <text x="375" y="58" fill="var(--dim)" font-size="9.5">guitar_pedal — the C++ chain</text>
+          <text x="375" y="74" fill="var(--dim)" font-size="9.5">256 frames every 5.3 ms</text>
+          <text x="375" y="98" fill="var(--faint)" font-family="var(--mono)" font-size="8.5">GPIO17 · GPIO22</text>
+          <text x="181" y="133">headphones</text>
+          <text x="331" y="138" font-size="9.5">footswitch</text>
+          <text x="419" y="138" font-size="9.5">LED</text>
+        </g>
+        <g fill="none" stroke="var(--accent-line)" stroke-width="1.4" marker-end="url(#rig-ah)">
+          <path d="M78 64 L116 64"/>
+          <path d="M242 54 L292 54"/>
+          <path d="M296 76 L246 76"/>
+          <path d="M181 98 L181 112"/>
+          <path d="M331 124 L331 114"/>
+          <path d="M419 114 L419 120"/>
+        </g>
+        <g font-family="var(--mono)" font-size="8.5" fill="var(--faint)" text-anchor="middle">
+          <text x="269" y="48">USB</text>
+          <text x="269" y="88">USB</text>
+        </g>
+      </svg>
+      <p>Here, everything that makes sound is that same C++, compiled to WebAssembly and running in
+         your browser. You don't have my guitar, so pick one of the loops I recorded on the pedal: it
+         plays into the input, and every preset processes it. Pause it or scrub through it in the
+         Looper panel; switch loops from the <b>Input</b> menu at the top or the <b>Saved loops</b>
+         list. Headphones help.</p>
       <div class="gate-loops" id="gate-loops"><span class="muted">loading loops…</span></div>
-      <button class="gate-sim" id="gate-sim">or start with the pedal's built-in test signal</button>
       <a class="demo-back gate-back" href="/">← back to the portfolio</a>
-      <p class="gate-fine">Every loop here is clean guitar — the looper stores the input before the
-         chain, so whatever you switch on is doing the work you hear rather than being baked into
-         the recording. On the real pedal a loaded loop plays <i>after</i> the effects; here it is
-         re-amped into the input, so every preset processes it.</p>
+      <p class="gate-fine">Every loop here is clean guitar: the pedal recorded the untouched input, so
+         whatever you switch on is doing the work you hear rather than being baked into the recording.</p>
     </div>`;
   document.body.append(gate);
   document.querySelectorAll('.demo-back').forEach((a) => a.addEventListener('click', backToPortfolio));
@@ -394,8 +462,7 @@
     gate.querySelector('.gate-card').setAttribute('aria-busy', 'true');
     try {
       await powerOn();
-      if (first === 'sim') { setSource('sim'); note('web: simulator on'); }
-      else await plugIn(first);
+      await plugIn(first);
     } catch (err) {
       // Anything that goes wrong here used to leave the card spinning with no
       // explanation, which reads as a freeze. Say what happened instead.
@@ -434,5 +501,4 @@
     }
     syncBar();
   });
-  gate.querySelector('#gate-sim').onclick = () => start('sim');
 })();

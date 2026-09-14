@@ -23,12 +23,33 @@
 }
 #demo-bar .demo-arch:hover, #demo-bar .demo-arch:focus-visible { border-color: var(--info); text-decoration: underline; text-underline-offset: 3px; }
 #demo-bar .demo-input { display: flex; align-items: center; gap: 8px; color: var(--dim); }
+/* The Input menu is the same control as the Saved loops list below: both pick
+   the loop that plays into the pedal. Styled as one of the page's own buttons,
+   with its chevron drawn here so no browser paints its own. */
 #demo-bar select {
-  max-width: min(60vw, 280px);
-  background: var(--panel-2); color: var(--text);
-  border: 1px solid var(--line-2); border-radius: 6px;
-  padding: 4px 8px; font: 12.5px var(--ui);
+  max-width: min(60vw, 300px);
+  -webkit-appearance: none; appearance: none;
+  background: var(--panel-2) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' fill='none' stroke='%236ee7b7' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/></svg>") no-repeat right 10px center;
+  color: var(--accent);
+  border: 1px solid var(--accent-line); border-radius: 7px;
+  padding: 5px 28px 5px 11px;
+  font: 600 12.5px/1.4 var(--ui);
+  cursor: pointer;
+  transition: border-color .15s, background-color .15s;
 }
+#demo-bar select:hover { background-color: var(--accent-dark); border-color: var(--accent); }
+#demo-bar select:focus-visible { outline: 2px solid var(--info); outline-offset: 1px; }
+#demo-bar select option { background: var(--panel-2); color: var(--text); font-weight: 400; }
+
+/* the loop that is playing into the input, in the page's Saved loops list */
+.loop-row.playing .nm { color: var(--accent); }
+.loop-row.playing .nm::before { content: "\25B8  "; color: var(--accent); }
+.loop-row.playing button.tiny.load-btn { background: var(--accent-dark); border-color: var(--accent-line); color: var(--accent); }
+/* the pedal's own controls that have no meaning here stay visible, greyed, with a reason on hover */
+button.demo-off { opacity: .35; cursor: not-allowed; }
+
+/* the hardware, on the opening card */
+#demo-gate .gate-rig { display: block; width: 100%; height: auto; margin: 14px 0 4px; }
 
 #demo-gate {
   position: fixed; inset: 0; z-index: 100;

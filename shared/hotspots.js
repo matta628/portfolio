@@ -1,5 +1,5 @@
 /**
- * The photo pressings — Plitvice, The Great Elm, Five Storeys, Strays and Out
+ * The photo pressings — Plitvice, The Great Elm, Shrine, I Gattini and Out
  * of Focus — are one idea five times over: a photograph with a few shapes
  * traced onto it, one shape per project. Hover a shape and it names itself;
  * click and the name grows into the full credit with a way into the demo.
@@ -90,7 +90,7 @@ window.photoSleeve = function (cfg) {
     const side = r.side || (r.label[0] > 66 ? 'right' : r.label[0] < 34 ? 'left' : 'center');
     card.className = `name side-${side}`;
     // set as custom properties, not inline left/top, so a sleeve can re-anchor
-    // the opened card from its stylesheet (see Strays, whose photo is full)
+    // the opened card from its stylesheet (see I Gattini, whose photo is full)
     card.style.setProperty('--x', `${r.label[0]}%`);
     card.style.setProperty('--y', `${r.label[1]}%`);
     // `.more` collapses with the 0fr..1fr grid trick, which only sizes its

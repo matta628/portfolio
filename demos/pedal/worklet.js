@@ -72,6 +72,8 @@ class PedalProcessor extends AudioWorkletProcessor {
       case 'freeze': e.engine_freeze_toggle(); break;
       case 'freezeMode': e.engine_set_freeze_mode(m.on ? 1 : 0); break;
       case 'source': e.engine_set_source(m.source); break;
+      case 'pause': e.engine_input_pause(m.on ? 1 : 0); break;
+      case 'seek': e.engine_input_seek(m.frame | 0); break;
       case 'reamp': {
         const ptr = e.engine_reamp_buffer(m.samples.length);
         this.f32(ptr, m.samples.length).set(m.samples);
@@ -96,9 +98,12 @@ class PedalProcessor extends AudioWorkletProcessor {
     this.port.postMessage({
       type: 'state',
       preset: e.engine_current(),
-      looper: LOOPER_STATES[e.engine_looper_state()] || '?',
-      loop_frames: e.engine_looper_length(),
-      loop_position: e.engine_looper_position(),
+      // The Looper panel shows the input loop, not the pedal's own looper:
+      // in the demo the loop you picked IS the input, and recording is off.
+      looper: e.engine_input_length() > 0 ? 'PLAY' : 'EMPTY',
+      loop_frames: e.engine_input_length(),
+      loop_position: e.engine_input_position(),
+      loop_paused: !!e.engine_input_paused(),
       frozen: !!e.engine_frozen(),
       freeze_mode: !!e.engine_freeze_mode(),
       comp_reduction_db: e.engine_comp_reduction_db(),

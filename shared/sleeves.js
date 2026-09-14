@@ -13,8 +13,8 @@
     { id: 'plitvice', name: 'Plitvice', art: () => '<img src="../plitvice/thumb.jpg" alt="">' },
     { id: 'in-rainbows', name: 'In Rainbows', art: () => IR_LINES.map((c) => `<i style="--c:${c}"></i>`).join('') },
     { id: 'out-of-focus', name: 'Out of Focus', art: () => '<img src="../out-of-focus/thumb.jpg" alt="">' },
-    { id: 'strays', name: 'Strays', art: () => '<img src="../strays/thumb.jpg" alt="">' },
-    { id: 'five-storeys', name: 'Five Storeys', art: () => '<img src="../five-storeys/thumb.jpg" alt="">' },
+    { id: 'i-gattini', name: 'I Gattini', art: () => '<img src="../i-gattini/thumb.jpg" alt="">' },
+    { id: 'shrine', name: 'Shrine', art: () => '<img src="../shrine/thumb.jpg" alt="">' },
     { id: 'great-elm', name: 'The Great Elm', art: () => '<img src="../great-elm/thumb.jpg" alt="">' },
   ];
   const current = document.body.dataset.pressing;

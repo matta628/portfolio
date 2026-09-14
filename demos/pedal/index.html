@@ -1439,7 +1439,7 @@ function render(s) {
   simBtn.classList.toggle("on", sim);
   // The sound card and the generator would both be driving the same chain, so
   // only one of them is ever allowed to.
-  simBtn.disabled = false;
+  simBtn.disabled = s.audio_running;
   simBtn.textContent = sim ? "Simulating input" : "Simulate input";
 
   $("lcd0").textContent = (s.lcd[0] + "                ").slice(0, 16);
