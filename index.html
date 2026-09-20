@@ -30,7 +30,28 @@
      happening for the demos; this stops it being a loop if it ever happens
      again anywhere else. -->
 <meta http-equiv="refresh" content="0; url=/plitvice/">
-<script>location.replace('/plitvice/');</script>
+<script>
+  // This file is also what the host serves for any path it cannot find, and
+  // that fallback is not ours to turn off: as of 20 Sep 2026 every unmatched
+  // path on the live site returns this page with a 200, including ones no rule
+  // here covers, so something above Pages is catch-all rewriting to /index.html
+  // before _redirects is consulted. Until that is undone in the Cloudflare
+  // dashboard, a shared link into a demo's client-side route lands here.
+  //
+  // Recover it rather than dumping the visitor on the front page. The demo's
+  // own router cannot read a url it never received, so the deep route is lost
+  // either way -- but landing inside the right demo beats landing outside it,
+  // and it is the sleeve redirect below that would otherwise append a segment
+  // and loop.
+  (function () {
+    var m = location.pathname.match(/^\/(demos\/[^/]+)\//);
+    if (m && location.pathname !== '/' + m[1] + '/') {
+      location.replace('/' + m[1] + '/');
+      return;
+    }
+    location.replace('/plitvice/');
+  })();
+</script>
 </head>
 <body></body>
 </html>
