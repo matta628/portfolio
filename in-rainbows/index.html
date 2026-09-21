@@ -256,16 +256,16 @@
 (() => {
   const N = 13;
   const byId = Object.fromEntries(window.PORTFOLIO.projects.map(p => [p.id, p]));
-  const HUE = { tastemaker: 185, jobs: 95, streeteasy: 28, pedal: -18 };
+  const HUE = { taste: 185, jobs: 95, streeteasy: 28, pedal: -18 };
   // What a line resolves to when it has your attention: the noise locks into the name.
-  const CLEAN = { tastemaker: ' TASTE MAKER ', jobs: ' JOB TRACKER ', streeteasy: ' STREET EASY ', pedal: 'GUITAR PEDAL ' };
+  const CLEAN = { taste: '    TASTE    ', jobs: ' JOB TRACKER ', streeteasy: ' STREET EASY ', pedal: 'GUITAR PEDAL ' };
 
   // text: the opening glitch, 13 cells. base: the letters it re-glitches from.
   // where: 'd' desktop only, 'm' mobile only, 'b' both.
   const LINES = [
     { text: 'SIDE/PROJECTS', c: 'orange', where: 'b' },
-    { text: 'TASTE / MAKER', c: 'blue', id: 'tastemaker', where: 'b' },
-    { text: '_TAS TEMA KER', c: 'blue', id: 'tastemaker', where: 'm' },
+    { text: '_ _ TASTE _ _', c: 'blue', id: 'taste', where: 'b' },
+    { text: '/ / TASTE / /', c: 'blue', id: 'taste', where: 'm' },
     { text: 'SIDEPROJ_ECTS', c: 'orange', where: 'b' },
     { text: 'GUITAR PED_AL', c: 'red', id: 'pedal', where: 'b' },
     { text: 'GUITAR/ PEDAL', c: 'red', id: 'pedal', where: 'm' },

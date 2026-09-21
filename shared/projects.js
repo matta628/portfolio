@@ -3,13 +3,13 @@ window.PORTFOLIO = {
   artist: 'Matt Aguilar',
   projects: [
     {
-      id: 'tastemaker',
+      id: 'taste',
       track: 'A1',
-      name: 'Tastemaker',
-      titleLines: ['Taste-', 'maker'],
+      name: 'Taste',
+      titleLines: ['Taste'],
       blurb: 'A taste graph and AI agent built on seven years of my real listening and reading history.',
       personnel: [['Python', 'vocals'], ['DuckDB', 'bass'], ['MCP', 'drums'], ['FastAPI', 'guitar'], ['React', 'keys']],
-      href: '../demos/tastemaker/',
+      href: '../demos/taste/',
     },
     {
       id: 'pedal',

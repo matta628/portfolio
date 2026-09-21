@@ -4,4 +4,4 @@
 # 200 means rewrite, not redirect — the URL the visitor sees is left
 # alone and the demo's own router reads it.
 
-/demos/tastemaker/*  /demos/tastemaker/index.html  200
+/demos/taste/*  /demos/taste/index.html  200

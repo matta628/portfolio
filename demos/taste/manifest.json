@@ -1,6 +1,6 @@
 {
-  "name": "Tastemaker",
-  "short_name": "Tastemaker",
+  "name": "Taste",
+  "short_name": "Taste",
   "description": "Personal guitar log and taste agent",
   "start_url": "/",
   "display": "standalone",
